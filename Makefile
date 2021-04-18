@@ -12,6 +12,7 @@ KERNEL_O = $(BUILD)/kernel.o
 GCC = riscv64-unknown-elf-gcc
 OBJCOPY = riscv64-unknown-elf-objcopy
 
+# 在当前目录生成k210.bin
 all:
 	$(GCC) -o $(KERNEL_O) -I src/lib -Wall -g -mcmodel=medany -T src/linker.ld -O2 -ffreestanding -nostdlib\
                                     src/asm/boot.s\
@@ -36,8 +37,10 @@ all:
                                     src/main.c
 	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)
 
+# 编译运行
 run: all up see
 
+# 烧录到板子
 up:
 	@cp $(BOOTLOADER) $(BOOTLOADER).copy
 	@dd if=$(KERNEL_BIN) of=$(BOOTLOADER).copy bs=$(K210_BOOTLOADER_SIZE) seek=1
@@ -45,6 +48,7 @@ up:
 	@sudo chmod 777 $(K210-SERIALPORT)
 	python3 $(K210-BURNER) -p $(K210-SERIALPORT) -b 1500000 $(KERNEL_BIN)
 
+# 通过串口查看
 see:
 	python3 -m serial.tools.miniterm --eol LF --dtr 0 --rts 0 --filter direct $(K210-SERIALPORT) 115200
 
