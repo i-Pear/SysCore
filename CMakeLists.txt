@@ -7,26 +7,14 @@ set(CMAKE_C_FLAGS "-Wall -g -mcmodel=medany -T ${CMAKE_CURRENT_SOURCE_DIR}/src/l
 
 include_directories(src/lib)
 
+aux_source_directory(src/asm SRC_ASM)
+aux_source_directory(src/driver SRC_DRIVER)
+aux_source_directory(src/lib SRC_LIB)
+
 add_executable(
         os_risc_v
-        src/asm/boot.s
-        src/asm/interrupt.s
-        src/lib/interrupt.c
-        src/lib/interrupt.h
-        src/lib/math.c
-        src/lib/math.h
-        src/lib/memory.c
-        src/lib/memory.h
-        src/lib/sbi.c
-        src/lib/sbi.h
-        src/lib/stdarg.h
-        src/lib/stdbool.h
-        src/lib/stddef.h
-        src/lib/stdio.c
-        src/lib/stdio.h
-        src/lib/stl.h
-        src/lib/stl.c
-        src/lib/page.c
-        src/lib/page.h
+        ${SRC_ASM}
+        ${SRC_DRIVER}
+        ${SRC_LIB}
         src/main.c
         )

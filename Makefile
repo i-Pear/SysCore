@@ -12,30 +12,14 @@ KERNEL_O = $(BUILD)/kernel.o
 GCC = riscv64-unknown-elf-gcc
 OBJCOPY = riscv64-unknown-elf-objcopy
 
+SRC_ALL = $(wildcard src/asm/*.s src/driver/*.h src/driver/*.c src/lib/*.h src/lib/*.c)
+
 # 在当前目录生成k210.bin
 all:
 	# gen build/
 	@test -d $(BUILD) || mkdir -p $(BUILD)
 	$(GCC) -o $(KERNEL_O) -I src/lib -Wall -g -mcmodel=medany -T src/linker.ld -O2 -ffreestanding -nostdlib\
-                                    src/asm/boot.s\
-                                    src/asm/interrupt.s\
-                                    src/lib/interrupt.c\
-                                    src/lib/interrupt.h\
-                                    src/lib/math.c\
-                                    src/lib/math.h\
-                                    src/lib/memory.c\
-                                    src/lib/memory.h\
-                                    src/lib/sbi.c\
-                                    src/lib/sbi.h\
-                                    src/lib/stdarg.h\
-                                    src/lib/stdbool.h\
-                                    src/lib/stddef.h\
-                                    src/lib/stdio.c\
-                                    src/lib/stdio.h\
-                                    src/lib/stl.h\
-                                    src/lib/stl.c\
-                                    src/lib/page.c\
-                                    src/lib/page.h\
+                                    $(SRC_ALL) \
                                     src/main.c
 	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)
 
