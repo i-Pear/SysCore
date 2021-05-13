@@ -34,7 +34,7 @@ Context *breakpoint(Context *context) {
 Context *tick(Context* context) {
     set_next_timeout();
     TICKS += 1;
-    if (TICKS % 100 == 0) {
+    if (TICKS % 100 == 0 && TICKS <= 1000) {
         printf("[TICK] %d tick\n", TICKS);
     }
     return context;

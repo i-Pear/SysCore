@@ -12,7 +12,8 @@ KERNEL_O = $(BUILD)/kernel.o
 GCC = riscv64-unknown-elf-gcc
 OBJCOPY = riscv64-unknown-elf-objcopy
 
-SRC_ALL = $(wildcard src/asm/*.s src/driver/*.h src/driver/*.c src/lib/*.h src/lib/*.c)
+SRC_ALL = $(wildcard src/asm/*.s src/lib/*.h src/lib/*.c)
+SRC_DRIVER = $(wildcard src/driver/*.h src/driver/*.c)
 
 # 在当前目录生成k210.bin
 all:
