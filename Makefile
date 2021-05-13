@@ -14,7 +14,7 @@ OBJCOPY = riscv64-unknown-elf-objcopy
 
 # 在当前目录生成k210.bin
 all:
-	@echo $(abspath $(lastword $(MAKEFILE_LIST)))
+	@ls -all
 	$(GCC) -o $(KERNEL_O) -I src/lib -Wall -g -mcmodel=medany -T src/linker.ld -O2 -ffreestanding -nostdlib\
                                     src/asm/boot.s\
                                     src/asm/interrupt.s\
