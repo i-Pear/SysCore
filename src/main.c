@@ -4,7 +4,12 @@
 void D(size_t x) { printf("0x%x\n", x); }
 
 void daemon_thread() {
-    puts("[Halt] Program Halt In U Mode");
+//    asm volatile ("li a7, 8");
+//    asm volatile ("ecall");
+
+    asm volatile ("li a7, 8");
+    asm volatile ("ecall");
+
     while (1);
 }
 
@@ -19,7 +24,10 @@ void init_thread() {
     "mv %0, sp"
     :"=r"(thread_context.x[2])
     );
-    thread_context.sstatus |= 0x120; // spie = 1 && spp = 1
+    printf("sstatus: %d\n", thread_context.sstatus);
+    thread_context.sstatus ^= 1 << 8; // spp = 1
+    thread_context.sstatus ^= 1 << 5; // spie = 1
+    printf("sstatus: %d\n", thread_context.sstatus);
     thread_context.sepc = (size_t) daemon_thread;
     thread_context.sepc += __kernel_vir_offset;
     thread_context.x[1] = (size_t) daemon_thread;
@@ -32,10 +40,13 @@ int main(size_t hart_id, size_t dtb_pa) {
     puts("[Memory] Initializing...");
     memory_init();
 
-    interrupt_timer_init();
+//    puts("[Timer] Initializing...");
+//    interrupt_timer_init();
 
-    puts("[Memory Map] Initializing...");
-    memory_map_init();
+//    puts("[Memory Map] Initializing...");
+//    memory_map_init();
+
+
 
     init_thread();
     // unreachable

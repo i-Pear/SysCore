@@ -1,4 +1,5 @@
 #include <interrupt.h>
+#include <syscall.h>
 
 static size_t INTERVAL = 1e5;
 static size_t TICKS = 0;
@@ -8,12 +9,16 @@ Context *breakpoint(Context *context);
 Context *tick(Context* context);
 
 Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
+    printf("Trigger Here! scause = %d\n", scause);
     switch (scause) {
         case 3: {
             return breakpoint(context);
         }
         case 5: {
             return tick(context);
+        }
+        case 7:{
+            return syscall(context);
         }
         default: {
             printf("scause: %d\n", scause);
@@ -27,7 +32,8 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
 
 Context *breakpoint(Context *context) {
     printf("Breakpoint at 0x%x\n", context->sepc);
-    context->sepc += 2;
+    // 2 or 4 ?
+    context->sepc += 4;
     return context;
 }
 
