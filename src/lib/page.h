@@ -14,7 +14,7 @@ typedef enum {
     PAGE_ENTRY_FLAG_ACCESSED = 1 << 6,   // 已使用
     PAGE_ENTRY_FLAG_DIRTY = 1 << 7,       // 已修改
     PAGE_ENTRY_FLAGS_NEXT_ENTRY = 0xc1,
-    PAGE_ENTRY_FLAGS_END_ENTRY = 0xcf
+    PAGE_ENTRY_FLAGS_END_ENTRY = 0xdf,
 } PAGE_ENTRY_FLAG;
 
 

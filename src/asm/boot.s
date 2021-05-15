@@ -22,16 +22,16 @@
     
 _start:
     # 计算 boot_page_table 的物理页号
-    lui t0, %hi(boot_page_table)
-    li t1, 0xffffffff00000000
-    sub t0, t0, t1
-    srli t0, t0, 12
-    # 8 << 60 是 satp 中使用 Sv39 模式的记号
-    li t1, (8 << 60)
-    or t0, t0, t1
-    # 写入 satp 并更新 TLB
-    csrw satp, t0
-    sfence.vma
+    # lui t0, %hi(boot_page_table)
+    # li t1, 0xffffffff00000000
+    # sub t0, t0, t1
+    # srli t0, t0, 12
+    # # 8 << 60 是 satp 中使用 Sv39 模式的记号
+    # li t1, (8 << 60)
+    # or t0, t0, t1
+    # # 写入 satp 并更新 TLB
+    # csrw satp, t0
+    # sfence.vma
 
 
     la sp, boot_stack_top

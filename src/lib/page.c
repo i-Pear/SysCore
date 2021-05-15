@@ -20,6 +20,7 @@ void make_map(Map *mem_map, size_t *page_table_start, size_t vir_addr, size_t ph
         size_t new_page = (size_t) alloc_page();
         *x = (new_page << 10) | PAGE_ENTRY_FLAGS_NEXT_ENTRY;
     }
+    printf("Here?\n");
     x = (size_t *) (*x >> 10) + (get_bits(vir_addr, 12, 9) / sizeof(size_t));
     *x = (phy_addr >> 2) | PAGE_ENTRY_FLAGS_END_ENTRY;
     flush_tlb();

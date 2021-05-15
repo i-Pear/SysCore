@@ -1,5 +1,6 @@
 #include <interrupt.h>
 #include <syscall.h>
+#include <register.h>
 
 static size_t INTERVAL = 1e5;
 static size_t TICKS = 0;
@@ -9,21 +10,33 @@ Context *breakpoint(Context *context);
 Context *tick(Context* context);
 
 Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
-    printf("Trigger Here! scause = %d\n", scause);
     switch (scause) {
+        // breakpoint
         case 3: {
             return breakpoint(context);
         }
         case 5: {
-            return tick(context);
+            size_t sip = register_read_sip();
+            if(sip & REGISTER_SIP_STIE){
+                // supervisor-level timer interrupt
+                return tick(context);
+            }else{
+                // load access fault
+                printf("Load Access Fault\n");
+                printf("Perhaps Page is Error\n");
+                printf("sepc: 0x%x\n", context->sepc);
+                printf("[Shutdown!]\n");
+                shutdown();
+            }
         }
-        case 7:{
+        // user ecall
+        case 8:{
             return syscall(context);
         }
         default: {
             printf("scause: %d\n", scause);
             printf("sepc: 0x%x\n", context->sepc);
-            printf("Interrupt scause wrong, exit.\n");
+            printf("Interrupt scause wrong, shutdown!.\n");
             shutdown();
         }
     }

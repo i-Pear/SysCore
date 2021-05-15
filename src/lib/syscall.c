@@ -18,5 +18,6 @@ Context* syscall(Context* context){
             shutdown();
         }
     }
+    context->sepc += 4;
     return context;
 }

@@ -20,7 +20,7 @@ void puts(char *str) {
 }
 
 void __print_pos(size_t num, int base) {
-    char sta[32];
+    char sta[65];
     int cur = 0;
     if (!num) {
         sta[cur++] = '0';
@@ -63,6 +63,11 @@ void printf(const char *format, ...) {
                 case 'x': {
                     size_t x = va_arg(arg, size_t);
                     __print_pos(x, 16);
+                    break;
+                }
+                case 'b': {
+                    size_t x = va_arg(arg, size_t);
+                    __print_pos(x, 2);
                     break;
                 }
                 case 's': {
