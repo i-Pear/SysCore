@@ -13,7 +13,7 @@ void daemon_thread() {
     asm volatile ("li a0, 11");
     asm volatile ("ecall");
 
-
+    // 20cf2
     while (1);
 }
 
@@ -29,6 +29,8 @@ void daemon_thread() {
  * 之后的流程是我们手动完成的：保存现场;跳到中断处理函数;恢复现场;
  *
  * 所以这里需要恢复现场+将模拟硬件自动完成的动作。
+ *
+ * 另外我们还得给u-mode分配页表，因为s态和u态无法使用一个页表
  */
 void init_thread() {
     Context thread_context;
@@ -42,19 +44,20 @@ void init_thread() {
     thread_context.sepc += __kernel_vir_offset;
     thread_context.x[1] = (size_t) daemon_thread;
     thread_context.x[1] += __kernel_vir_offset;
+
+    size_t init_thread_page_table = (size_t)alloc_page();
+    printf("[D] phy 0x%x\n", (size_t) daemon_thread);
+    make_map(memory_map, (size_t *)init_thread_page_table, thread_context.sepc, (size_t) daemon_thread);
     __restore(&thread_context);
 }
 
 
 int main(size_t hart_id, size_t dtb_pa) {
-//    puts("[Memory] Initializing...");
-//    memory_init();
+    puts("[Memory] Initializing...");
+    memory_init();
 //
     puts("[DEBUG] Timer Interrupt Start.");
     interrupt_timer_init();
-
-//    puts("[Memory Map] Initializing...");
-//    memory_map_init();
 
 
 

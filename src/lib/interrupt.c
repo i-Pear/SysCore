@@ -11,6 +11,13 @@ Context *tick(Context* context);
 
 Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
     switch (scause) {
+        // instruction access fault
+        case 1:{
+            printf("Instruction Access Fault!\n");
+            printf("sepc: 0x%x\n", context->sepc);
+            printf("[Shutdown!]\n");
+            shutdown();
+        }
         // breakpoint
         case 3: {
             return breakpoint(context);
