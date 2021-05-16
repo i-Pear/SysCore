@@ -15,6 +15,7 @@
     .global get_boot_page_table
     .global flush_tlb
     .global interrupt_timer_init
+    .global read_sp
 
     .extern __interrupt
     .extern set_next_timeout
@@ -74,6 +75,16 @@ flush_tlb:
 
 read_time:
     csrr a0, time
+    ret
+
+read_sp:
+    addi sp,sp,-8
+    sd ra,8(sp)
+
+    mv a0, sp
+
+    ld ra,8(sp)
+    addi sp,sp,8
     ret
 
 get_boot_page_table:

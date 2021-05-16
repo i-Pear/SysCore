@@ -38,7 +38,7 @@ void init_thread() {
     thread_context.sstatus = register_read_sstatus();
     // user stack
     size_t user_stack_page = (size_t)alloc_page();
-    thread_context.x[2] = user_stack_page + __page_size;
+    thread_context.x[2] = user_stack_page + __page_size - 8;
     thread_context.x[2] += __kernel_vir_offset;
     thread_context.sstatus |= REGISTER_SSTATUS_SPP; // spp = 1
     thread_context.sstatus ^= REGISTER_SSTATUS_SPP; // spp = 0
@@ -61,15 +61,27 @@ void init_thread() {
 
     puts("[DEBUG] Timer Interrupt Start.");
     interrupt_timer_init();
-
+    puts("[DEBUG] Timer Interrupt End.");
     __turn_to_user_mode(&thread_context);
+}
+
+extern size_t read_sp();
+void print_sp(){
+    printf("sp: 0x%x\n", read_sp());
+}
+
+void print_satp(){
+    printf("satp: 0x%x\n", register_read_satp());
+}
+
+void print_sscratch(){
+    printf("sscratch: 0x%x\n", register_read_sscratch());
 }
 
 
 int main(size_t hart_id, size_t dtb_pa) {
     puts("[Memory] Initializing...");
     memory_init();
-
     init_thread();
     // unreachable
     puts("Press Any Key To Continue.");

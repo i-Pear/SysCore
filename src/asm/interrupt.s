@@ -121,7 +121,6 @@ __turn_to_user_mode:
     # receive Context
     mv sp, a0
 
-
     # 恢复 CSR
     LOAD    s1, 32
     LOAD    s2, 33
@@ -129,8 +128,6 @@ __turn_to_user_mode:
     csrw    sepc, s2
     LOAD    s1, 34
     csrw    satp, s1
-
-    sfence.vma
 
     # 恢复通用寄存器
     LOAD    x1, 1
@@ -143,5 +140,8 @@ __turn_to_user_mode:
 
     # 恢复 sp（又名 x2）这里最后恢复是为了上面可以正常使用 LOAD 宏
     LOAD    x2, 2
+
+    # TODO  死在这了！
+    sfence.vma
 
     sret
