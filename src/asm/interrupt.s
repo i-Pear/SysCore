@@ -142,6 +142,6 @@ __turn_to_user_mode:
     LOAD    x2, 2
 
     # TODO  死在这了！
-    sfence.vma
+    # sfence.vma
 
     sret
