@@ -28,6 +28,7 @@ void daemon_thread() {
  * 所以这里需要恢复现场+将模拟硬件自动完成的动作。
  */
 void init_thread() {
+    printf("[DEBUG] Prepare For User Mode.\n");
     kernelContext.kernel_satp = register_read_satp();
     Context thread_context;
     thread_context.sstatus = register_read_sstatus();
@@ -42,8 +43,10 @@ void init_thread() {
     thread_context.ra += __kernel_vir_offset;
     size_t user_satp = (size_t)alloc_page();
     size_t* virtual_user_satp = (size_t*)(user_satp + __kernel_vir_offset);
+    for(int i = 0;i < 511; i++){
+        *(virtual_user_satp + i) = 0;
+    }
     *(virtual_user_satp + 510) = (0x80000 << 10) | 0xdf;
-    printf("tab = 0x%x\n", *(virtual_user_satp + 510));
     user_satp >>= 12;
     user_satp |= (8 << 60);
     thread_context.satp = user_satp;
