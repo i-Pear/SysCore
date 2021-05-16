@@ -1,4 +1,5 @@
-#include <syscall.h>
+#include "syscall.h"
+#include "stdio.h"
 
 Context* syscall(Context* context){
     // Check SystemCall Number

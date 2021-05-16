@@ -1,4 +1,4 @@
-#include <page.h>
+#include "page.h"
 
 Map *memory_map;
 
@@ -22,7 +22,7 @@ void make_map(Map *mem_map, size_t *page_table_start, size_t vir_addr, size_t ph
     }
     x = (size_t *) (*x >> 10) + (get_bits(vir_addr, 12, 9) / sizeof(size_t));
     *x = (phy_addr >> 2) | PAGE_ENTRY_FLAGS_END_ENTRY;
-    flush_tlb();
+//    flush_tlb();
 }
 
 void memory_map_init() {

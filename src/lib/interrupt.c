@@ -1,6 +1,7 @@
-#include <interrupt.h>
-#include <syscall.h>
-#include <register.h>
+#include "interrupt.h"
+#include "syscall.h"
+#include "register.h"
+#include "stdio.h"
 
 static size_t INTERVAL = 1e5;
 static size_t TICKS = 0;
@@ -69,4 +70,5 @@ Context *tick(Context* context) {
 void set_next_timeout() {
     set_timer(read_time() + INTERVAL);
 }
+
 

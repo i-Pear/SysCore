@@ -1,7 +1,7 @@
 #ifndef __REGISTER_H__
 #define __REGISTER_H__
 
-#include <stddef.h>
+#include "stddef.h"
 
 // supervisor-level timer interrupts
 #define REGISTER_SIP_STIE (1 << 5)
@@ -13,6 +13,7 @@
 size_t register_read_sip();
 size_t register_read_sstatus();
 size_t register_read_sp();
+size_t register_read_satp();
 
 #endif
 

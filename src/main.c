@@ -4,6 +4,7 @@
 
 void D(size_t x) { printf("0x%x\n", x); }
 
+
 void daemon_thread() {
 //    asm volatile ("li a7, 8");
 //    asm volatile ("ecall");
@@ -35,8 +36,10 @@ void daemon_thread() {
 void init_thread() {
     Context thread_context;
     thread_context.sstatus = register_read_sstatus();
-    // kernel stack
-    thread_context.x[2] = register_read_sp();
+    // user stack
+    size_t user_stack_page = (size_t)alloc_page();
+    thread_context.x[2] = user_stack_page + __page_size;
+    thread_context.x[2] += __kernel_vir_offset;
     thread_context.sstatus |= REGISTER_SSTATUS_SPP; // spp = 1
     thread_context.sstatus ^= REGISTER_SSTATUS_SPP; // spp = 0
     thread_context.sstatus |= REGISTER_SSTATUS_SPIE; // spie = 1
@@ -46,20 +49,26 @@ void init_thread() {
     thread_context.x[1] += __kernel_vir_offset;
 
     size_t init_thread_page_table = (size_t)alloc_page();
-    printf("[D] phy 0x%x\n", (size_t) daemon_thread);
-    make_map(memory_map, (size_t *)init_thread_page_table, thread_context.sepc, (size_t) daemon_thread);
-    __restore(&thread_context);
+    // calculate satp
+    thread_context.satp = init_thread_page_table;
+    thread_context.satp >>= 12;
+    thread_context.satp |= (8 << 60);
+    make_map(memory_map, (size_t *)init_thread_page_table, thread_context.sepc & 0xfffffffffffff000, (size_t) daemon_thread & 0xfffffffffffff000);
+    make_map(memory_map, (size_t *)init_thread_page_table, user_stack_page + __kernel_vir_offset, user_stack_page);
+    size_t real_addr = (size_t)__interrupt;
+    make_map(memory_map, (size_t *)init_thread_page_table, (real_addr + __kernel_vir_offset) & 0xfffffffffffff000, real_addr & 0xfffffffffffff000);
+    make_map(memory_map, (size_t *)init_thread_page_table, ((real_addr + __kernel_vir_offset) & 0xfffffffffffff000) + 0x1000, (real_addr & 0xfffffffffffff000) + 0x1000);
+
+    puts("[DEBUG] Timer Interrupt Start.");
+    interrupt_timer_init();
+
+    __turn_to_user_mode(&thread_context);
 }
 
 
 int main(size_t hart_id, size_t dtb_pa) {
     puts("[Memory] Initializing...");
     memory_init();
-//
-    puts("[DEBUG] Timer Interrupt Start.");
-    interrupt_timer_init();
-
-
 
     init_thread();
     // unreachable

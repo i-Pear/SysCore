@@ -1,7 +1,7 @@
 #ifndef __INTERRUPT_H__
 #define __INTERRUPT_H__
 
-#include <stdio.h>
+#include "stddef.h"
 
 /*
     Interrupt Context
@@ -46,6 +46,7 @@ typedef struct {
     size_t x[32];
     size_t sstatus;
     size_t sepc;
+    size_t satp;
 } Context;
 
 Context *handle_interrupt(Context *context, size_t scause, size_t stval);
@@ -55,5 +56,9 @@ void set_next_timeout();
 extern void close_interrupt();
 
 extern void __restore(Context *context);
+
+extern void __turn_to_user_mode(Context *context);
+
+extern size_t __interrupt();
 
 #endif

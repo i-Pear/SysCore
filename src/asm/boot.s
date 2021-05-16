@@ -89,8 +89,10 @@ interrupt_timer_init:
     addi sp,sp,-8
     sd ra,8(sp) 
 
+    # 开启时钟中断
     li t0, 1 << 5
     csrs sie, t0
+    # 全局s-mode中断位
     csrsi sstatus, 2
     call set_next_timeout
 
