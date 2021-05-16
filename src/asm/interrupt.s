@@ -30,6 +30,9 @@
     .extern debug_func
 # 进入中断
 __interrupt:
+    #保存原先的栈顶指针到sscratch
+    csrw sscratch, sp
+
     # 在栈上开辟 Context 所需的空间
     addi    sp, sp, -CONTEXT_SIZE*8
 

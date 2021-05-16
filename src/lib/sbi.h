@@ -1,7 +1,7 @@
 #ifndef __SBI_H__
 #define __SBI_H__
 
-#include <stddef.h>
+#include "stddef.h"
 
 #define SBI_SET_TIMER 0
 #define SBI_CONSOLE_PUTCHAR 1

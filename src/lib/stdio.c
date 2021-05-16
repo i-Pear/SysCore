@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include "stdio.h"
 
 size_t getchar() {
     size_t res = sbi_call(SBI_CONSOLE_GETCHAR, 0, 0, 0);

@@ -1,6 +1,6 @@
-#include <page.h>
-#include <interrupt.h>
-#include <register.h>
+#include "lib/page.h"
+#include "lib/interrupt.h"
+#include "lib/register.h"
 
 void D(size_t x) { printf("0x%x\n", x); }
 

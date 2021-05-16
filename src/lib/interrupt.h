@@ -1,7 +1,7 @@
 #ifndef __INTERRUPT_H__
 #define __INTERRUPT_H__
 
-#include <stdio.h>
+#include "stdio.h"
 
 /*
     Interrupt Context

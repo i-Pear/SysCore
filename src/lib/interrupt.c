@@ -1,6 +1,6 @@
-#include <interrupt.h>
-#include <syscall.h>
-#include <register.h>
+#include "interrupt.h"
+#include "syscall.h"
+#include "register.h"
 
 static size_t INTERVAL = 1e5;
 static size_t TICKS = 0;

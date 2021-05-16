@@ -1,9 +1,9 @@
 #ifndef __MEMORY_H__
 #define __MEMORY_H__
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
+#include "stdbool.h"
+#include "stddef.h"
+#include "stdio.h"
 
 #define PAGE_CLOSE
 

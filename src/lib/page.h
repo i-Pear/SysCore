@@ -1,8 +1,8 @@
 #ifndef __PAGE_H__
 #define __PAGE_H__
 
-#include <math.h>
-#include <stl.h>
+#include "math.h"
+#include "stl.h"
 
 typedef enum {
     PAGE_ENTRY_FLAG_VALID = 1 << 0,      // 有效位

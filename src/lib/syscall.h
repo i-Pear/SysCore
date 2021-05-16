@@ -1,7 +1,7 @@
 #ifndef __SYSCALL_H__
 #define __SYSCALL_H__
 
-#include <interrupt.h>
+#include "interrupt.h"
 
 // 文件系统相关
 /**

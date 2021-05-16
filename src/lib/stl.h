@@ -1,7 +1,7 @@
 #ifndef __STL_H__
 #define __STL_H__
 
-#include <memory.h>
+#include "memory.h"
 
 typedef struct {
     char *start;
