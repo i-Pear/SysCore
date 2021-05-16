@@ -26,3 +26,12 @@ size_t register_read_sp() {
     );
     return res;
 }
+
+size_t register_read_satp() {
+    size_t res;
+    asm volatile(
+    "csrr %0, satp"
+    :"=r"(res)
+    );
+    return res;
+}

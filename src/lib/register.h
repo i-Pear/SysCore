@@ -13,6 +13,7 @@
 size_t register_read_sip();
 size_t register_read_sstatus();
 size_t register_read_sp();
+size_t register_read_satp();
 
 #endif
 

@@ -20,7 +20,7 @@ void puts(char *str) {
 }
 
 void __print_pos(size_t num, int base) {
-    char sta[65];
+    char sta[100];
     int cur = 0;
     if (!num) {
         sta[cur++] = '0';

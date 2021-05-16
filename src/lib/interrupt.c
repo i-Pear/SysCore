@@ -4,6 +4,7 @@
 
 static size_t INTERVAL = 1e5;
 static size_t TICKS = 0;
+KernelContext kernelContext;
 
 Context *breakpoint(Context *context);
 

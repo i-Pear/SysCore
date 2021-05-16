@@ -3,7 +3,7 @@
 # 寄存器宽度对应的字节数
 .set    REG_SIZE, 8
 # Context 的大小
-.set    CONTEXT_SIZE, 36
+.set    CONTEXT_SIZE, 37
 
 # 宏：将寄存器存到栈上
 .macro SAVE reg, offset
@@ -53,10 +53,12 @@ __interrupt:
     csrr    s2, sepc
     csrr    s3, stval
     csrr    s4, scause
+    csrr    s5, satp
     SAVE    s1, 32
     SAVE    s2, 33
     SAVE    s3, 34
     SAVE    s4, 35
+    SAVE    s5, 36
 
 
     # 调用 handle_interrupt，传入参数
@@ -76,6 +78,8 @@ __interrupt:
 # 离开中断
 # 从 Context 中恢复所有寄存器，并跳转至 Context 中 sepc 的位置
 __restore:
+    la t0, kernelContext
+    sd sp, 8(t0)
     # receive Context
     mv sp, a0
     # 恢复 CSR
@@ -83,10 +87,14 @@ __restore:
     LOAD    s2, 33
     LOAD    s3, 34
     LOAD    s4, 35
+    LOAD    s5, 36
     csrw    sstatus, s1
     csrw    sepc, s2
     csrw    stval, s3
     csrw    scause, s4
+    csrw    satp, s5
+
+    # sfence.vma
 
     # 恢复通用寄存器
     LOAD    x1, 1

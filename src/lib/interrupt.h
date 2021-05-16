@@ -78,8 +78,16 @@ typedef struct {
     size_t sstatus;
     size_t sepc;
     size_t stval;
-    size_t scause; //scause
+    size_t scause;
+    size_t satp;
 } Context;
+
+typedef struct {
+    size_t kernel_satp;
+    size_t kernel_sp;
+} KernelContext;
+
+extern KernelContext kernelContext;
 
 Context *handle_interrupt(Context *context, size_t scause, size_t stval);
 

@@ -28,6 +28,7 @@ void daemon_thread() {
  * 所以这里需要恢复现场+将模拟硬件自动完成的动作。
  */
 void init_thread() {
+    kernelContext.kernel_satp = register_read_satp();
     Context thread_context;
     thread_context.sstatus = register_read_sstatus();
     // kernel stack
@@ -39,11 +40,17 @@ void init_thread() {
     thread_context.sepc += __kernel_vir_offset;
     thread_context.ra = (size_t) daemon_thread;
     thread_context.ra += __kernel_vir_offset;
+    size_t user_satp = (size_t)alloc_page();
+    user_satp >>= 12;
+    user_satp |= (8 << 60);
+    thread_context.satp = user_satp;
     __restore(&thread_context);
 }
 
 
 int main(size_t hart_id, size_t dtb_pa) {
+    printf("[DEBUG] Memory Init.");
+    memory_init();
     puts("[DEBUG] Timer Interrupt Start.");
     interrupt_timer_init();
 
