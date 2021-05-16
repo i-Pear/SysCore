@@ -2,19 +2,19 @@
 
 Context* syscall(Context* context){
     // Check SystemCall Number
-    switch (context->x[7]) {
+    switch (context->a7) {
         // Print Register
         // @param: x: register number
         case 0:{
-            printf("[DEBUG] x%d = %d\n", context->x[10], context->x[context->x[10]]);
+            printf("[DEBUG] x%d = %d\n", context->a0, *((size_t *)context + context->a0));
             break;
         }
         case SYS_getpid:{
-            context->x[10] = 0;
+            context->a0 = 0;
             break;
         }
         default:{
-            printf("[SYSCALL] Unhandled Syscall: %d\n", context->x[10]);
+            printf("[SYSCALL] Unhandled Syscall: %d\n", context->a0);
             shutdown();
         }
     }

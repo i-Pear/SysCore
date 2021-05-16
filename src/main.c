@@ -5,9 +5,6 @@
 void D(size_t x) { printf("0x%x\n", x); }
 
 void daemon_thread() {
-//    asm volatile ("li a7, 8");
-//    asm volatile ("ecall");
-
     asm volatile ("li a7, 0");
     asm volatile ("li a1, 999");
     asm volatile ("li a0, 11");
@@ -34,30 +31,21 @@ void init_thread() {
     Context thread_context;
     thread_context.sstatus = register_read_sstatus();
     // kernel stack
-    thread_context.x[2] = register_read_sp();
+    thread_context.sp = register_read_sp();
     thread_context.sstatus |= REGISTER_SSTATUS_SPP; // spp = 1
     thread_context.sstatus ^= REGISTER_SSTATUS_SPP; // spp = 0
     thread_context.sstatus |= REGISTER_SSTATUS_SPIE; // spie = 1
     thread_context.sepc = (size_t) daemon_thread;
     thread_context.sepc += __kernel_vir_offset;
-    thread_context.x[1] = (size_t) daemon_thread;
-    thread_context.x[1] += __kernel_vir_offset;
+    thread_context.ra = (size_t) daemon_thread;
+    thread_context.ra += __kernel_vir_offset;
     __restore(&thread_context);
 }
 
 
 int main(size_t hart_id, size_t dtb_pa) {
-//    puts("[Memory] Initializing...");
-//    memory_init();
-//
     puts("[DEBUG] Timer Interrupt Start.");
     interrupt_timer_init();
-
-//    puts("[Memory Map] Initializing...");
-//    memory_map_init();
-
-
-
 
     init_thread();
     // unreachable

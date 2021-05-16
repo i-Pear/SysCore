@@ -3,11 +3,11 @@
 # 寄存器宽度对应的字节数
 .set    REG_SIZE, 8
 # Context 的大小
-.set    CONTEXT_SIZE, 34
+.set    CONTEXT_SIZE, 36
 
 # 宏：将寄存器存到栈上
 .macro SAVE reg, offset
-    sd  \reg, \offset*8(sp)
+    sd  \reg, \offset*REG_SIZE(sp)
 .endm
 
 .macro SAVE_N n
@@ -17,7 +17,7 @@
 
 # 宏：将寄存器从栈中取出
 .macro LOAD reg, offset
-    ld  \reg, \offset*8(sp)
+    ld  \reg, \offset*REG_SIZE(sp)
 .endm
 
 .macro LOAD_N n
@@ -31,12 +31,12 @@
 # 进入中断
 __interrupt:
     # 在栈上开辟 Context 所需的空间
-    addi    sp, sp, -34*8
+    addi    sp, sp, -CONTEXT_SIZE*8
 
     # 保存通用寄存器，除了 x0（固定为 0）
     SAVE    x1, 1
     # 将原来的 sp（sp 又名 x2）写入 2 位置
-    addi    x1, sp, 34*8
+    addi    x1, sp, CONTEXT_SIZE*8
     SAVE    x1, 2
     # 保存 x3 至 x31
     .set    n, 3
@@ -48,8 +48,13 @@ __interrupt:
     # 取出 CSR 并保存
     csrr    s1, sstatus
     csrr    s2, sepc
+    csrr    s3, stval
+    csrr    s4, scause
     SAVE    s1, 32
     SAVE    s2, 33
+    SAVE    s3, 34
+    SAVE    s4, 35
+
 
     # 调用 handle_interrupt，传入参数
     # context: &mut Context
@@ -73,8 +78,12 @@ __restore:
     # 恢复 CSR
     LOAD    s1, 32
     LOAD    s2, 33
+    LOAD    s3, 34
+    LOAD    s4, 35
     csrw    sstatus, s1
     csrw    sepc, s2
+    csrw    stval, s3
+    csrw    scause, s4
 
     # 恢复通用寄存器
     LOAD    x1, 1
