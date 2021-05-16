@@ -15,6 +15,7 @@
     .global get_boot_page_table
     .global flush_tlb
     .global interrupt_timer_init
+    .global read_sp
 
     .extern __interrupt
     .extern set_next_timeout
@@ -76,6 +77,16 @@ read_time:
     csrr a0, time
     ret
 
+read_sp:
+    addi sp,sp,-8
+    sd ra,8(sp)
+
+    mv a0, sp
+
+    ld ra,8(sp)
+    addi sp,sp,8
+    ret
+
 get_boot_page_table:
     la a0, boot_page_table
     ret
@@ -89,8 +100,10 @@ interrupt_timer_init:
     addi sp,sp,-8
     sd ra,8(sp) 
 
+    # 开启时钟中断
     li t0, 1 << 5
     csrs sie, t0
+    # 全局s-mode中断位
     csrsi sstatus, 2
     call set_next_timeout
 
