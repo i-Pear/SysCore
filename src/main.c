@@ -58,6 +58,7 @@ int main(size_t hart_id, size_t dtb_pa) {
 
 
 
+
     init_thread();
     // unreachable
     puts("Press Any Key To Continue.");
