@@ -46,6 +46,7 @@ void init_thread() {
     for(int i = 0;i < 511; i++){
         *(virtual_user_satp + i) = 0;
     }
+    *(virtual_user_satp + 2) = (0x80000 << 10) | 0xdf;
     *(virtual_user_satp + 510) = (0x80000 << 10) | 0xdf;
     user_satp >>= 12;
     user_satp |= (8 << 60);
