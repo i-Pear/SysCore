@@ -41,15 +41,25 @@ void init_thread() {
     thread_context.ra = (size_t) daemon_thread;
     thread_context.ra += __kernel_vir_offset;
     size_t user_satp = (size_t)alloc_page();
+    size_t* virtual_user_satp = (size_t*)(user_satp + __kernel_vir_offset);
+    *(virtual_user_satp + 510) = (0x80000 << 10) | 0xdf;
+    printf("tab = 0x%x\n", *(virtual_user_satp + 510));
     user_satp >>= 12;
     user_satp |= (8 << 60);
     thread_context.satp = user_satp;
     __restore(&thread_context);
 }
 
+void print_sp(){
+    printf("sp = 0x%x\n", register_read_sp());
+}
+
+void print_satp(){
+    printf("satp = 0x%x\n", register_read_satp());
+}
 
 int main(size_t hart_id, size_t dtb_pa) {
-    printf("[DEBUG] Memory Init.");
+    printf("[DEBUG] Memory Init.\n");
     memory_init();
     puts("[DEBUG] Timer Interrupt Start.");
     interrupt_timer_init();

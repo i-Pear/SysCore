@@ -5,7 +5,7 @@
 #include "stddef.h"
 #include "stdio.h"
 
-#define PAGE_CLOSE
+//#define PAGE_CLOSE
 
 #ifndef memory
 #define __memory (8 * 1024 * 1024)

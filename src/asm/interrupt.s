@@ -60,6 +60,11 @@ __interrupt:
     SAVE    s4, 35
     SAVE    s5, 36
 
+    la t0, kernelContext
+    ld t1, 8(t0)
+    csrw satp, t1
+
+    sfence.vma
 
     # 调用 handle_interrupt，传入参数
     # context: &mut Context
@@ -94,7 +99,9 @@ __restore:
     csrw    scause, s4
     csrw    satp, s5
 
-    # sfence.vma
+    # TODO 死于sfence.vma
+    fence.i
+    sfence.vma
 
     # 恢复通用寄存器
     LOAD    x1, 1
