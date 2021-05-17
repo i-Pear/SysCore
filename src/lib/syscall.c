@@ -19,7 +19,7 @@ Context* syscall(Context* context){
             break;
         }
         default:{
-            printf("[SYSCALL] Unhandled Syscall: %d\n", context->a0);
+            printf("[SYSCALL] Unhandled Syscall: %d\n", context->a7);
             shutdown();
         }
     }

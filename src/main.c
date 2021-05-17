@@ -1,6 +1,8 @@
 #include "lib/page.h"
 #include "lib/interrupt.h"
 #include "lib/register.h"
+#include "lib/elf_data.h"
+#include "lib/elf_loader.h"
 
 void D(size_t x) { printf("0x%x\n", x); }
 
@@ -28,6 +30,11 @@ void daemon_thread() {
  * 所以这里需要恢复现场+将模拟硬件自动完成的动作。
  */
 void init_thread() {
+    // load ELF
+    int size=sizeof(ELF_DATA);
+    size_t ptr=load_elf(ELF_DATA,size);
+    printf("returned function address: %x\n",ptr);
+
     printf("[DEBUG] Prepare For User Mode.\n");
     Context thread_context;
     thread_context.sstatus = register_read_sstatus();
@@ -49,7 +56,8 @@ void init_thread() {
     /**
      * 此处sepc为中断后返回地址
      */
-    thread_context.sepc = (size_t) daemon_thread;
+    // thread_context.sepc = (size_t) daemon_thread;
+    thread_context.sepc = ptr;
     /**
      * 页表处理
      * 1. satp应由物理页首地址右移12位并且或上（8 << 60），表示开启sv39分页模式

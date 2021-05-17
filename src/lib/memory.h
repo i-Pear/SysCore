@@ -46,4 +46,8 @@ size_t get_page_num(void *page_addr);
  */
 void memory_init();
 
+int strcmp(const char* a,const char* b);
+
+void memset(char* p,char content,int size);
+
 #endif
