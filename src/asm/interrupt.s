@@ -61,7 +61,7 @@ __interrupt:
     SAVE    s5, 36
 
     la t0, kernelContext
-    ld t1, 8(t0)
+    ld t1, 0(t0)
     csrw satp, t1
 
     sfence.vma
@@ -99,8 +99,6 @@ __restore:
     csrw    scause, s4
     csrw    satp, s5
 
-    # TODO 死于sfence.vma
-    fence.i
     sfence.vma
 
     # 恢复通用寄存器

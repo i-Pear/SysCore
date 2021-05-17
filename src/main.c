@@ -29,7 +29,6 @@ void daemon_thread() {
  */
 void init_thread() {
     printf("[DEBUG] Prepare For User Mode.\n");
-    kernelContext.kernel_satp = register_read_satp();
     Context thread_context;
     thread_context.sstatus = register_read_sstatus();
     // kernel stack
@@ -65,7 +64,8 @@ void print_satp(){
 int main(size_t hart_id, size_t dtb_pa) {
     printf("[DEBUG] Memory Init.\n");
     memory_init();
-    puts("[DEBUG] Timer Interrupt Start.");
+    puts("[DEBUG] Interrupt & Timer Interrupt Open.");
+    kernelContext.kernel_satp = register_read_satp();
     interrupt_timer_init();
 
     init_thread();
