@@ -31,21 +31,40 @@ void init_thread() {
     printf("[DEBUG] Prepare For User Mode.\n");
     Context thread_context;
     thread_context.sstatus = register_read_sstatus();
-    // kernel stack
-    thread_context.sp = register_read_sp();
+    /**
+     * 用户栈
+     * 由于alloc_page函数返回值为一页的物理首地址，故此处增加__kernel_vir_offset
+     * 栈通常向低地址方向增长，故此处增加__page_size
+     */
+    thread_context.sp = (size_t) alloc_page() + __page_size + __kernel_vir_offset;
+    /**
+     * 此处spp应为0,表示user-mode
+     */
     thread_context.sstatus |= REGISTER_SSTATUS_SPP; // spp = 1
     thread_context.sstatus ^= REGISTER_SSTATUS_SPP; // spp = 0
+    /**
+     * 此处spie应为1,表示user-mode允许中断
+     */
     thread_context.sstatus |= REGISTER_SSTATUS_SPIE; // spie = 1
+    /**
+     * 此处sepc为中断后返回地址
+     */
     thread_context.sepc = (size_t) daemon_thread;
     thread_context.sepc += __kernel_vir_offset;
-    thread_context.ra = (size_t) daemon_thread;
-    thread_context.ra += __kernel_vir_offset;
-    size_t user_satp = (size_t)alloc_page();
-    size_t* virtual_user_satp = (size_t*)(user_satp + __kernel_vir_offset);
-    for(int i = 0;i < 511; i++){
+    /**
+     * 页表处理
+     * 1. satp应由虚拟页首地址右移12位并且或上（8 << 60），表示开启sv39分页模式
+     * 2. 未使用的页表项应该置0
+     */
+    size_t user_satp = (size_t) alloc_page();
+    size_t *virtual_user_satp = (size_t *) (user_satp + __kernel_vir_offset);
+    for (int i = 0; i < 511; i++) {
         *(virtual_user_satp + i) = 0;
     }
+    // 0x8000_0000 -> 0x8000_0000
+    // TODO 此处不合理
     *(virtual_user_satp + 2) = (0x80000 << 10) | 0xdf;
+    // 0xffff_ffff_8000_0000 -> 0x8000_0000
     *(virtual_user_satp + 510) = (0x80000 << 10) | 0xdf;
     user_satp >>= 12;
     user_satp |= (8 << 60);
@@ -53,11 +72,11 @@ void init_thread() {
     __restore(&thread_context);
 }
 
-void print_sp(){
+void print_sp() {
     printf("sp = 0x%x\n", register_read_sp());
 }
 
-void print_satp(){
+void print_satp() {
     printf("satp = 0x%x\n", register_read_satp());
 }
 
