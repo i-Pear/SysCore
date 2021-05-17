@@ -1,4 +1,5 @@
 #include "syscall.h"
+#include "register.h"
 
 Context* syscall(Context* context){
     // Check SystemCall Number
@@ -7,6 +8,10 @@ Context* syscall(Context* context){
         // @param: x: register number
         case 0:{
             printf("[DEBUG] x%d = %d\n", context->a0, *((size_t *)context + context->a0));
+            break;
+        }
+        case 1:{
+            printf("[DEBUG] satp = 0x%x\n", context->satp);
             break;
         }
         case SYS_getpid:{

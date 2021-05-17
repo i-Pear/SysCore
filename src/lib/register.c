@@ -44,3 +44,13 @@ size_t register_read_sp() {
     );
     return res;
 }
+
+size_t register_read_pc() {
+    asm volatile ("auipc t0, 0");
+    size_t res;
+    asm volatile(
+    "mv %0, t0"
+    :"=r"(res)
+    );
+    return res;
+}

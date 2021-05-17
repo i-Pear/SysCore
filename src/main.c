@@ -50,25 +50,51 @@ void init_thread() {
      * 此处sepc为中断后返回地址
      */
     thread_context.sepc = (size_t) daemon_thread;
-    thread_context.sepc += __kernel_vir_offset;
     /**
      * 页表处理
-     * 1. satp应由虚拟页首地址右移12位并且或上（8 << 60），表示开启sv39分页模式
+     * 1. satp应由物理页首地址右移12位并且或上（8 << 60），表示开启sv39分页模式
      * 2. 未使用的页表项应该置0
      */
     size_t user_satp = (size_t) alloc_page();
-    size_t *virtual_user_satp = (size_t *) (user_satp + __kernel_vir_offset);
+
     for (int i = 0; i < 511; i++) {
-        *(virtual_user_satp + i) = 0;
+        *((size_t *)user_satp + i) = 0;
     }
+
     // 0x8000_0000 -> 0x8000_0000
     // TODO 此处不合理
-    *(virtual_user_satp + 2) = (0x80000 << 10) | 0xdf;
+    *((size_t *)user_satp + 2) = (0x80000 << 10) | 0xdf;
     // 0xffff_ffff_8000_0000 -> 0x8000_0000
-    *(virtual_user_satp + 510) = (0x80000 << 10) | 0xdf;
+    *((size_t *)user_satp + 510) = (0x80000 << 10) | 0xdf;
     user_satp >>= 12;
     user_satp |= (8 << 60);
     thread_context.satp = user_satp;
+    __restore(&thread_context);
+}
+
+/**
+ * 这个函数用来使pc指向虚拟地址而不是真实地址
+ * 切换之后仍然停留在s-mode
+ */
+void turn_to_virtual_supervisor_mode(){
+    printf("[DEBUG] Prepare For SuperVisor Mode With VirtualOffset.\n");
+    Context thread_context;
+    thread_context.sstatus = register_read_sstatus();
+    thread_context.sp = register_read_sp() + __kernel_vir_offset;
+    /**
+     * 此处spp为1,表示s-mode
+     */
+    thread_context.sstatus |= REGISTER_SSTATUS_SPP; // spp = 1
+    /**
+     * 此处spie为1,表示s-mode允许中断
+     */
+    thread_context.sstatus |= REGISTER_SSTATUS_SPIE; // spie = 1
+    /**
+     * 此处sepc为中断后返回地址
+     */
+    thread_context.sepc = (size_t) init_thread + __kernel_vir_offset;
+    thread_context.ra = (size_t) init_thread + __kernel_vir_offset;
+    thread_context.satp = kernelContext.kernel_satp;
     __restore(&thread_context);
 }
 
@@ -87,7 +113,8 @@ int main(size_t hart_id, size_t dtb_pa) {
     kernelContext.kernel_satp = register_read_satp();
     interrupt_timer_init();
 
-    init_thread();
+//    init_thread();
+    turn_to_virtual_supervisor_mode();
     // unreachable
     puts("Press Any Key To Continue.");
     getchar();
