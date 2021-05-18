@@ -14,6 +14,9 @@ Context* syscall(Context* context){
             printf("[DEBUG] satp = 0x%x\n", context->satp);
             break;
         }
+        case 996:{
+            printf("%c",context->a0);
+        }
         case SYS_getpid:{
             context->a0 = 0;
             break;
