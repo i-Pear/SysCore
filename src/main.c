@@ -33,7 +33,6 @@ void init_thread() {
     // load ELF
     int size=sizeof(ELF_DATA);
     size_t ptr=load_elf(ELF_DATA,size);
-    printf("returned function address: %x\n",ptr);
 
     printf("[DEBUG] Prepare For User Mode.\n");
     Context thread_context;

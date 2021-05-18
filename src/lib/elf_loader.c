@@ -7,17 +7,6 @@ void *elf_read(void **source, int size) {
     return res;
 }
 
-void *find_sym(const char *name, Elf64_Shdr *shdr, const char *strings, const char *src, char *dst) {
-    Elf64_Sym *syms = (Elf64_Sym *) (src + shdr->sh_offset);
-    int i;
-    for (i = 0; i < shdr->sh_size / sizeof(Elf64_Sym); i += 1) {
-        if (strcmp(name, strings + syms[i].st_name) == 0) {
-            return dst + syms[i].st_value;
-        }
-    }
-    return NULL;
-}
-
 void *load_elf(const char *_elf_data, int size) {
     // check magic number
     if (_elf_data[0] != 0x7f || _elf_data[1] != 0x45 || _elf_data[2] != 0x4c || _elf_data[3] != 0x46) {
@@ -68,28 +57,18 @@ void *load_elf(const char *_elf_data, int size) {
         if (phdr[i].p_type != PT_LOAD)continue;
         if (phdr[i].p_filesz == 0)continue;
 
-        printf("Copying Segment of size %d\n", phdr[i].p_filesz);
+        printf("[ELF LOADER] Copying Segment of size %d\n", phdr[i].p_filesz);
 
         char *start = elf_start + phdr[i].p_offset;
         char *target_addr = phdr[i].p_vaddr + exec;
-        printf("p_vaddr: 0x%x  exec: 0x%x\n", phdr[i].p_vaddr, exec);
-        printf("Start memcpy! from 0x%x to 0x%x \n", start, target_addr);
+        printf("[ELF LOADER] p_vaddr: 0x%x  exec: 0x%x\n", phdr[i].p_vaddr, exec);
+        printf("[ELF LOADER] Start memcpy! from 0x%x to 0x%x \n", start, target_addr);
         entry=target_addr;
 
         memcpy(target_addr, start, phdr[i].p_filesz);
     }
 
-    for (int i = 0; i < Ehdr->e_shnum; ++i) {
-        if (shdr[i].sh_type == SHT_DYNSYM) {
-            syms = (Elf64_Sym *) (elf_start + shdr[i].sh_offset);
-            strings = elf_start + shdr[shdr[i].sh_link].sh_offset;
-            entry = find_sym("main", shdr + i, strings, elf_start, exec);
-            printf("found entry!\n");
-            break;
-        }
-    }
-    printf("entry= %x\n",entry);
+    printf("[ELF LOADER] entry= %x\n",entry);
 
     return entry;
-
 }
