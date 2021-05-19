@@ -5,6 +5,7 @@
 #include "lib/elf_loader.h"
 #include "driver/interface.h"
 #include "driver/sdcard.h"
+#include "lib/fat32.h"
 
 void D(size_t x) { printf("0x%x\n", x); }
 
@@ -22,7 +23,7 @@ void daemon_thread() {
 void test_sdcard_main(){
     uniform_init();
     sdcard_init();
-//    test_fat32();
+    test_fat32();
 }
 
 
@@ -44,7 +45,7 @@ void init_thread() {
     int size=sizeof(ELF_DATA);
     size_t ptr=load_elf(ELF_DATA,size);
 
-    printf("[DEBUG] Prepare For User Mode.\n");
+    printf("[OS] Prepare For User Mode.\n");
     Context thread_context;
     thread_context.sstatus = register_read_sstatus();
     /**
@@ -94,7 +95,7 @@ void init_thread() {
  * 切换之后仍然停留在s-mode
  */
 void turn_to_virtual_supervisor_mode(){
-    printf("[DEBUG] Prepare For SuperVisor Mode With VirtualOffset.\n");
+    printf("[OS] Prepare For SuperVisor Mode With VirtualOffset.\n");
     Context thread_context;
     thread_context.sstatus = register_read_sstatus();
     thread_context.sp = register_read_sp() + __kernel_vir_offset;
@@ -124,9 +125,9 @@ void print_satp() {
 }
 
 int main(size_t hart_id, size_t dtb_pa) {
-    printf("[DEBUG] Memory Init.\n");
+    printf("[OS] Memory Init.\n");
     memory_init();
-    puts("[DEBUG] Interrupt & Timer Interrupt Open.");
+    puts("[OS] Interrupt & Timer Interrupt Open.");
     kernelContext.kernel_satp = register_read_satp();
     interrupt_timer_init();
 

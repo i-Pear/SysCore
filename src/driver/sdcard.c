@@ -227,7 +227,7 @@ static int check_block_size(void) {
 
         if (0 == result) {
             if (ocr[0] & 0x40) {
-                printf("SDHC/SDXC detected\n");
+                printf("[SD] SDHC/SDXC detected\n");
                 if (512 != BSIZE) {
                     printf("BSIZE != 512\n");
                     return 0xff;
@@ -422,33 +422,4 @@ void sdcard_write_sector(uint8 *buf, int sectorno) {
 
 //    releasesleep(&sdcard_lock);
     // leave critical section!
-}
-
-// A simple test for sdcard read/write test
-void test_sdcard(void) {
-    uint8 buf[BSIZE];
-
-    for (int sec = 0; sec < 5; sec ++) {
-        for (int i = 0; i < BSIZE; i ++) {
-            buf[i] = 0xaa;		// data to be written
-        }
-
-        sdcard_write_sector(buf, sec);
-
-        for (int i = 0; i < BSIZE; i ++) {
-            buf[i] = 0xff;		// fill in junk
-        }
-
-        sdcard_read_sector(buf, sec);
-        for (int i = 0; i < BSIZE; i ++) {
-            if (0 == i % 16) {
-                printf("\n");
-            }
-
-            printf("%x ", buf[i]);
-        }
-        printf("\n");
-    }
-
-    while (1) ;
 }
