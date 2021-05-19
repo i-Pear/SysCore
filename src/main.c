@@ -3,6 +3,8 @@
 #include "lib/register.h"
 #include "lib/elf_data.h"
 #include "lib/elf_loader.h"
+#include "driver/interface.h"
+#include "driver/sdcard.h"
 
 void D(size_t x) { printf("0x%x\n", x); }
 
@@ -14,6 +16,13 @@ void daemon_thread() {
 
 
     while (1);
+}
+
+
+void test_sdcard_main(){
+    uniform_init();
+    sdcard_init();
+//    test_fat32();
 }
 
 
@@ -30,6 +39,7 @@ void daemon_thread() {
  * 所以这里需要恢复现场+将模拟硬件自动完成的动作。
  */
 void init_thread() {
+    test_sdcard_main();
     // load ELF
     int size=sizeof(ELF_DATA);
     size_t ptr=load_elf(ELF_DATA,size);

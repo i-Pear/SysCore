@@ -21,6 +21,7 @@ all:
 	@test -d $(BUILD) || mkdir -p $(BUILD)
 	$(GCC) -o $(KERNEL_O) -Wall -g -mcmodel=medany -T src/linker.ld -O2 -ffreestanding -nostdlib\
                                     $(SRC_ALL) \
+                                    $(SRC_DRIVER) \
                                     src/main.c
 	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)
 
@@ -38,4 +39,3 @@ up:
 # 通过串口查看
 see:
 	python3 -m serial.tools.miniterm --eol LF --dtr 0 --rts 0 --filter direct $(K210-SERIALPORT) 115200
-

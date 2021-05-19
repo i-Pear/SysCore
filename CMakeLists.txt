@@ -17,4 +17,4 @@ add_executable(
         ${SRC_DRIVER}
         ${SRC_LIB}
         src/main.c
-        src/lib/lty.h src/lib/elf_loader.c src/lib/elf_loader.h)
+)
