@@ -73,7 +73,7 @@ size_t fat_get_sector_by_address(size_t addr) {
     return (addr | 0x1ff) ^ 0x1ff;
 }
 
-#define FAT_SECTOR_BUF_SIZE (512 * 2)
+#define FAT_SECTOR_BUF_SIZE (0x4200)
 uint8 sector_buf[FAT_SECTOR_BUF_SIZE];
 
 uint8 *fat_read(size_t addr, size_t len) {
@@ -295,10 +295,10 @@ size_t read_a_sector(struct FatFile *file, char buf[]) {
     if (file->cluster_flag == CLUSTER_END) {
         return 0;
     }
-    size_t len = dpb.sector_size_in_bytes;
+    size_t len = dpb.sector_size_in_bytes * dpb.number_of_sectors_per_cluster;
     size_t file_size = file->fat32Entry.file_size;
-    if (file_size - file->cluster_num * dpb.sector_size_in_bytes <= 512) {
-        len = file_size - file->cluster_num * dpb.sector_size_in_bytes;
+    if (file_size - file->cluster_num * dpb.sector_size_in_bytes * dpb.number_of_sectors_per_cluster <= dpb.sector_size_in_bytes * dpb.number_of_sectors_per_cluster) {
+        len = file_size - file->cluster_num * dpb.sector_size_in_bytes * dpb.number_of_sectors_per_cluster;
     }
     void* res = fat_read(file->content_start, len);
     memcpy(buf, res, len);
@@ -309,6 +309,7 @@ size_t read_a_sector(struct FatFile *file, char buf[]) {
         file->fat = calc_next_fat(file->fat);
         file->cluster_num++;
     }
+    printf("len = 0x%x\n", len);
     return len;
 }
 
@@ -318,8 +319,6 @@ void fat32_init() {
     root_addr = (dpb.reserved_sectors + dpb.number_of_fats * dpb.number_sectors_in_the_one_fat) *
                 dpb.sector_size_in_bytes;
     fat_addr = dpb.reserved_sectors * dpb.sector_size_in_bytes;
-    printf("[FAT] root addr: 0x%x\n", root_addr);
-    printf("[FAT] fat addr: 0x%x\n", fat_addr);
 }
 
 /**
@@ -333,13 +332,16 @@ void fat32_init() {
 int fat_read_file(struct Fat32Entry fat32Entry, char buffer[]){
     struct FatFile file = FatFile_init(fat32Entry);
     size_t len, cur = 0;
-    char buf[512];
+    char buf[dpb.sector_size_in_bytes * dpb.number_of_sectors_per_cluster];
     do {
         len = read_a_sector(&file, buf);
 //        printf("Receive %d bytes.\n", len);
-        for(int i = 0;i < len; i++){
-            buffer[cur + i] = buf[i];
-        }
+//        for(int i = 0;i < len; i++){
+//            if(i % 16 == 0)printf("\n");
+//            printf("0x%x, ", buf[i]);
+//            buffer[cur + i] = buf[i];
+//        }
+//        printf("\n");
         cur += len;
     } while (len);
     return (int)cur;

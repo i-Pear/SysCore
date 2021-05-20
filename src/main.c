@@ -21,12 +21,12 @@ void daemon_thread() {
 
 
 void test_sdcard_main(){
-    uniform_init();
-    sdcard_init();
-    fat32_init();
     int find = 0;
     struct Fat32Entry fat32Entry = fat_find_file_entry("/lty", &find);
-    char buf[fat32Entry.file_size];
+    char* buf = alloc_page();
+    for (int i = 0; i < 20; ++i) {
+        alloc_page();
+    }
     int len = fat_read_file(fat32Entry, buf);
     printf("[FAT] file size = %d\n", fat32Entry.file_size);
     printf("[FAT] read %d Bytes\n", len);
@@ -46,7 +46,12 @@ void test_sdcard_main(){
  * 所以这里需要恢复现场+将模拟硬件自动完成的动作。
  */
 void init_thread() {
-    test_sdcard_main();
+    printf("[OS] bsp init.\n");
+    bsp_init();
+    printf("[OS] sdcard init.\n");
+    sdcard_init();
+    printf("[OS] fat32 init.\n");
+    fat32_init();
     // load ELF
     int size=sizeof(ELF_DATA);
     size_t ptr=load_elf(ELF_DATA,size);

@@ -22,6 +22,6 @@ void *memmove(void *dst, const void *src, uint n) {
     return dst;
 }
 
-void uniform_init(){
+void bsp_init(){
     fpioa_pin_init();
 }
