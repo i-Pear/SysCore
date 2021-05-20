@@ -309,7 +309,7 @@ size_t read_a_sector(struct FatFile *file, char buf[]) {
         file->fat = calc_next_fat(file->fat);
         file->cluster_num++;
     }
-    printf("len = 0x%x\n", len);
+//    printf("len = 0x%x\n", len);
     return len;
 }
 
@@ -335,13 +335,9 @@ int fat_read_file(struct Fat32Entry fat32Entry, char buffer[]){
     char buf[dpb.sector_size_in_bytes * dpb.number_of_sectors_per_cluster];
     do {
         len = read_a_sector(&file, buf);
-//        printf("Receive %d bytes.\n", len);
-//        for(int i = 0;i < len; i++){
-//            if(i % 16 == 0)printf("\n");
-//            printf("0x%x, ", buf[i]);
-//            buffer[cur + i] = buf[i];
-//        }
-//        printf("\n");
+        for(int i = 0;i < len; i++){
+            buffer[cur + i] = buf[i];
+        }
         cur += len;
     } while (len);
     return (int)cur;
