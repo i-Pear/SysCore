@@ -23,7 +23,13 @@ void daemon_thread() {
 void test_sdcard_main(){
     uniform_init();
     sdcard_init();
-    test_fat32();
+    fat32_init();
+    int find = 0;
+    struct Fat32Entry fat32Entry = fat_find_file_entry("/lty", &find);
+    char buf[fat32Entry.file_size];
+    int len = fat_read_file(fat32Entry, buf);
+    printf("[FAT] file size = %d\n", fat32Entry.file_size);
+    printf("[FAT] read %d Bytes\n", len);
 }
 
 
