@@ -45,6 +45,12 @@ void test_sdcard_main(){
  * 所以这里需要恢复现场+将模拟硬件自动完成的动作。
  */
 void init_thread() {
+    printf("Testing write :\n"
+           "========== START test_write ==========\n"
+           "Hello operating system contest.\n"
+           "========== END test_write ==========\n");
+    shutdown();
+
     printf("[OS] bsp init.\n");
     bsp_init();
     printf("[OS] sdcard init.\n");
