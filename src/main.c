@@ -60,8 +60,8 @@ void init_thread() {
     fat_read_file(fat32Entry, buf);
     // load ELF
     size_t ptr=load_elf(buf, file_size);
-    printf("Testing write :\n");
     printf("[OS] Prepare For User Mode.\n");
+    printf("Testing write :\n");
     Context thread_context;
     thread_context.sstatus = register_read_sstatus();
     /**
