@@ -164,6 +164,8 @@ size_t calc_content(size_t cluster_num) {
     return root_addr + (cluster_num - 2) * dpb.sector_size_in_bytes * dpb.number_of_sectors_per_cluster;
 }
 
+
+
 void tree(size_t addr, int level) {
     struct Fat32Entry file_start = *(struct Fat32Entry *) fat_read(addr, sizeof(struct Fat32Entry));
     uint16_t file_name[512];
@@ -190,6 +192,11 @@ void tree(size_t addr, int level) {
         file_start = *(struct Fat32Entry *) fat_read(addr, sizeof(struct Fat32Entry));
     }
 }
+
+void tree_all(){
+    tree(root_addr, 0);
+}
+
 
 int strcmp_u16(uint16_t *left, uint16_t *right) {
     while (*left || *right) {

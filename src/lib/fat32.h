@@ -1,6 +1,8 @@
 #ifndef __FAT_32_H__
 #define __FAT_32_H__
 
+#include "stddef.h"
+
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
@@ -21,6 +23,7 @@ struct Fat32Entry {
     uint32_t file_size;
 }__attribute__((packed));
 
+void tree_all();
 
 void test_fat32();
 /**
