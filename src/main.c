@@ -1,7 +1,6 @@
 #include "lib/page.h"
 #include "lib/interrupt.h"
 #include "lib/register.h"
-#include "lib/elf_data.h"
 #include "lib/elf_loader.h"
 #include "driver/interface.h"
 #include "driver/sdcard.h"
@@ -52,21 +51,15 @@ void init_thread() {
     sdcard_init();
     printf("[OS] fat32 init.\n");
     fat32_init();
-
+    printf("[OS] Starting to load elf...");
     int find = 0;
-    struct Fat32Entry fat32Entry = fat_find_file_entry("/lty", &find);
-    int len = fat_calculate_file_size(fat32Entry);
+    struct Fat32Entry fat32Entry = fat_find_file_entry("/write", &find);
+    int file_size = fat_calculate_file_size(fat32Entry);
     char* buf = alloc_page();
     for(int i = 0;i < 20; i++)alloc_page();
-    int read = fat_read_file(fat32Entry, buf);
-    printf("read %d bytes\n", read);
-    for(int i = 0;i < 512; i++){
-        printf("%x ", buf[i]);
-    }
-    printf("\n");
+    fat_read_file(fat32Entry, buf);
     // load ELF
-    int size=sizeof(ELF_DATA);
-    size_t ptr=load_elf(ELF_DATA,size);
+    size_t ptr=load_elf(buf, file_size);
 
     printf("[OS] Prepare For User Mode.\n");
     Context thread_context;

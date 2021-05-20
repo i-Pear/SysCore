@@ -32,7 +32,8 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
         }
         // user ecall
         case 8:{
-            return syscall(context);
+            Context *ret = syscall(context);
+            return ret;
         }
         default: {
             printf("scause: %d\n", scause);
