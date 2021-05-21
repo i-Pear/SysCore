@@ -61,7 +61,12 @@ __interrupt:
     SAVE    s5, 36
 
     la t0, kernelContext
+    # kernel_satp
     ld t1, 0(t0)
+    # kernel_handle_interrupt
+    ld t2, 16(t0)
+    # kernel_restore
+    ld t3, 24(t0)
     csrw satp, t1
 
     sfence.vma
@@ -75,9 +80,11 @@ __interrupt:
     andi a1, a1, 31
     # stval: usize
     csrr    a2, stval
+
     # la ra, __restore
     # jal  handle_interrupt
-    call handle_interrupt
+    mv ra, t3
+    jr t2
 
     .global __restore
 # 离开中断

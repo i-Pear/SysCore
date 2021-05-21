@@ -23,6 +23,8 @@ extern void interrupt_timer_init();
 
 extern void* get_boot_page_table();
 
+extern size_t get_restore();
+
 extern void flush_tlb();
 
 void shutdown();

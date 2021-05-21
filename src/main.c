@@ -72,6 +72,8 @@ int main() {
     init_kernel_heap();
     puts("[OS] Interrupt & Timer Interrupt Open.");
     kernelContext.kernel_satp = register_read_satp();
+    kernelContext.kernel_handle_interrupt = (size_t)handle_interrupt;
+    kernelContext.kernel_restore = (size_t) __restore;
     interrupt_timer_init();
 
     turn_to_virtual_supervisor_mode();

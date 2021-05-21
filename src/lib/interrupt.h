@@ -85,6 +85,8 @@ typedef struct {
 typedef struct {
     size_t kernel_satp;
     size_t kernel_sp;
+    size_t kernel_handle_interrupt;
+    size_t kernel_restore;
 } KernelContext;
 
 extern KernelContext kernelContext;
