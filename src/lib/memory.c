@@ -1,90 +1,149 @@
 #include "memory.h"
 
-#define L(x) ((x) << 1)
-#define R(x) (((x) << 1) + 1)
+size_t __kernel_end;
 
-#define __page_num (__memory / __page_size)
-#define __heap_size (__heap_page_num * __page_size)
+__Memory_SegmentTreeNode global_pages[__page_num * 4];
+int __memory_alloc_length[__page_num];
 
-typedef struct {
-    bool is_alloced;
-    bool is_split;
-} Buddy;
+#define cnt global_pages[node]
 
-Buddy buddies[(__heap_size) << 2] = {};
-size_t kernel_end = 0;
-
-size_t fix_size(size_t x) {
-    x -= 1;
-    x |= x >> 1;
-    x |= x >> 2;
-    x |= x >> 4;
-    x |= x >> 8;
-    x |= x >> 16;
-    return x + 1;
+int __memory_get_size(int node){
+    return global_pages[node].r - global_pages[node].l + 1;
 }
 
-bool alloc(size_t size, size_t cur, size_t *addr, size_t csize) {
-    if (buddies[cur].is_alloced || (cur >= __heap_size << 2) || csize < size) {
-        return false;
+bool __memory_isEmpty(int node){
+    return global_pages[node].max_space == __memory_get_size(node);
+}
+
+void __memory_push_up(int node) {
+    if(!__memory_isEmpty(L(node))){
+        cnt.left_boarder_space = global_pages[L(node)].left_boarder_space;
+    }else{
+        cnt.left_boarder_space = __memory_get_size(L(node)) + global_pages[R(node)].left_boarder_space;
     }
-    if (csize == size && !buddies[cur].is_split) {
-        buddies[cur].is_alloced = true;
-        return true;
+    cnt.left_right_space = global_pages[L(node)].right_boarder_space;
+    cnt.right_left_space = global_pages[R(node)].left_boarder_space;
+    if(!__memory_isEmpty(R(node))){
+        cnt.right_boarder_space = global_pages[R(node)].right_boarder_space;
+    }else{
+        cnt.right_boarder_space = global_pages[L(node)].right_boarder_space + __memory_get_size(R(node));
     }
-    if (!buddies[L(cur)].is_alloced) {
-        bool ret = alloc(size, L(cur), addr, csize >> 1);
-        if (ret) {
-            buddies[cur].is_split = true;
-            return ret;
+
+    cnt.left_max_space = global_pages[L(node)].max_space;
+    cnt.right_max_space = global_pages[R(node)].max_space;
+
+    cnt.max_space = max(cnt.left_max_space, max(cnt.right_max_space, cnt.left_right_space + cnt.right_left_space));
+}
+
+void __memory_init_pages(int node, int l, int r) {
+    cnt.set = 0;
+    cnt.l = l;
+    cnt.r = r;
+    cnt.mid = (l + r) / 2;
+
+    cnt.max_space= r - l + 1;
+    if(l!=r){
+        __memory_init_pages(L(node),l,cnt.mid);
+        __memory_init_pages(R(node),cnt.mid+1,r);
+    }
+    cnt.right_max_space =cnt.right_boarder_space = cnt.right_left_space = global_pages[R(node)].max_space;
+    cnt.left_max_space =cnt.left_right_space = cnt.left_boarder_space = global_pages[L(node)].max_space;
+}
+
+int __memory_find_space(int node, int size) {
+    if (cnt.l == cnt.r) {
+        // leaf node
+        if (cnt.max_space >= size) {
+            return cnt.l;
+        } else {
+            return -1;
         }
-    }
-    if (!buddies[R(cur)].is_alloced) {
-        *addr += csize >> 1;
-        bool ret = alloc(size, R(cur), addr, csize >> 1);
-        if (ret) {
-            buddies[cur].is_split = true;
-            return ret;
+    } else {
+        // try left son
+        if (cnt.left_max_space >= size) {
+            return __memory_find_space(L(node), size);
         }
+        // try right son
+        if (cnt.right_max_space >= size) {
+            return __memory_find_space(R(node), size);
+        }
+        // try to place middle
+        if (cnt.left_right_space + cnt.right_left_space >= size) {
+            return cnt.mid - cnt.left_right_space + 1;
+        }
+        return -1;
     }
-    return false;
 }
 
-void *k_malloc(size_t size) {
-    size = fix_size(size);
-    size_t addr = kernel_end;
-    bool success = alloc(size, 1, &addr, __heap_size);
-    if (!success) {
-        puts("Memory overflow.\n");
-        return 0;
+void __memory_push_down(int node) {
+    if (cnt.set == 1) {
+        global_pages[L(node)].set = cnt.set;
+        global_pages[L(node)].max_space = global_pages[L(node)].left_boarder_space = global_pages[L(node)].right_boarder_space = 0;
+        global_pages[R(node)].set = cnt.set;
+        global_pages[R(node)].max_space = global_pages[R(node)].left_boarder_space = global_pages[R(node)].right_boarder_space = 0;
+    } else if (cnt.set == -1) {
+        global_pages[L(node)].set = cnt.set;
+        global_pages[L(node)].max_space = global_pages[L(node)].left_boarder_space = global_pages[L(node)].right_boarder_space =
+                global_pages[L(node)].r - global_pages[L(node)].l + 1;
+        global_pages[R(node)].set = cnt.set;
+        global_pages[R(node)].max_space = global_pages[R(node)].left_boarder_space = global_pages[R(node)].right_boarder_space =
+                global_pages[R(node)].r - global_pages[R(node)].l + 1;
     }
-    return (void *) addr;
+    cnt.set = 0;
 }
 
-void dealloc(size_t addr, size_t cur, size_t ptr, size_t csize) {
-    size_t m = csize >> 1;
-    if (cur >= __heap_size << 2) {
-        return;
+void __memory_update(int node, int l, int r, int set) {
+    l = max(l, cnt.l);
+    r = min(r, cnt.r);
+    if (r < l)return; // assert: l<=r
+
+    if (l == cnt.l && r == cnt.r) {
+        // full cover
+        if (set == 1) {
+            cnt.set = 1;
+            cnt.max_space = cnt.left_boarder_space = cnt.right_boarder_space = 0;
+        } else if (set == -1) {
+            cnt.set = -1;
+            cnt.max_space = cnt.left_boarder_space = cnt.right_boarder_space = cnt.r - cnt.l + 1;
+        }
+    } else {
+        __memory_push_down(node);
+        __memory_update(L(node), l, r, set);
+        __memory_update(R(node), l, r, set);
+        __memory_push_up(node);
     }
-    if (buddies[cur].is_alloced && addr == ptr) {
-        buddies[cur].is_alloced = false;
-    } else if (addr < m && buddies[cur].is_split) {
-        dealloc(addr, L(cur), ptr, csize >> 1);
-    } else if (addr > m && buddies[cur].is_split) {
-        dealloc(addr, R(cur), ptr + (csize >> 1), csize >> 1);
-    }
-    if (!buddies[cur].is_alloced && buddies[cur].is_split &&
-        !buddies[L(cur)].is_split && !buddies[L(cur)].is_alloced &&
-        !buddies[R(cur)].is_split && !buddies[R(cur)].is_alloced)
-        buddies[cur].is_split = false;
 }
 
-void k_free(void *addr) {
-    dealloc((size_t) addr - get_kernel_end(), 1, 0, __heap_size);
+void init_memory(){
+    printf("Reserved page num=%d\n",__page_num);
+    __kernel_end=get_kernel_end();
+    __kernel_end=(__kernel_end+__page_size-1)/__page_size*__page_size;
+    printf("kernel end= 0x%x\n",__kernel_end);
+    int page_count=(__memory_end-__kernel_end)/__page_size;
+    printf("[Memory] total global_pages' count is %d\n",page_count);
+    __memory_init_pages(1,0,page_count-1);
 }
 
-void memory_init() {
-    printf("memory_init\n");
-    size_t used_page_num = __heap_page_num + 10;
-    kernel_end = alloc_page(used_page_num * 4096);
+size_t alloc_page(size_t size){
+    printf("Trying to alloc page, size=0x%x\n",size);
+    int count=(size+__page_size-1)/__page_size;
+    printf("count=%d\n",count);
+    int start=__memory_find_space(1,count);
+    if(start==-1){
+        printf("Can't alloc page!\n");
+        return -1;
+    }
+    printf("Alloced page of start=%d length=%d\n",start,count);
+    __memory_update(1,start,start+count-1,1);
+    __memory_alloc_length[start]=count;
+    return __kernel_end+start*__page_size;
 }
+
+void dealloc_page(size_t p){
+    int start=(p-__kernel_end)/__page_size;
+    int length=__memory_alloc_length[start];
+    printf("dealloc_page page: start=%d length=%d\n",start,length);
+    __memory_update(1,start,start+length-1,-1);
+}
+
+#undef cnt

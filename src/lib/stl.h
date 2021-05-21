@@ -1,7 +1,7 @@
 #ifndef __STL_H__
 #define __STL_H__
 
-#include "memory.h"
+#include "kernel_heap.h"
 
 #define INT_MAX 2147483647
 #define INT_MIN (-INT_MAX-1)

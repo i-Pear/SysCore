@@ -26,12 +26,12 @@ void make_map(Map *mem_map, size_t *page_table_start, size_t vir_addr, size_t ph
 }
 
 void memory_map_init() {
-    Map_init(&memory_map);
-    size_t kernel_start = __kernel_start;
-    size_t heap_end = get_kernel_end() + __heap_page_num * __page_size;
-    size_t pages = (heap_end - kernel_start) >> 12;
-    for (size_t i = 0; i < pages; i++) {
-        make_map(memory_map, (size_t *) get_boot_page_table(), kernel_start + (i << 12),
-                 kernel_start + (i << 12));
-    }
+//    Map_init(&memory_map);
+//    size_t kernel_start = __kernel_start;
+//    size_t heap_end = get_kernel_end() + __heap_page_num * __page_size;
+//    size_t pages = (heap_end - kernel_start) >> 12;
+//    for (size_t i = 0; i < pages; i++) {
+//        make_map(memory_map, (size_t *) get_boot_page_table(), kernel_start + (i << 12),
+//                 kernel_start + (i << 12));
+//    }
 }

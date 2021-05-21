@@ -1,5 +1,6 @@
 #include "fat32.h"
 #include "stdio.h"
+#include "kernel_heap.h"
 #include "../driver/sdcard.h"
 
 #define FILE_ATTR_SUB_DIRECTORY 0x10
@@ -86,7 +87,7 @@ size_t fat_get_sector_by_address(size_t addr) {
  * @return 读取的数据缓存位置的首地址，尽快将数据转移位置，否则该缓存可能被覆盖
  * @warn 返回地址的数据应该只读
  */
-uint8 *fat_read_from_sd(size_t addr, size_t len) {
+uint8_t *fat_read(size_t addr, size_t len) {
     // fat表缓存
     if ((addr - fat_addr) / sizeof(uint32_t) < FAT_FAT_BUFF_ENTRY_COUNT && len == sizeof(uint32_t)) {
         return (uint8 *) (fat_fat_buff + (addr - fat_addr) / sizeof(uint32_t));
@@ -145,7 +146,7 @@ struct Fat32Entry analyze_fat32_entry(struct Fat32Entry file_start, size_t *file
             break;
         }
         *file_start_addr += sizeof(struct Fat32Entry);
-        file_start = *(struct Fat32Entry *) fat_read_from_sd(*file_start_addr, sizeof(struct Fat32Entry));
+        file_start = *(struct Fat32Entry *) fat_read(*file_start_addr, sizeof(struct Fat32Entry));
     }
     file_name[file_name_d++] = '\0';
     return file_start;
@@ -179,7 +180,7 @@ uint32_t calc_cluster(struct Fat32Entry fat32Entry) {
  * @return
  */
 uint32_t calc_fat_by_entry(struct Fat32Entry file) {
-    return *((uint32_t *) fat_read_from_sd(fat_addr + calc_cluster(file) * sizeof(uint32_t), sizeof(uint32_t)));
+    return *((uint32_t *) fat_read(fat_addr + calc_cluster(file) * sizeof(uint32_t), sizeof(uint32_t)));
 }
 
 int strcmp_s(char *left, char *right, size_t len) {
@@ -205,13 +206,13 @@ size_t calc_content(size_t cluster_num) {
  * @param level 置0即可
  */
 void tree(size_t addr, int level) {
-    struct Fat32Entry file_start = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));
+    struct Fat32Entry file_start = *(struct Fat32Entry *) fat_read(addr, sizeof(struct Fat32Entry));
     uint16_t file_name[512];
     while (file_start.file_attributes) {
         file_start = analyze_fat32_entry(file_start, &addr, file_name);
         if (calc_fat_by_entry(file_start) == 0) {
             addr += sizeof file_start;
-            file_start = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));
+            file_start = *(struct Fat32Entry *) fat_read(addr, sizeof(struct Fat32Entry));
             continue;
         }
         for (int i = 0; i < level; i++)
@@ -227,7 +228,7 @@ void tree(size_t addr, int level) {
         }
 
         addr += sizeof file_start;
-        file_start = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));
+        file_start = *(struct Fat32Entry *) fat_read(addr, sizeof(struct Fat32Entry));
     }
 }
 
@@ -270,12 +271,12 @@ struct Fat32Entry fat_find_file_entry(const char *file_name, int *find) {
     if (search_file_name[i - 1] == '/')
         search_file_name[i - 1] = 0;
     size_t addr = root_addr;
-    struct Fat32Entry file = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));
+    struct Fat32Entry file = *(struct Fat32Entry *) fat_read(addr, sizeof(struct Fat32Entry));
     while (file.file_attributes) {
         file = analyze_fat32_entry(file, &addr, file_entry_name);
         if (calc_fat_by_entry(file) == 0 || file.file_attributes == 0) {
             addr += sizeof(struct Fat32Entry);
-            file = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));
+            file = *(struct Fat32Entry *) fat_read(addr, sizeof(struct Fat32Entry));
             continue;
         }
         if (strcmp_u16(file_entry_name, search_file_name + offset) == 0) {
@@ -287,10 +288,10 @@ struct Fat32Entry fat_find_file_entry(const char *file_name, int *find) {
             while (search_file_name[i] && search_file_name[i++] != '/') {}
             if (search_file_name[i - 1] == '/')
                 search_file_name[i - 1] = 0;
-            file = *(struct Fat32Entry *) fat_read_from_sd(calc_content(calc_cluster(file)), sizeof(struct Fat32Entry));
+            file = *(struct Fat32Entry *) fat_read(calc_content(calc_cluster(file)), sizeof(struct Fat32Entry));
         }
         addr += sizeof(struct Fat32Entry);
-        file = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));
+        file = *(struct Fat32Entry *) fat_read(addr, sizeof(struct Fat32Entry));
     }
     *find = 0;
     struct Fat32Entry fake;
@@ -338,7 +339,7 @@ struct FatFile FatFile_init(struct Fat32Entry fat32Entry) {
 }
 
 uint32_t calc_next_fat(uint32_t fat) {
-    return *((uint32_t *) fat_read_from_sd(fat_addr + fat * sizeof(uint32_t), sizeof(uint32_t)));
+    return *((uint32_t *) fat_read(fat_addr + fat * sizeof(uint32_t), sizeof(uint32_t)));
 }
 
 size_t read_a_sector(struct FatFile *file, char buf[]) {
@@ -351,8 +352,8 @@ size_t read_a_sector(struct FatFile *file, char buf[]) {
         dpb.sector_size_in_bytes * dpb.number_of_sectors_per_cluster) {
         len = file_size - file->cluster_num * dpb.sector_size_in_bytes * dpb.number_of_sectors_per_cluster;
     }
-    uint8 *res = (uint8 *) fat_read_from_sd(file->content_start, len);
-    for(size_t i = 0;i < len; i++)buf[i] = res[i];
+    void *res = fat_read(file->content_start, len);
+    memcpy(buf, res, len);
     enum CLUSTER_FLAG flag = get_cluster_flag(file->fat);
     file->cluster_flag = flag;
     if (file->cluster_flag != CLUSTER_END) {
@@ -365,11 +366,11 @@ size_t read_a_sector(struct FatFile *file, char buf[]) {
 }
 
 void fat32_init() {
-    dpb = *(struct DPB *) fat_read_from_sd(0, 512);
+    dpb = *(struct DPB *) fat_read(0, 512);
     root_addr = (dpb.reserved_sectors + dpb.number_of_fats * dpb.number_sectors_in_the_one_fat) *
                 dpb.sector_size_in_bytes;
     fat_addr = dpb.reserved_sectors * dpb.sector_size_in_bytes;
-    uint32_t *x = (uint32_t *) fat_read_from_sd(fat_addr, sizeof(uint32_t) * FAT_FAT_BUFF_ENTRY_COUNT);
+    uint32_t *x = (uint32_t *) fat_read(fat_addr, sizeof(uint32_t) * FAT_FAT_BUFF_ENTRY_COUNT);
     for (int i = 0; i < FAT_FAT_BUFF_ENTRY_COUNT; i++) {
         fat_fat_buff[i] = x[i];
     }
@@ -399,46 +400,6 @@ int fat_read_file(struct Fat32Entry fat32Entry, char buffer[]) {
 
 uint32_t fat_calculate_file_size(struct Fat32Entry fat32Entry) {
     return fat32Entry.file_size;
-}
-
-int fat_read(struct Fat32Entry fat32Entry, char buf[], uint32_t offset, uint32_t length) {
-    if (offset + length > fat32Entry.file_size) {
-        return -1;
-    }
-    size_t size_per_cluster = dpb.sector_size_in_bytes * dpb.number_of_sectors_per_cluster;
-//    printf("size_per_cluster = %d\n", size_per_cluster);
-    uint32_t current_cluster = calc_cluster(fat32Entry);
-//    printf("current_cluster = %d\n", current_cluster);
-    size_t cluster_id = offset / size_per_cluster;
-//    printf("cluster_id = %d\n", cluster_id);
-    size_t current_cluster_id = 0;
-    while (current_cluster_id < cluster_id) {
-        current_cluster = *(uint32_t *) fat_read_from_sd(fat_addr + current_cluster * sizeof(uint32_t), sizeof(uint32_t));
-//        printf("current_cluster = %d\n", current_cluster);
-        current_cluster_id++;
-    }
-//    printf("cluster_id = %d\n", cluster_id);
-    size_t cur = 0;
-    // 注意偏移
-    size_t offset_from_current_cluster_content_start = offset - cluster_id * size_per_cluster;
-//    printf("offset_from_current_cluster_content_start = %d\n", offset_from_current_cluster_content_start );
-    size_t read_bytes = size_per_cluster < length ? size_per_cluster : length;
-//    printf("read_bytes = %d\n", read_bytes);
-    uint8 *data = (uint8*) fat_read_from_sd(calc_content(current_cluster) + offset_from_current_cluster_content_start, read_bytes);
-    for(size_t i = 0;i < read_bytes; i++)buf[cur + i] = data[i];
-    cur += read_bytes;
-//    printf("cur = %d\n", cur);
-    while (cur < length){
-        current_cluster = calc_next_fat(current_cluster);
-//        printf("current_cluster = %d\n", current_cluster);
-        read_bytes = size_per_cluster < (length - cur) ? size_per_cluster : (length - cur);
-//        printf("read_bytes = %d\n", read_bytes);
-        data = fat_read_from_sd(calc_content(current_cluster), read_bytes);
-        for(size_t i = 0;i < read_bytes; i++)buf[cur + i] = data[i];
-        cur += read_bytes;
-//        printf("cur = %d\n", cur);
-    }
-    return (int)read_bytes;
 }
 
 void test_fat32() {

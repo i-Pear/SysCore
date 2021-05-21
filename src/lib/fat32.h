@@ -61,6 +61,6 @@ uint32_t fat_calculate_file_size(struct Fat32Entry fat32Entry);
  * @param length
  * @return
  */
-int fat_read(struct Fat32Entry fat32Entry, char buf[], uint32_t offset, uint32_t length);
+uint8_t *fat_read(size_t addr, size_t len);
 
 #endif

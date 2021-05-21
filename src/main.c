@@ -115,7 +115,7 @@ void turn_to_virtual_supervisor_mode(){
 int main() {
     printf("[OS] Memory Init.\n");
     init_memory();
-    memory_init();
+    init_kernel_heap();
     puts("[OS] Interrupt & Timer Interrupt Open.");
     kernelContext.kernel_satp = register_read_satp();
     interrupt_timer_init();

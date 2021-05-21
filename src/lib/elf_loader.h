@@ -3,7 +3,7 @@
 
 #include <elf.h>
 #include "stdio.h"
-#include "memory.h"
+#include "kernel_heap.h"
 
 void* elf_read(void** source, int size);
 
