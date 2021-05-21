@@ -1,6 +1,7 @@
 #include "interrupt.h"
 #include "syscall.h"
 #include "register.h"
+#include "stl.h"
 
 static size_t INTERVAL = 1e5;
 static size_t TICKS = 0;
@@ -11,14 +12,26 @@ Context *breakpoint(Context *context);
 Context *tick(Context* context);
 
 Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
+    int is_interrupt = (int)(scause >> 63);
+    scause &= 31;
     switch (scause) {
+        case 1:{
+            if(is_interrupt == 0){
+                // load ins fault
+                printf("load ins fault\n");
+                shutdown();
+            }else{
+                printf("s-mode software interrupt\n");
+                shutdown();
+            }
+            break;
+        }
         // breakpoint
         case 3: {
             return breakpoint(context);
         }
         case 5: {
-            size_t sip = register_read_sip();
-            if(sip & REGISTER_SIP_STIE){
+            if(is_interrupt){
                 // supervisor-level timer interrupt
                 return tick(context);
             }else{

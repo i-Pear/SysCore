@@ -44,7 +44,7 @@ void create_process(const char *elf_path) {
     /**
      * 此处sepc为中断后返回地址
      */
-    thread_context.sepc = entry+elf_page_base-0x80000000;
+    thread_context.sepc = entry;
     /**
      * 页表处理
      * 1. satp应由物理页首地址右移12位并且或上（8 << 60），表示开启sv39分页模式
@@ -56,20 +56,8 @@ void create_process(const char *elf_path) {
         *((size_t *) page_table_base + i) = 0;
     }
 
-    // 0x0000_0000 -> elf
-    *((size_t *) page_table_base + 0) = (0x80000 << 10) | 0xdf;
-    printf("elf_page_base = 0x%x\n", elf_page_base);
-    // 0x4000_0000 -> stack
-//    *((size_t *) page_table_base + 1) = (((size_t) stack >> 12) << 10) | 0xdf;
-//    printf("stack = 0x%x\n", stack);
-
     // 0x8000_0000 -> 0x8000_0000
     *((size_t *) page_table_base + 2) = (0x80000 << 10) | 0xdf;
-
-    printf("page table:\n");
-    for (int i = 0; i <=2 ; i++) {
-        printf("%b \n",*((size_t *) page_table_base + i));
-    }
 
     page_table_base >>= 12;
     page_table_base |= (8LL << 60);
