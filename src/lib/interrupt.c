@@ -2,6 +2,7 @@
 #include "syscall.h"
 #include "register.h"
 #include "stl.h"
+#include "scheduler.h"
 
 static size_t INTERVAL = 1e5;
 static size_t TICKS = 0;
@@ -11,6 +12,8 @@ Context *breakpoint(Context *context);
 
 Context *tick(Context* context);
 
+Context *page_fault(Context* context, size_t stval);
+
 Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
     int is_interrupt = (int)(scause >> 63);
     scause &= 31;
@@ -19,9 +22,22 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
             if(is_interrupt == 0){
                 // load ins fault
                 printf("load ins fault\n");
-                shutdown();
+                return page_fault(context, stval);
             }else{
                 printf("s-mode software interrupt\n");
+                shutdown();
+            }
+            break;
+        }
+        case 2:{
+            if(is_interrupt == 0){
+                printf("illegal ins\n");
+                lty(stval);
+                lty(context->sepc);
+                shutdown();
+            }
+            else{
+                printf("unknown interrupt\n");
                 shutdown();
             }
             break;
@@ -56,6 +72,64 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
         }
     }
     return NULL;
+}
+
+Context *page_fault(Context* context, size_t stval){
+    size_t satp = context->satp;
+
+    size_t vir_addr = stval;
+    size_t table_base = satp << 12;
+    lty(vir_addr);
+    lty(table_base);
+
+    size_t ppn1 = (vir_addr & (0b111111111LL << 30)) >> 30;
+    size_t ppn2 = (vir_addr & (0b111111111LL << 21)) >> 21;
+    size_t ppn3 = (vir_addr & (0b111111111LL << 12)) >> 12;
+    lty(ppn1);
+    lty(ppn2);
+    lty(ppn3);
+
+    size_t* pte1 = (size_t *)table_base + ppn1;
+    lty(*pte1);
+
+    if(*pte1 == 0){
+        size_t new_addr = alloc_page(4096);
+        memset((char *) new_addr, 0, 4096);
+        table_base = new_addr;
+        lty(new_addr);
+        *pte1 = ((new_addr >> 12) << 10) | 0xd1;
+        lty(*pte1);
+    }
+
+    size_t* pte2 = (size_t*)table_base + ppn2;
+    lty(*pte2);
+
+    if(*pte2 == 0){
+        size_t new_addr = alloc_page(4096);
+        memset((char *) new_addr, 0, 4096);
+        table_base = new_addr;
+        lty(new_addr);
+        *pte2 = ((new_addr >> 12) << 10) | 0xd1;
+        lty(*pte2);
+    }
+
+    size_t* pte3 = (size_t*)table_base + ppn3;
+    lty(*pte3);
+
+    if(*pte3 == 0){
+//        size_t new_addr = elf_exec_page_base_only_one + ((vir_addr >> 12) << 12);
+        size_t new_addr = alloc_page(4096);
+        memset((char *) new_addr, 0, 4096);
+        lty(new_addr);
+        *pte3 = ((new_addr >> 12) << 10) | 0xdf;
+        lty(*pte3);
+
+
+    }
+
+    asm volatile("sfence.vma");
+
+    return context;
 }
 
 Context *breakpoint(Context *context) {

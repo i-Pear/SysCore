@@ -10,6 +10,8 @@ struct pcb {
     size_t executable;
 };
 
+size_t elf_exec_page_base_only_one;
+
 void create_process(const char *elf_path) {
     // read file
     int find = 0;
@@ -22,6 +24,7 @@ void create_process(const char *elf_path) {
 
     size_t elf_page_base,entry;
     load_elf(elf_file_cache, file_size,&elf_page_base,&entry);
+    elf_exec_page_base_only_one = elf_page_base;
 
     Context thread_context;
     thread_context.sstatus = register_read_sstatus();

@@ -58,6 +58,8 @@ __interrupt:
     SAVE    s2, 33
     SAVE    s3, 34
     SAVE    s4, 35
+    li      s4, 0x8000000000000000
+    or      s5, s5, s4
     SAVE    s5, 36
 
     la t0, kernelContext

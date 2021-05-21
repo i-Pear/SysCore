@@ -1,5 +1,6 @@
 k210.bin
 cmake-build-debug/
+cmake-build-debug-risc-v/
 build/
 .idea/
 .vscode/
