@@ -29,9 +29,9 @@ void create_process(const char *elf_path) {
      * 用户栈
      * 栈通常向低地址方向增长，故此处增加__page_size
      */
-    // thread_context.sp = (size_t) alloc_page(4096) + __page_size;
-    size_t stack=(size_t) alloc_page(4096);
-    thread_context.sp=stack;
+     thread_context.sp = (size_t) alloc_page(4096) + __page_size;
+//    size_t stack=(size_t) alloc_page(4096);
+//    thread_context.sp=stack;
     /**
      * 此处spp应为0,表示user-mode
      */
@@ -44,7 +44,7 @@ void create_process(const char *elf_path) {
     /**
      * 此处sepc为中断后返回地址
      */
-    thread_context.sepc = entry;
+    thread_context.sepc = entry + elf_page_base;
     /**
      * 页表处理
      * 1. satp应由物理页首地址右移12位并且或上（8 << 60），表示开启sv39分页模式
@@ -60,7 +60,7 @@ void create_process(const char *elf_path) {
     *((size_t *) page_table_base) = (((size_t) elf_page_base >> 12) << 10) | 0xdf;
 
     // 0x0010_0000 -> stack
-    *((size_t *) page_table_base + 1) = (((size_t) stack >> 12) << 10) | 0xdf;
+//    *((size_t *) page_table_base + 1) = (((size_t) stack >> 12) << 10) | 0xdf;
 
     // 0x8000_0000 -> 0x8000_0000
     *((size_t *) page_table_base + 2) = (0x80000 << 10) | 0xdf;
