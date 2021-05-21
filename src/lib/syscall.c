@@ -20,7 +20,7 @@ Context* syscall(Context* context){
         }
         case SYS_write:{
             int file=context->a0;
-            char* buf=context->a1;
+            char* buf=context->a1+0x80000000;
             int count=context->a2;
             if(file==1){
                 // stdout

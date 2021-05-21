@@ -44,7 +44,7 @@ void create_process(const char *elf_path) {
     /**
      * 此处sepc为中断后返回地址
      */
-    thread_context.sepc = entry;
+    thread_context.sepc = entry+elf_page_base-0x80000000;
     /**
      * 页表处理
      * 1. satp应由物理页首地址右移12位并且或上（8 << 60），表示开启sv39分页模式
