@@ -1,5 +1,6 @@
 #include "syscall.h"
 #include "register.h"
+#include "stl.h"
 
 #define return(x) context->a0=x
 

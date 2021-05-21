@@ -6,6 +6,8 @@
 #define INT_MAX 2147483647
 #define INT_MIN (-INT_MAX-1)
 
+#define lty(a) printf(#a " = 0x%x\n",a)
+
 typedef struct {
     char *start;
     size_t length;

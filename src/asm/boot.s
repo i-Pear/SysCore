@@ -26,7 +26,7 @@ _start:
     la t0, boot_page_table
     srli t0, t0, 12
     # 8 << 60 是 satp 中使用 Sv39 模式的记号
-    li t1, (8 << 60)
+    li t1, 0x8000000000000000
     or t0, t0, t1
     # 写入 satp 并更新 TLB
     csrw satp, t0

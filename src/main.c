@@ -36,9 +36,12 @@ void init_thread() {
     sdcard_init();
     printf("[OS] fat32 init.\n");
     fat32_init();
+    lty(register_read_satp());
 
     create_process("/write");
 }
+
+
 
 /**
  * 这个函数用来使pc指向虚拟地址而不是真实地址
