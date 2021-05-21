@@ -4,6 +4,7 @@
 
 ## 格式化SD卡的命令
 ```shell
+sudo dd if=/dev/zero of=/dev/sda bs=1M count=1
 sudo mkfs.vfat -F 32 /dev/sda -I
 sudo test -d /mnt/sd || mkdir -p /mnt/sd
 sudo mount -t vfat /dev/sda /mnt/sd
