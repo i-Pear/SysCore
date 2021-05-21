@@ -1,9 +1,10 @@
 #include "memory.h"
 
 size_t __kernel_end;
+int page_count;
 
-__Memory_SegmentTreeNode global_pages[__page_num * 4];
-int __memory_alloc_length[__page_num];
+__Memory_SegmentTreeNode global_pages[__reserved_page_num * 4];
+int __memory_alloc_length[__reserved_page_num];
 
 #define cnt global_pages[node]
 
@@ -115,7 +116,7 @@ void __memory_update(int node, int l, int r, int set) {
 }
 
 void init_memory(){
-    printf("Reserved page num=%d\n",__page_num);
+    printf("Reserved page num=%d\n", __reserved_page_num);
     __kernel_end=get_kernel_end();
     __kernel_end=(__kernel_end+__page_size-1)/__page_size*__page_size;
     printf("kernel end= 0x%x\n",__kernel_end);
