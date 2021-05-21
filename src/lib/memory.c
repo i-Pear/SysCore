@@ -3,7 +3,6 @@
 #define L(x) ((x) << 1)
 #define R(x) (((x) << 1) + 1)
 
-
 #define __page_num (__memory / __page_size)
 #define __heap_size (__heap_page_num * __page_size)
 
@@ -99,17 +98,6 @@ void *alloc_page() {
             return (void *) (__kernel_start + i * __page_size);
         }
     }
-}
-
-size_t get_page_num(void *page_addr) {
-    size_t addr = (size_t) page_addr;
-    return (addr - __kernel_start) / __page_size;
-}
-
-void dealloc_page(void *x) {
-    size_t y = ((size_t) x - __kernel_start) / __page_size;
-    if (pages[y])
-        pages[y] = false;
 }
 
 void memory_init() {

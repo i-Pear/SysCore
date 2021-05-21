@@ -1,4 +1,4 @@
-#include "lib/page.h"
+#include "lib/page_table.h"
 #include "lib/interrupt.h"
 #include "lib/register.h"
 #include "lib/elf_loader.h"
