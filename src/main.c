@@ -9,10 +9,7 @@
 void test_sdcard_main(){
     int find = 0;
     struct Fat32Entry fat32Entry = fat_find_file_entry("/lty", &find);
-    char* buf = alloc_page();
-    for (int i = 0; i < 20; ++i) {
-        alloc_page();
-    }
+    char* buf = alloc_page(20*4096);
     int len = fat_read_file(fat32Entry, buf);
     printf("[FAT] file size = %d\n", fat32Entry.file_size);
     printf("[FAT] read %d Bytes\n", len);
@@ -38,13 +35,12 @@ void init_thread() {
     sdcard_init();
     printf("[OS] fat32 init.\n");
     fat32_init();
-    tree_all();
+    // tree_all();
     printf("[OS] Starting to load elf...");
     int find = 0;
     struct Fat32Entry fat32Entry = fat_find_file_entry("/write", &find);
     int file_size = fat_calculate_file_size(fat32Entry);
-    char* buf = alloc_page();
-    for(int i = 0;i < 20; i++)alloc_page();
+    char* buf = alloc_page(20*4096);
     fat_read_file(fat32Entry, buf);
     // load ELF
     size_t ptr=load_elf(buf, file_size);
@@ -56,7 +52,7 @@ void init_thread() {
      * 用户栈
      * 栈通常向低地址方向增长，故此处增加__page_size
      */
-    thread_context.sp = (size_t) alloc_page() + __page_size;
+    thread_context.sp = (size_t) alloc_page(4096) + __page_size;
     /**
      * 此处spp应为0,表示user-mode
      */
@@ -76,7 +72,7 @@ void init_thread() {
      * 1. satp应由物理页首地址右移12位并且或上（8 << 60），表示开启sv39分页模式
      * 2. 未使用的页表项应该置0
      */
-    size_t user_satp = (size_t) alloc_page();
+    size_t user_satp = (size_t) alloc_page(4096);
 
     for (int i = 0; i < 511; i++) {
         *((size_t *)user_satp + i) = 0;
@@ -118,6 +114,7 @@ void turn_to_virtual_supervisor_mode(){
 
 int main() {
     printf("[OS] Memory Init.\n");
+    init_memory();
     memory_init();
     puts("[OS] Interrupt & Timer Interrupt Open.");
     kernelContext.kernel_satp = register_read_satp();

@@ -44,8 +44,7 @@ void *load_elf(const char *_elf_data, int size) {
     printf("[ELF LOADER] ELF entry: %x\n", Ehdr->e_entry);
 
 //    char *exec = k_malloc(size);
-    char *exec = (char *) alloc_page();
-    for (int i = 1; i < 100; i++)alloc_page();
+    char *exec = (char *) alloc_page(100*4096);
 
     Elf64_Phdr *phdr = (Elf64_Phdr *) (elf_start + Ehdr->e_phoff);
     Elf64_Shdr *shdr = (Elf64_Shdr *) (elf_start + Ehdr->e_shoff);

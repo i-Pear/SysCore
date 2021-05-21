@@ -83,25 +83,8 @@ void k_free(void *addr) {
     dealloc((size_t) addr - get_kernel_end(), 1, 0, __heap_size);
 }
 
-bool pages[__page_num] = {};
-
-void *alloc_page() {
-    static size_t i = 0, used_page_cnt = 0;
-    if (used_page_cnt > __page_num)return (void *) (-1);
-    for (;; i = (i + 1) % __page_num) {
-        if (!pages[i]) {
-            pages[i] = true;
-            used_page_cnt++;
-            return (void *) (__kernel_start + i * __page_size);
-        }
-    }
-}
-
 void memory_init() {
-    kernel_end = get_kernel_end();
-    size_t kernel_page_num = (kernel_end - __kernel_start) / __page_size;
-    size_t used_page_num = kernel_page_num + __heap_page_num;
-    for (size_t i = 0; i < used_page_num; i++) {
-        alloc_page();
-    }
+    printf("memory_init\n");
+    size_t used_page_num = __heap_page_num + 10;
+    kernel_end = alloc_page(used_page_num * 4096);
 }
