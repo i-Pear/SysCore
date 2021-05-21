@@ -6,19 +6,6 @@
 #include "driver/sdcard.h"
 #include "lib/fat32.h"
 
-void D(size_t x) { printf("0x%x\n", x); }
-
-void daemon_thread() {
-    asm volatile ("li a7, 0");
-    asm volatile ("li a1, 999");
-    asm volatile ("li a0, 11");
-    asm volatile ("ecall");
-
-
-    while (1);
-}
-
-
 void test_sdcard_main(){
     int find = 0;
     struct Fat32Entry fat32Entry = fat_find_file_entry("/lty", &find);
