@@ -120,22 +120,13 @@ void turn_to_virtual_supervisor_mode(){
     __restore(&thread_context);
 }
 
-void print_sp() {
-    printf("sp = 0x%x\n", register_read_sp());
-}
-
-void print_satp() {
-    printf("satp = 0x%x\n", register_read_satp());
-}
-
-int main(size_t hart_id, size_t dtb_pa) {
+int main() {
     printf("[OS] Memory Init.\n");
     memory_init();
     puts("[OS] Interrupt & Timer Interrupt Open.");
     kernelContext.kernel_satp = register_read_satp();
     interrupt_timer_init();
 
-//    init_thread();
     turn_to_virtual_supervisor_mode();
     // unreachable
     puts("Press Any Key To Continue.");
