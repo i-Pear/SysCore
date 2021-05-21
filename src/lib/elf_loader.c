@@ -7,11 +7,11 @@ void *elf_read(void **source, int size) {
     return res;
 }
 
-void *load_elf(const char *_elf_data, int size) {
+void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* entry) {
     // check magic number
     if (_elf_data[0] != 0x7f || _elf_data[1] != 0x45 || _elf_data[2] != 0x4c || _elf_data[3] != 0x46) {
         printf("[ELF LOADER] Invalid ELF File! \n");
-        return 0;
+        return;
     }
     void *elf_start = (void *) _elf_data;
 
@@ -43,14 +43,12 @@ void *load_elf(const char *_elf_data, int size) {
     }
     printf("[ELF LOADER] ELF entry: %x\n", Ehdr->e_entry);
 
-//    char *exec = k_malloc(size);
     char *exec = (char *) alloc_page(100*4096);
 
     Elf64_Phdr *phdr = (Elf64_Phdr *) (elf_start + Ehdr->e_phoff);
     Elf64_Shdr *shdr = (Elf64_Shdr *) (elf_start + Ehdr->e_shoff);
     Elf64_Sym *syms = NULL;
     char *strings = NULL;
-    void *entry = NULL;
 
     for (int i = 0; i < Ehdr->e_phnum; i++) {
         if (phdr[i].p_type != PT_LOAD)continue;
@@ -62,12 +60,10 @@ void *load_elf(const char *_elf_data, int size) {
         char *target_addr = phdr[i].p_vaddr + exec;
         printf("[ELF LOADER] p_vaddr: 0x%x  exec: 0x%x\n", phdr[i].p_vaddr, exec);
         printf("[ELF LOADER] Start memcpy! from 0x%x to 0x%x \n", start, target_addr);
-        entry=target_addr;
 
         memcpy(target_addr, start, phdr[i].p_filesz);
     }
 
-    printf("[ELF LOADER] entry= %x\n",entry);
-
-    return entry;
+    *elf_page_base=(size_t)exec;
+    *entry=Ehdr->e_entry;
 }
