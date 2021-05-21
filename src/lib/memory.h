@@ -5,8 +5,6 @@
 #include "stddef.h"
 #include "stdio.h"
 
-//#define PAGE_CLOSE
-
 #ifndef memory
 #define __memory (8 * 1024 * 1024)
 #else
@@ -17,12 +15,6 @@
 #define __heap_page_num (8)
 #else
 #define __heap_page_num heap_page_num
-#endif
-
-#ifdef PAGE_CLOSE
-#define __kernel_vir_offset (0)
-#else
-#define __kernel_vir_offset (0xffffffff00000000)
 #endif
 
 #define __page_size (4096)

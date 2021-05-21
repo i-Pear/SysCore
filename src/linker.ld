@@ -8,8 +8,8 @@ ENTRY(_start)
 
 /* 数据存放起始地址 */
 /* BASE_ADDRESS = 0x80200000; */
-BASE_ADDRESS = 0xffffffff80020000;
-/*BASE_ADDRESS = 0x80020000;*/
+/* BASE_ADDRESS = 0xffffffff80020000; */
+BASE_ADDRESS = 0x80020000;
 
 SECTIONS
 {

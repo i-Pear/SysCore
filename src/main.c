@@ -54,10 +54,9 @@ void init_thread() {
     thread_context.sstatus = register_read_sstatus();
     /**
      * 用户栈
-     * 由于alloc_page函数返回值为一页的物理首地址，故此处增加__kernel_vir_offset
      * 栈通常向低地址方向增长，故此处增加__page_size
      */
-    thread_context.sp = (size_t) alloc_page() + __page_size + __kernel_vir_offset;
+    thread_context.sp = (size_t) alloc_page() + __page_size;
     /**
      * 此处spp应为0,表示user-mode
      */
@@ -84,10 +83,7 @@ void init_thread() {
     }
 
     // 0x8000_0000 -> 0x8000_0000
-    // TODO 此处不合理
     *((size_t *)user_satp + 2) = (0x80000 << 10) | 0xdf;
-    // 0xffff_ffff_8000_0000 -> 0x8000_0000
-    *((size_t *)user_satp + 510) = (0x80000 << 10) | 0xdf;
     user_satp >>= 12;
     user_satp |= (8 << 60);
     thread_context.satp = user_satp;
@@ -102,7 +98,7 @@ void turn_to_virtual_supervisor_mode(){
     printf("[OS] Prepare For SuperVisor Mode With VirtualOffset.\n");
     Context thread_context;
     thread_context.sstatus = register_read_sstatus();
-    thread_context.sp = register_read_sp() + __kernel_vir_offset;
+    thread_context.sp = register_read_sp();
     /**
      * 此处spp为1,表示s-mode
      */
@@ -114,8 +110,8 @@ void turn_to_virtual_supervisor_mode(){
     /**
      * 此处sepc为中断后返回地址
      */
-    thread_context.sepc = (size_t) init_thread + __kernel_vir_offset;
-    thread_context.ra = (size_t) init_thread + __kernel_vir_offset;
+    thread_context.sepc = (size_t) init_thread;
+    thread_context.ra = (size_t) init_thread;
     thread_context.satp = kernelContext.kernel_satp;
     __restore(&thread_context);
 }

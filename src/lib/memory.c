@@ -54,9 +54,6 @@ bool alloc(size_t size, size_t cur, size_t *addr, size_t csize) {
 void *k_malloc(size_t size) {
     size = fix_size(size);
     size_t addr = kernel_end;
-    if(!(kernel_end & __kernel_vir_offset)){
-        addr += __kernel_vir_offset;
-    }
     bool success = alloc(size, 1, &addr, __heap_size);
     if (!success) {
         puts("Memory overflow.\n");

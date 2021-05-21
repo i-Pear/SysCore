@@ -23,9 +23,7 @@
     
 _start:
     # 计算 boot_page_table 的物理页号
-    lui t0, %hi(boot_page_table)
-    li t1, 0xffffffff00000000
-    sub t0, t0, t1
+    la t0, boot_page_table
     srli t0, t0, 12
     # 8 << 60 是 satp 中使用 Sv39 模式的记号
     li t1, (8 << 60)
@@ -134,6 +132,5 @@ boot_page_table:
     # 第 2 项：0x8000_0000 -> 0x8000_0000，0xcf 表示 VRWXAD 均为 1, 只允许S态访问
     .quad (0x80000 << 10) | 0xcf
     .zero 507 * 8
-    # 第 510 项：0xffff_ffff_8000_0000 -> 0x8000_0000，0xcf 表示 VRWXAD 均为 1, 只允许S态访问
-    .quad (0x80000 << 10) | 0xcf
+    .quad 0
     .quad 0

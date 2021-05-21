@@ -31,7 +31,7 @@ void memory_map_init() {
     size_t heap_end = get_kernel_end() + __heap_page_num * __page_size;
     size_t pages = (heap_end - kernel_start) >> 12;
     for (size_t i = 0; i < pages; i++) {
-        make_map(memory_map, (size_t *) get_boot_page_table(), kernel_start + (i << 12) + __kernel_vir_offset,
+        make_map(memory_map, (size_t *) get_boot_page_table(), kernel_start + (i << 12),
                  kernel_start + (i << 12));
     }
 }
