@@ -101,15 +101,6 @@ void *alloc_page() {
     }
 }
 
-int strcmp(const char* a,const char* b){
-    while (*a&&*b){
-        if(*a!=*b)return 1;
-        a++;
-        b++;
-    }
-    return 0;
-}
-
 size_t get_page_num(void *page_addr) {
     size_t addr = (size_t) page_addr;
     return (addr - __kernel_start) / __page_size;
@@ -127,18 +118,5 @@ void memory_init() {
     size_t used_page_num = kernel_page_num + __heap_page_num;
     for (size_t i = 0; i < used_page_num; i++) {
         alloc_page();
-    }
-}
-
-void memcpy(void *to, void *from, size_t size) {
-    char *tar = to, *ori = from;
-    for (size_t i = 0; i < size; i++) {
-        *(tar + i) = *(ori + i);
-    }
-}
-
-void memset(char* p,char content,int size){
-    for(int i=0;i<size;i++){
-        *(p+i)=content;
     }
 }

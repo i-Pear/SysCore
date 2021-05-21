@@ -1,5 +1,9 @@
 #include "stl.h"
 
+inline pair_int make_pair(int a,int b){
+    pair_int result={a,b};
+    return result;
+}
 
 void Vec_init(Vec **vec, size_t type_size) {
     *vec = k_malloc(sizeof(Vec));
@@ -121,3 +125,23 @@ int Map_get(Map *map, size_t key, size_t *value) {
         return 0;
 }
 
+void memcpy(void *to, void *from, size_t size) {
+    char *tar = to, *ori = from;
+    for (size_t i = 0; i < size; i++) {
+        *(tar + i) = *(ori + i);
+    }
+}
+
+void memset(char* p,char content,int size){
+    for(int i=0;i<size;i++){
+        *(p+i)=content;
+    }
+}
+
+int max(int a,int b){
+    return a>b?a:b;
+}
+
+int min(int a,int b){
+    return a<b?a:b;
+}

@@ -3,8 +3,6 @@
 
 #include "stddef.h"
 
-#define max(x, y) (x > y ? x : y)
-
 size_t ppow(size_t x, size_t y);
 
 #endif
