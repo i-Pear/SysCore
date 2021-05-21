@@ -5,6 +5,7 @@
 #include "driver/interface.h"
 #include "driver/sdcard.h"
 #include "lib/fat32.h"
+#include "lib/scheduler.h"
 
 void test_sdcard_main(){
     int find = 0;
@@ -35,55 +36,8 @@ void init_thread() {
     sdcard_init();
     printf("[OS] fat32 init.\n");
     fat32_init();
-    // tree_all();
-    printf("[OS] Starting to load elf...");
-    int find = 0;
-    struct Fat32Entry fat32Entry = fat_find_file_entry("/write", &find);
-    int file_size = fat_calculate_file_size(fat32Entry);
-    char* buf = alloc_page(20*4096);
-    fat_read_file(fat32Entry, buf);
-    // load ELF
-    size_t ptr=load_elf(buf, file_size);
-    printf("[OS] Prepare For User Mode.\n");
-    printf("Testing write :\n");
-    Context thread_context;
-    thread_context.sstatus = register_read_sstatus();
-    /**
-     * 用户栈
-     * 栈通常向低地址方向增长，故此处增加__page_size
-     */
-    thread_context.sp = (size_t) alloc_page(4096) + __page_size;
-    /**
-     * 此处spp应为0,表示user-mode
-     */
-    thread_context.sstatus |= REGISTER_SSTATUS_SPP; // spp = 1
-    thread_context.sstatus ^= REGISTER_SSTATUS_SPP; // spp = 0
-    /**
-     * 此处spie应为1,表示user-mode允许中断
-     */
-    thread_context.sstatus |= REGISTER_SSTATUS_SPIE; // spie = 1
-    /**
-     * 此处sepc为中断后返回地址
-     */
-    // thread_context.sepc = (size_t) daemon_thread;
-    thread_context.sepc = ptr;
-    /**
-     * 页表处理
-     * 1. satp应由物理页首地址右移12位并且或上（8 << 60），表示开启sv39分页模式
-     * 2. 未使用的页表项应该置0
-     */
-    size_t user_satp = (size_t) alloc_page(4096);
 
-    for (int i = 0; i < 511; i++) {
-        *((size_t *)user_satp + i) = 0;
-    }
-
-    // 0x8000_0000 -> 0x8000_0000
-    *((size_t *)user_satp + 2) = (0x80000 << 10) | 0xdf;
-    user_satp >>= 12;
-    user_satp |= (8 << 60);
-    thread_context.satp = user_satp;
-    __restore(&thread_context);
+    create_process("/write");
 }
 
 /**
