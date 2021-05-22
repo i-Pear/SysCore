@@ -85,6 +85,9 @@ void create_process(const char *elf_path) {
     // read file
     int find = 0;
     struct Fat32Entry fat32Entry = fat_find_file_entry(elf_path, &find);
+    if(!find){
+        panic("can't find file");
+    }
     int file_size = fat_calculate_file_size(fat32Entry);
     char *elf_file_cache = alloc_page(file_size);
     printf("Start read file...\n");
@@ -92,7 +95,7 @@ void create_process(const char *elf_path) {
     printf("File read successfully.\n");
 
     size_t elf_page_base,entry;
-    load_elf(elf_file_cache, file_size,&elf_page_base,&entry);
+    load_elf(elf_file_cache, fat_calculate_file_size(fat32Entry),&elf_page_base,&entry);
     dealloc_page(elf_file_cache);
 
     Context* thread_context=new(Context);
@@ -161,8 +164,9 @@ void schedule(){
         __restore(running->thread_context);
     }else{
         if(pcb_list_is_empty(&runnable)){
-            printf("Nothing to run, shutdown.\n");
-            shutdown();
+//            printf("Nothing to run, shutdown.\n");
+//            shutdown();
+            while (1);
         }else{
             running=runnable.start->pcb;
             lty(running);

@@ -249,6 +249,8 @@ int strcmp_u16(uint16_t *left, uint16_t *right) {
     return 0;
 }
 
+
+
 /**
  * 查找起始项
  * @param file_name 文件路径
@@ -289,6 +291,7 @@ struct Fat32Entry fat_find_file_entry(const char *file_name, int *find) {
             if (search_file_name[i - 1] == '/')
                 search_file_name[i - 1] = 0;
             file = *(struct Fat32Entry *) fat_read_from_sd(calc_content(calc_cluster(file)), sizeof(struct Fat32Entry));
+            addr = calc_content(calc_cluster(file));
         }
         addr += sizeof(struct Fat32Entry);
         file = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));

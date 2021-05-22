@@ -17,7 +17,7 @@
 #endif
 
 #define new(x) k_malloc(sizeof(x))
-#define panic(message) printf("[panic] __FILE__:__LINE__  %s",message);shutdown();
+#define panic(message) printf("[panic] %s:%d  %s\n",__FILE__,__LINE__,message);shutdown();
 
 typedef struct {
     char *start;

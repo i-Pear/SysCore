@@ -43,14 +43,11 @@ void init_thread() {
 
     lty(register_read_satp());
 
+    create_process("/yield");
     create_process("/write");
     create_process("/uname");
-    create_process("/yield");
 
-    printf("in main:\n");
-    printf("try to schedule.\n");
     schedule();
-
 }
 
 int main() {
@@ -66,7 +63,6 @@ int main() {
 
     init_thread();
     // unreachable
-    puts("Press Any Key To Continue.");
-    getchar();
+    panic("Unreachable code!");
     return 0;
 }

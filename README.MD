@@ -4,11 +4,13 @@
 
 ## 格式化SD卡的命令
 ```shell
+注意！你的sd卡究竟是不是/dev/sda!!!!!!!!!!!
 sudo dd if=/dev/zero of=/dev/sda bs=1M count=1
 sudo mkfs.vfat -F 32 /dev/sda -I
 sudo test -d /mnt/sd || mkdir -p /mnt/sd
 sudo mount -t vfat /dev/sda /mnt/sd
-sudo cp -r test_suites/* /mnt/sd/
+sudo mkdir /mnt/sd/riscv64
+sudo cp -r test_suites/* /mnt/sd/riscv64
 sudo umount /mnt/sd
 ```
 
