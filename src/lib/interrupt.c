@@ -129,6 +129,17 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
                 return page_fault(context, stval);
             }
         }
+        case 7:{
+            if(is_interrupt == 0){
+                // store access fault
+                mtl("store access fault");
+                return page_fault(context, stval);
+            }else{
+                printf("machine timer interrupt interrupt\n");
+                shutdown();
+            }
+            break;
+        }
         // user ecall
         case 8:{
             Context *ret = syscall(context);

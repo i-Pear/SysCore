@@ -50,7 +50,17 @@ void pcb_push_front(pcb_List* list,pcb* pcb){
 }
 
 void pcb_list_pop_front(pcb_List* list){
-
+    if(list->start==list->end){
+        // has only one
+        pcb_listNode* firstNode=list->start;
+        list->start=list->end=null;
+        k_free(firstNode);
+    }else{
+        pcb_listNode* firstNode=list->start;
+        firstNode->next->previous=null;
+        list->start=firstNode->next;
+        k_free(firstNode);
+    }
 }
 
 pcb_List runnable,blocked;
@@ -67,6 +77,10 @@ size_t get_running_elf_page(){
     return running->elf_page_base;
 }
 
+int get_running_pid(){
+    return running->pid;
+}
+
 void create_process(const char *elf_path) {
     // read file
     int find = 0;
@@ -79,6 +93,7 @@ void create_process(const char *elf_path) {
 
     size_t elf_page_base,entry;
     load_elf(elf_file_cache, file_size,&elf_page_base,&entry);
+    dealloc_page(elf_file_cache);
 
     Context* thread_context=new(Context);
     thread_context->sstatus = register_read_sstatus();
@@ -123,11 +138,22 @@ void create_process(const char *elf_path) {
     new_pcb->page_table=page_table_base;
 
     pcb_push_back(&runnable, new_pcb);
-    running=new_pcb;
+}
+
+void yield(){
+    pcb_push_back(&runnable, running);
+    running=null;
+    schedule();
 }
 
 void exit_process(){
-
+    dealloc_page(running->elf_page_base);
+    // TODO: dealloc_page(running->page_table);
+    dealloc_page(running->stack);
+    k_free(running->thread_context);
+    k_free(running);
+    running=null;
+    schedule();
 }
 
 void schedule(){

@@ -44,8 +44,10 @@ void init_thread() {
     lty(register_read_satp());
 
     create_process("/write");
+    create_process("/uname");
+    create_process("/yield");
+
     printf("in main:\n");
-    lty(get_running_elf_page());
     printf("try to schedule.\n");
     schedule();
 

@@ -45,7 +45,11 @@ void init_scheduler();
 
 size_t get_running_elf_page();
 
+int get_running_pid();
+
 void create_process(const char *elf_path);
+
+void yield();
 
 void exit_process();
 
