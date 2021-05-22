@@ -439,7 +439,7 @@ int fat_read(struct Fat32Entry fat32Entry, char buf[], uint32_t offset, uint32_t
         cur += read_bytes;
 //        printf("cur = %d\n", cur);
     }
-    return (int)read_bytes;
+    return (int)cur;
 }
 
 void test_fat32() {
