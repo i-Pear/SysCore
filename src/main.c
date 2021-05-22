@@ -43,7 +43,7 @@ void init_thread() {
 
     lty(register_read_satp());
 
-    create_process("/yield");
+//    create_process("/yield");
     create_process("/write");
     create_process("/uname");
 
