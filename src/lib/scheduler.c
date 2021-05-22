@@ -67,5 +67,7 @@ void create_process(const char *elf_path) {
     lty(page_table_base);
     thread_context.satp = page_table_base;
     lty(register_read_satp());
+    puts("[OS] Interrupt & Timer Interrupt Open.");
+    interrupt_timer_init();
     __restore(&thread_context);
 }

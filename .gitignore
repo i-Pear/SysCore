@@ -4,3 +4,4 @@ cmake-build-debug-risc-v/
 build/
 .idea/
 .vscode/
+*.dump

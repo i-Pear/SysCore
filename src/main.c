@@ -41,45 +41,18 @@ void init_thread() {
     create_process("/write");
 }
 
-
-
-/**
- * 这个函数用来使pc指向虚拟地址而不是真实地址
- * 切换之后仍然停留在s-mode
- */
-void turn_to_virtual_supervisor_mode(){
-    printf("[OS] Prepare For SuperVisor Mode With VirtualOffset.\n");
-    Context thread_context;
-    thread_context.sstatus = register_read_sstatus();
-    thread_context.sp = register_read_sp();
-    /**
-     * 此处spp为1,表示s-mode
-     */
-    thread_context.sstatus |= REGISTER_SSTATUS_SPP; // spp = 1
-    /**
-     * 此处spie为1,表示s-mode允许中断
-     */
-    thread_context.sstatus |= REGISTER_SSTATUS_SPIE; // spie = 1
-    /**
-     * 此处sepc为中断后返回地址
-     */
-    thread_context.sepc = (size_t) init_thread;
-    thread_context.ra = (size_t) init_thread;
-    thread_context.satp = kernelContext.kernel_satp;
-    __restore(&thread_context);
-}
-
 int main() {
     printf("[OS] Memory Init.\n");
     init_memory();
     init_kernel_heap();
-    puts("[OS] Interrupt & Timer Interrupt Open.");
-    kernelContext.kernel_satp = register_read_satp();
+//    puts("[OS] Interrupt & Timer Interrupt Open.");
+    kernelContext.kernel_satp = register_read_satp() | (8LL << 60);
+    lty(kernelContext.kernel_satp);
     kernelContext.kernel_handle_interrupt = (size_t)handle_interrupt;
     kernelContext.kernel_restore = (size_t) __restore;
-    interrupt_timer_init();
+//    interrupt_timer_init();
 
-    turn_to_virtual_supervisor_mode();
+    init_thread();
     // unreachable
     puts("Press Any Key To Continue.");
     getchar();

@@ -71,7 +71,7 @@ __interrupt:
     ld t3, 24(t0)
     csrw satp, t1
 
-    sfence.vma
+    sfence.vma zero,zero
 
     # 调用 handle_interrupt，传入参数
     # context: &mut Context
@@ -108,7 +108,7 @@ __restore:
     csrw    scause, s4
     csrw    satp, s5
 
-    sfence.vma
+    sfence.vma zero, zero
 
     # 恢复通用寄存器
     LOAD    x1, 1

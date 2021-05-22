@@ -1,6 +1,7 @@
 #include "syscall.h"
 #include "register.h"
 #include "stl.h"
+#include "scheduler.h"
 
 #define return(x) context->a0=x
 
@@ -19,8 +20,9 @@ Context* syscall(Context* context){
             break;
         }
         case SYS_write:{
+            lty("000000000000000000000000000");
             int file=context->a0;
-            char* buf=context->a1;
+            char* buf=context->a1 + elf_exec_page_base_only_one;
             int count=context->a2;
             if(file==1){
                 // stdout
