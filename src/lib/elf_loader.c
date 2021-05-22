@@ -1,12 +1,5 @@
 #include "elf_loader.h"
 
-void *elf_read(void **source, int size) {
-    void *res = k_malloc(size);
-    memcpy(res, *source, size);
-    *source += size;
-    return res;
-}
-
 void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* entry) {
     // check magic number
     if (_elf_data[0] != 0x7f || _elf_data[1] != 0x45 || _elf_data[2] != 0x4c || _elf_data[3] != 0x46) {

@@ -17,12 +17,11 @@ Context *page_fault(Context* context, size_t stval);
 Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
     int is_interrupt = (int)(scause >> 63);
     scause &= 31;
-    printf("\n------------------------------------------------\n");
     switch (scause) {
         case 1:{
             if(is_interrupt == 0){
                 // load ins fault
-                printf("load ins fault\n");
+                mtl("load ins fault");
                 return page_fault(context, stval);
             }else{
                 printf("s-mode software interrupt\n");
@@ -32,7 +31,7 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
         }
         case 2:{
             if(is_interrupt == 0){
-                printf("illegal ins\n");
+                mtl("illegal ins");
                 lty(context->sepc);
                 lty(context->stval);
                 lty(context->satp);
@@ -122,7 +121,7 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
                 return tick(context);
             }else{
                 // load access fault
-                printf("Load Access Fault\n");
+                mtl("Load Access Fault");
 //                printf("Perhaps Page is Error\n");
 //                printf("sepc: 0x%x\n", context->sepc);
 //                printf("[Shutdown!]\n");
@@ -194,7 +193,8 @@ Context *page_fault(Context* context, size_t stval){
     lty(*pte3);
 
     if(*pte3 == 0){
-        size_t new_addr = elf_exec_page_base_only_one + ((vir_addr >> 12) << 12);
+        lty(get_running_elf_page());
+        size_t new_addr = get_running_elf_page() + ((vir_addr >> 12) << 12);
 //        size_t new_addr = alloc_page(4096);
 //        memset((char *) new_addr, 0, 4096);
         lty(new_addr);

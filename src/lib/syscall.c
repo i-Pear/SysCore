@@ -20,9 +20,8 @@ Context* syscall(Context* context){
             break;
         }
         case SYS_write:{
-            lty("000000000000000000000000000");
             int file=context->a0;
-            char* buf=context->a1 + elf_exec_page_base_only_one;
+            char* buf=context->a1 + get_running_elf_page();
             int count=context->a2;
             if(file==1){
                 // stdout

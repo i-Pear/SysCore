@@ -6,7 +6,18 @@
 #define INT_MAX 2147483647
 #define INT_MIN (-INT_MAX-1)
 
+// #define debug_mode
+
+#ifdef debug_mode
 #define lty(a) printf(#a " = 0x%x\n",a)
+#define mtl(x) printf("%s\n",x)
+#else
+#define lty(a) ;
+#define mtl(x) ;
+#endif
+
+#define new(x) k_malloc(sizeof(x))
+#define panic(message) printf("[panic] __FILE__:__LINE__  %s",message);shutdown();
 
 typedef struct {
     char *start;
@@ -57,7 +68,7 @@ int Map_get(Map *map, size_t key, size_t *value);
 
 void memcpy(void *to, void *from, size_t size);
 
-void memset(char* p,char content,int size);
+void memset(void* p,char content,int size);
 
 int max(int a,int b);
 

@@ -5,7 +5,7 @@
 
 // supervisor-level timer interrupts
 #define REGISTER_SIP_STIE (1 << 5)
-// the privilege level at which a hart was executing before entering supervisor mode
+// the privilege level at which a hart was executing previous entering supervisor mode
 #define REGISTER_SSTATUS_SPP (1 << 8)
 // whether supervisor interrupts were enabled prior to trapping into supervisor mode
 #define REGISTER_SSTATUS_SPIE (1 << 5)

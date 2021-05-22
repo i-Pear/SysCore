@@ -126,15 +126,15 @@ void init_memory(){
 }
 
 size_t alloc_page(size_t size){
-    printf("Trying to alloc page, size=0x%x\n",size);
+    // printf("Trying to alloc page, size=0x%x\n",size);
     int count=(size+__page_size-1)/__page_size;
-    printf("count=%d\n",count);
+    // printf("count=%d\n",count);
     int start=__memory_find_space(1,count);
     if(start==-1){
         printf("Can't alloc page!\n");
         return -1;
     }
-    printf("Alloced page of start=%d length=%d\n",start,count);
+    // printf("Alloced page of start=%d length=%d\n",start,count);
     __memory_update(1,start,start+count-1,1);
     __memory_alloc_length[start]=count;
     return __kernel_end+start*__page_size;
@@ -143,7 +143,7 @@ size_t alloc_page(size_t size){
 void dealloc_page(size_t p){
     int start=(p-__kernel_end)/__page_size;
     int length=__memory_alloc_length[start];
-    printf("dealloc_page page: start=%d length=%d\n",start,length);
+    // printf("dealloc_page page: start=%d length=%d\n",start,length);
     __memory_update(1,start,start+length-1,-1);
 }
 

@@ -1,16 +1,71 @@
 #include "scheduler.h"
-#include "fat32.h"
-#include "elf_loader.h"
-#include "interrupt.h"
-#include "register.h"
 
-struct pcb {
-    int pid;
-    size_t stack;
-    size_t executable;
-};
+int global_pid=0;
 
-size_t elf_exec_page_base_only_one;
+int get_new_pid(){
+    return ++global_pid;
+}
+
+bool pcb_list_is_empty(pcb_List* list){
+    return list->start==null;
+}
+
+void pcb_push_back(pcb_List* list,pcb* pcb){
+    if(list->start==null&&list->end==null){
+        // empty list
+        pcb_listNode* new_node=k_malloc(sizeof(pcb_listNode));
+        lty(new_node);
+        new_node->pcb=pcb;
+        new_node->previous=null;
+        new_node->next=null;
+
+        list->start=list->end=new_node;
+    }else{
+        pcb_listNode* new_node=k_malloc(sizeof(pcb_listNode));
+        new_node->pcb=pcb;
+        // link
+        new_node->previous=list->end;
+        list->end->next=new_node;
+        list->end=new_node;
+    }
+}
+
+void pcb_push_front(pcb_List* list,pcb* pcb){
+    if(list->start==null&&list->end==null){
+        // empty list
+        pcb_listNode* new_node=k_malloc(sizeof(pcb_listNode));
+        new_node->pcb=pcb;
+        new_node->previous=null;
+        new_node->next=null;
+
+        list->start=list->end=new_node;
+    }else{
+        pcb_listNode* new_node=k_malloc(sizeof(pcb_listNode));
+        new_node->pcb=pcb;
+        // link
+        new_node->next=list->start;
+        list->start->previous=new_node;
+        list->start=new_node;
+    }
+}
+
+void pcb_list_pop_front(pcb_List* list){
+
+}
+
+pcb_List runnable,blocked;
+pcb* running;
+
+void init_scheduler(){
+    runnable.start=runnable.end=null;
+    blocked.start=blocked.end=null;
+    running=null;
+}
+
+size_t get_running_elf_page(){
+    if(running==null)return 0;
+    return running->elf_page_base;
+}
 
 void create_process(const char *elf_path) {
     // read file
@@ -24,50 +79,73 @@ void create_process(const char *elf_path) {
 
     size_t elf_page_base,entry;
     load_elf(elf_file_cache, file_size,&elf_page_base,&entry);
-    elf_exec_page_base_only_one = elf_page_base;
 
-    Context thread_context;
-    thread_context.sstatus = register_read_sstatus();
+    Context* thread_context=new(Context);
+    thread_context->sstatus = register_read_sstatus();
     /**
      * 用户栈
      * 栈通常向低地址方向增长，故此处增加__page_size
      */
-     thread_context.sp = (size_t) alloc_page(4096) + __page_size;
+     size_t stack_page=(size_t) alloc_page(4096);
+     thread_context->sp = stack_page + __page_size;
 //    size_t stack=(size_t) alloc_page(4096);
 //    thread_context.sp=4096+0x40000000;
     /**
      * 此处spp应为0,表示user-mode
      */
-    thread_context.sstatus |= REGISTER_SSTATUS_SPP; // spp = 1
-    thread_context.sstatus ^= REGISTER_SSTATUS_SPP; // spp = 0
+    thread_context->sstatus |= REGISTER_SSTATUS_SPP; // spp = 1
+    thread_context->sstatus ^= REGISTER_SSTATUS_SPP; // spp = 0
     /**
      * 此处spie应为1,表示user-mode允许中断
      */
-    thread_context.sstatus |= REGISTER_SSTATUS_SPIE; // spie = 1
+    thread_context->sstatus |= REGISTER_SSTATUS_SPIE; // spie = 1
     /**
      * 此处sepc为中断后返回地址
      */
-    thread_context.sepc = entry;
+    thread_context->sepc = entry;
     /**
      * 页表处理
      * 1. satp应由物理页首地址右移12位并且或上（8 << 60），表示开启sv39分页模式
      * 2. 未使用的页表项应该置0
      */
     size_t page_table_base = (size_t) alloc_page(4096);
-
-    for (int i = 0; i < 512; i++) {
-        *((size_t *) page_table_base + i) = 0;
-    }
-
+    memset(page_table_base,0,4096);
     // 0x8000_0000 -> 0x8000_0000
     *((size_t *) page_table_base + 2) = (0x80000 << 10) | 0xdf;
+    thread_context->satp = (page_table_base>>12)|(8LL << 60);
 
-    page_table_base >>= 12;
-    page_table_base |= (8LL << 60);
-    lty(page_table_base);
-    thread_context.satp = page_table_base;
-    lty(register_read_satp());
-    puts("[OS] Interrupt & Timer Interrupt Open.");
-    interrupt_timer_init();
-    __restore(&thread_context);
+    // push into runnable list
+    pcb* new_pcb=k_malloc(sizeof(pcb));
+    new_pcb->pid=get_new_pid();
+    new_pcb->stack=stack_page;
+    new_pcb->thread_context=thread_context;
+    new_pcb->elf_page_base=elf_page_base;
+    new_pcb->page_table=page_table_base;
+
+    pcb_push_back(&runnable, new_pcb);
+    running=new_pcb;
+}
+
+void exit_process(){
+
+}
+
+void schedule(){
+    if(running!=null){
+        __restore(running->thread_context);
+    }else{
+        if(pcb_list_is_empty(&runnable)){
+            printf("Nothing to run, shutdown.\n");
+            shutdown();
+        }else{
+            running=runnable.start->pcb;
+            lty(running);
+            lty(running->elf_page_base);
+            pcb_list_pop_front(&runnable);
+
+            lty(running->thread_context->satp);
+            lty(running->thread_context->sepc);
+            __restore(running->thread_context);
+        }
+    }
 }

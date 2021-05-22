@@ -36,9 +36,19 @@ void init_thread() {
     sdcard_init();
     printf("[OS] fat32 init.\n");
     fat32_init();
+    printf("[OS] Interrupt & Timer Interrupt Open.\n");
+    interrupt_timer_init();
+    printf("[OS] init scheduler.\n");
+    init_scheduler();
+
     lty(register_read_satp());
 
     create_process("/write");
+    printf("in main:\n");
+    lty(get_running_elf_page());
+    printf("try to schedule.\n");
+    schedule();
+
 }
 
 int main() {

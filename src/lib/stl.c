@@ -132,9 +132,9 @@ void memcpy(void *to, void *from, size_t size) {
     }
 }
 
-void memset(char* p,char content,int size){
+void memset(void* p,char content,int size){
     for(int i=0;i<size;i++){
-        *(p+i)=content;
+        *((char*)p+i)=content;
     }
 }
 
