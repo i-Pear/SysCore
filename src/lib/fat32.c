@@ -200,41 +200,6 @@ size_t calc_content(size_t cluster_num) {
     return root_addr + (cluster_num - 2) * dpb.sector_size_in_bytes * dpb.number_of_sectors_per_cluster;
 }
 
-/**
- * 从起始地址开始遍历文件树
- * @param addr 起始地址，为fat32表项位置
- * @param level 置0即可
- */
-void tree(size_t addr, int level) {
-    struct Fat32Entry file_start = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));
-    uint16_t file_name[512];
-    while (file_start.file_attributes) {
-        file_start = analyze_fat32_entry(file_start, &addr, file_name);
-        if (calc_fat_by_entry(file_start) == 0) {
-            addr += sizeof file_start;
-            file_start = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));
-            continue;
-        }
-        for (int i = 0; i < level; i++)
-            putchar(' ');
-        p_uint16(file_name);
-        if (file_start.file_attributes == FILE_ATTR_SUB_DIRECTORY)
-            putchar('/');
-        putchar('\n');
-        if (file_start.file_attributes == FILE_ATTR_SUB_DIRECTORY
-            && strcmp_s(file_start.short_file_name, ".       ", 8) != 0
-            && strcmp_s(file_start.short_file_name, "..      ", 8) != 0) {
-            tree(calc_content(calc_cluster(file_start)), level + 1);
-        }
-
-        addr += sizeof file_start;
-        file_start = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));
-    }
-}
-
-void tree_all() {
-    tree(root_addr, 0);
-}
 
 
 int strcmp_u16(uint16_t *left, uint16_t *right) {
@@ -250,6 +215,35 @@ int strcmp_u16(uint16_t *left, uint16_t *right) {
 }
 
 
+/**
+ * 获得簇情况
+ * @param fat
+ * @return
+ */
+enum CLUSTER_FLAG get_cluster_flag(size_t fat) {
+    switch (fat) {
+        case 0x0: {
+            return CLUSTER_UNUSED;
+        }
+        case 0x1: {
+            return CLUSTER_RESERVED;
+        }
+        case 0x2 ... 0x0fffffef: {
+            return CLUSTER_USED;
+        }
+        case 0x0ffffff0 ... 0x0ffffff6: {
+            return CLUSTER_RESERVED_VALUE;
+        }
+        case 0x0fffffff7: {
+            return CLUSTER_BAD;
+        }
+        case 0x0ffffff8 ... 0x0fffffff: {
+            return CLUSTER_END;
+        }
+    }
+    printf("Err CLUSTER!");
+    return CLUSTER_BAD;
+}
 
 /**
  * 查找起始项
@@ -258,6 +252,7 @@ int strcmp_u16(uint16_t *left, uint16_t *right) {
  * @return Fat32Entry
  */
 struct Fat32Entry fat_find_file_entry(const char *file_name, int *find) {
+    size_t size_per_cluster = dpb.sector_size_in_bytes * dpb.number_of_sectors_per_cluster;
     uint16_t file_entry_name[512];
     uint16_t search_file_name[512];
     size_t i = 0, offset = 0;
@@ -293,42 +288,76 @@ struct Fat32Entry fat_find_file_entry(const char *file_name, int *find) {
             file = *(struct Fat32Entry *) fat_read_from_sd(calc_content(calc_cluster(file)), sizeof(struct Fat32Entry));
             addr = calc_content(calc_cluster(file));
         }
-        addr += sizeof(struct Fat32Entry);
-        file = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));
+        size_t cur_addr = addr + sizeof(file);
+        if((cur_addr & ((size_per_cluster << 1) - 1)) == size_per_cluster){
+            cur_addr -= size_per_cluster;
+            uint32_t cluster_num = (cur_addr - root_addr) / size_per_cluster + 2;
+            uint32_t cluster_value = *(uint32_t *) fat_read_from_sd(fat_addr + cluster_num * sizeof(uint32_t), sizeof(uint32_t));
+            if(get_cluster_flag(cluster_value) == CLUSTER_END){
+                *find = 0;
+                struct Fat32Entry fake;
+                return fake;
+            }
+            file = *(struct Fat32Entry*) fat_read_from_sd(calc_content(cluster_value), sizeof(struct Fat32Entry));
+            addr = calc_content(cluster_value);
+        }else{
+            addr += sizeof(struct Fat32Entry);
+            file = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));
+        }
     }
     *find = 0;
     struct Fat32Entry fake;
     return fake;
 }
 
+
 /**
- * 获得簇情况
- * @param fat
- * @return
+ * 从起始地址开始遍历文件树
+ * @param addr 起始地址，为fat32表项位置
+ * @param level 置0即可
  */
-enum CLUSTER_FLAG get_cluster_flag(size_t fat) {
-    switch (fat) {
-        case 0x0: {
-            return CLUSTER_UNUSED;
+void tree(size_t addr, int level) {
+    size_t size_per_cluster = dpb.sector_size_in_bytes * dpb.number_of_sectors_per_cluster;
+    struct Fat32Entry file_start = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));
+    uint16_t file_name[512];
+    while (file_start.file_attributes) {
+        file_start = analyze_fat32_entry(file_start, &addr, file_name);
+        if (calc_fat_by_entry(file_start) == 0) {
+            addr += sizeof file_start;
+            file_start = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));
+            continue;
         }
-        case 0x1: {
-            return CLUSTER_RESERVED;
+        for (int i = 0; i < level; i++)
+            putchar(' ');
+        p_uint16(file_name);
+        if (file_start.file_attributes == FILE_ATTR_SUB_DIRECTORY)
+            putchar('/');
+        putchar('\n');
+        if (file_start.file_attributes == FILE_ATTR_SUB_DIRECTORY
+            && strcmp_s(file_start.short_file_name, ".       ", 8) != 0
+            && strcmp_s(file_start.short_file_name, "..      ", 8) != 0) {
+            tree(calc_content(calc_cluster(file_start)), level + 1);
         }
-        case 0x2 ... 0x0fffffef: {
-            return CLUSTER_USED;
-        }
-        case 0x0ffffff0 ... 0x0ffffff6: {
-            return CLUSTER_RESERVED_VALUE;
-        }
-        case 0x0fffffff7: {
-            return CLUSTER_BAD;
-        }
-        case 0x0ffffff8 ... 0x0fffffff: {
-            return CLUSTER_END;
+
+        size_t cur_addr = addr + sizeof(file_start);
+        if((cur_addr & ((size_per_cluster << 1) - 1)) == size_per_cluster){
+            cur_addr -= size_per_cluster;
+            uint32_t cluster_num = (cur_addr - root_addr) / size_per_cluster + 2;
+            uint32_t cluster_value = *(uint32_t *) fat_read_from_sd(fat_addr + cluster_num * sizeof(uint32_t), sizeof(uint32_t));
+            if(get_cluster_flag(cluster_value) == CLUSTER_END){
+                return;
+            }
+            file_start = *(struct Fat32Entry*) fat_read_from_sd(calc_content(cluster_value), sizeof(struct Fat32Entry));
+            addr = calc_content(cluster_value);
+        }else{
+            addr += sizeof file_start;
+            file_start = *(struct Fat32Entry *) fat_read_from_sd(addr, sizeof(struct Fat32Entry));
         }
     }
-    printf("Err CLUSTER!");
-    return CLUSTER_BAD;
+}
+
+void tree_all() {
+    tree(root_addr, 0);
 }
 
 struct FatFile FatFile_init(struct Fat32Entry fat32Entry) {

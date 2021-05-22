@@ -15,6 +15,9 @@ OBJCOPY = riscv64-unknown-elf-objcopy
 SRC_ALL = $(wildcard src/asm/*.s src/lib/*.h src/lib/*.c)
 SRC_DRIVER = $(wildcard src/driver/*.h src/driver/*.c)
 
+dst = /mnt/sd
+sd = /dev/sda
+
 # 在当前目录生成k210.bin
 all:
 	# gen build/
@@ -39,3 +42,17 @@ up:
 # 通过串口查看
 see:
 	python3 -m serial.tools.miniterm --eol LF --dtr 0 --rts 0 --filter direct $(K210-SERIALPORT) 115200
+
+
+sd:
+	@if [ ! -f "fs.img" ]; then \
+		echo "making fs image..."; \
+		dd if=/dev/zero of=fs.img bs=512k count=512; \
+		mkfs.vfat -F 32 fs.img; fi
+	@sudo mount fs.img $(dst)
+	@sudo test -d $(dst) || mkdir -p $(dst)
+	@sudo cp -r test_suites/* $(dst)
+	@sudo umount $(dst)
+
+flash:
+	@sudo dd if=fs.img of=$(sd);
