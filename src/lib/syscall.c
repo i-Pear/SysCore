@@ -54,9 +54,10 @@ Context *syscall(Context *context) {
         }
         case SYS_openat:{
             // O_RDONLY = 0, O_WRONLY = 1
-
+            panic("unhandle sysopenat")
             break;
         }
+
         case SYS_times:{
             struct ES_tms* tms=get_actual_page(context->a0);
             tms->tms_utime=1;
