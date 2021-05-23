@@ -14,6 +14,7 @@ OBJCOPY = riscv64-unknown-elf-objcopy
 
 SRC_ALL = $(wildcard src/asm/*.s src/lib/*.h src/lib/*.c)
 SRC_DRIVER = $(wildcard src/driver/*.h src/driver/*.c)
+SRC_FATFS = $(wildcard src/driver/fatfs/*.h src/driver/fatfs/*.c)
 
 dst = /mnt/sd
 sd = /dev/sda
@@ -25,6 +26,7 @@ all:
 	$(GCC) -o $(KERNEL_O) -w -g -mcmodel=medany -T src/linker.ld -O2 -ffreestanding -nostdlib\
                                     $(SRC_ALL) \
                                     $(SRC_DRIVER) \
+                                    $(SRC_FATFS) \
                                     src/main.c
 	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)
 	@cp $(BOOTLOADER) $(BOOTLOADER).copy

@@ -4,17 +4,9 @@
 #include "lib/elf_loader.h"
 #include "driver/interface.h"
 #include "driver/sdcard.h"
-#include "lib/fat32.h"
 #include "lib/scheduler.h"
+#include "driver/fatfs/ff.h"
 
-void test_sdcard_main(){
-    int find = 0;
-    struct Fat32Entry fat32Entry = fat_find_file_entry("/lty", &find);
-    char* buf = alloc_page(20*4096);
-    int len = fat_read_file(fat32Entry, buf);
-    printf("[FAT] file size = %d\n", fat32Entry.file_size);
-    printf("[FAT] read %d Bytes\n", len);
-}
 
 void print_satp(){
     lty(register_read_satp());
@@ -35,20 +27,23 @@ void print_satp(){
 void init_thread() {
     printf("[OS] bsp init.\n");
     bsp_init();
-    printf("[OS] sdcard init.\n");
-    sdcard_init();
-    printf("[OS] fat32 init.\n");
-    fat32_init();
+    printf("[OS] Init Fs.\n");
+    FATFS fs;
+    FRESULT res_sd;
+    res_sd = f_mount(&fs, "", 1);
+    if(res_sd != FR_OK){
+        panic("fat init failed")
+    }
     printf("[OS] Interrupt & Timer Interrupt Open.\n");
     interrupt_timer_init();
     printf("[OS] init scheduler.\n");
     init_scheduler();
 
-    create_process("/riscv64/write");
-    create_process("/riscv64/uname");
-    create_process("/riscv64/times");
-    create_process("/riscv64/getpid");
-    create_process("/riscv64/getppid");
+    create_process("write");
+    create_process("uname");
+    create_process("times");
+    create_process("getpid");
+    create_process("getppid");
 
     schedule();
 }

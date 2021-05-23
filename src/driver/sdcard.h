@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-void sdcard_init(void);
+int sdcard_init(void);
 
 void sdcard_read_sector(uint8 *buf, int sectorno);
 

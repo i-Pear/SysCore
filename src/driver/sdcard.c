@@ -4,6 +4,10 @@
 #include "spi.h"
 #include "interface.h"
 
+uint16 SD_SECTOR_SIZE;
+uint16 SD_BLOCK_SIZE;
+uint32 SD_SECTOR_COUNT;
+
 void SD_CS_HIGH(void) {
     gpiohs_set_pin(7, GPIO_PV_HIGH);
 }
@@ -41,10 +45,10 @@ static void sd_read_data(uint8 *data_buff, uint32 length) {
 static void sd_send_cmd(uint8 cmd, uint32 arg, uint8 crc) {
     uint8 frame[6];
     frame[0] = (cmd | 0x40);
-    frame[1] = (uint8)(arg >> 24);
-    frame[2] = (uint8)(arg >> 16);
-    frame[3] = (uint8)(arg >> 8);
-    frame[4] = (uint8)(arg);
+    frame[1] = (uint8) (arg >> 24);
+    frame[2] = (uint8) (arg >> 16);
+    frame[3] = (uint8) (arg >> 8);
+    frame[4] = (uint8) (arg);
     frame[5] = (crc);
     SD_CS_LOW();
     sd_write_data(frame, 6);
@@ -64,15 +68,15 @@ static void sd_end_cmd(void) {
  * 		what they are in SD mode.
  */
 
-#define SD_CMD0 	0
-#define SD_CMD8 	8
-#define SD_CMD58 	58 		// READ_OCR
-#define SD_CMD55 	55 		// APP_CMD
-#define SD_ACMD41 	41 		// SD_SEND_OP_COND
-#define SD_CMD16 	16 		// SET_BLOCK_SIZE
-#define SD_CMD17 	17 		// READ_SINGLE_BLOCK
-#define SD_CMD24 	24 		// WRITE_SINGLE_BLOCK
-#define SD_CMD13 	13 		// SEND_STATUS
+#define SD_CMD0    0
+#define SD_CMD8    8
+#define SD_CMD58    58        // READ_OCR
+#define SD_CMD55    55        // APP_CMD
+#define SD_ACMD41    41        // SD_SEND_OP_COND
+#define SD_CMD16    16        // SET_BLOCK_SIZE
+#define SD_CMD17    17        // READ_SINGLE_BLOCK
+#define SD_CMD24    24        // WRITE_SINGLE_BLOCK
+#define SD_CMD13    13        // SEND_STATUS
 
 /*
  * Read sdcard response in R1 type.
@@ -142,8 +146,7 @@ static int verify_operation_condition(void) {
     if (0x09 == result) {
         printf("invalid CRC for CMD8\n");
         return 0xff;
-    }
-    else if (0x01 == result && 0x01 == (frame[2] & 0x0f) && 0xaa == frame[3]) {
+    } else if (0x01 == result && 0x01 == (frame[2] & 0x0f) && 0xaa == frame[3]) {
         return 0x00;
     }
 
@@ -168,7 +171,7 @@ static int read_OCR(void) {
 
         if (
                 0x01 == result && // R1 response in idle status
-                (ocr[1] & 0x1f) && (ocr[2] & 0x80) 	// voltage range valid
+                (ocr[1] & 0x1f) && (ocr[2] & 0x80)    // voltage range valid
                 ) {
             return 0;
         }
@@ -219,7 +222,7 @@ static int check_block_size(void) {
     uint8 ocr[4];
 
     int timeout = 0xff;
-    while (timeout --) {
+    while (timeout--) {
         sd_send_cmd(SD_CMD58, 0, 0);
         result = sd_get_response_R1();
         sd_get_response_R3_rest(ocr);
@@ -234,8 +237,7 @@ static int check_block_size(void) {
                 }
 
                 is_standard_sd = 0;
-            }
-            else {
+            } else {
                 printf("SDSC detected, setting block size\n");
 
                 // setting SD card block size to BSIZE
@@ -281,7 +283,7 @@ static int sd_init(void) {
     SD_CS_LOW();
 
     // send dummy bytes for 80 clock cycles
-    for (int i = 0; i < 10; i ++)
+    for (int i = 0; i < 10; i++)
         frame[i] = 0xff;
     sd_write_data(frame, 10);
 
@@ -299,7 +301,7 @@ static int sd_init(void) {
 }
 
 
-void sdcard_init(void) {
+int sdcard_init(void) {
     int result = sd_init();
     if (0 != result) {
         printf("[panic!] sdcard_init failed\n");
@@ -307,6 +309,15 @@ void sdcard_init(void) {
 #ifdef DEBUG
     printf("sdcard_init\n");
 #endif
+    if (result == 0) {
+        char buff[512];
+#include "sdcard.h"
+        sdcard_read_sector((uint8*)buff, 0);
+        SD_SECTOR_SIZE = *(uint16 *) (buff + 11);
+        SD_BLOCK_SIZE = (*(uint8 *) (buff + 13)) * SD_SECTOR_SIZE;
+        SD_SECTOR_COUNT = *(uint32 *) (buff + 32);
+    }
+    return !result;
 }
 
 void sdcard_read_sector(uint8 *buf, int sectorno) {
@@ -320,8 +331,7 @@ void sdcard_read_sector(uint8 *buf, int sectorno) {
 
     if (is_standard_sd) {
         address = sectorno << 9;
-    }
-    else {
+    } else {
         address = sectorno;
     }
 
@@ -365,8 +375,7 @@ void sdcard_write_sector(uint8 *buf, int sectorno) {
 
     if (is_standard_sd) {
         address = sectorno << 9;
-    }
-    else {
+    } else {
         address = sectorno;
     }
     // enter critical section!

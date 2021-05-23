@@ -2,7 +2,6 @@
 #define OS_RISC_V_SCHEDULER_H
 
 #include "stl.h"
-#include "fat32.h"
 #include "elf_loader.h"
 #include "interrupt.h"
 #include "register.h"
