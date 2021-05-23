@@ -81,7 +81,6 @@ Context *syscall(Context *context) {
             size_t flag = context->a2;
 
             debug_openat(dir_fd);
-            printf("filename = %s\n", filename);
             debug_openat(flag);
 
             if(filename[0] == '.' && filename[1] == '/'){
@@ -136,6 +135,27 @@ Context *syscall(Context *context) {
             }
             return(ret);
 #undef debug_read
+            break;
+        }
+        case SYS_close:{
+#define debug_close(a) printf(#a " = 0x%x\n",a)
+#undef debug_close
+#define debug_close ;
+            // fd：要关闭的文件描述符。
+            // int ret = close(fd);
+            // 返回值：成功执行，返回0。失败，返回-1。
+            size_t fd = context->a0;
+
+            debug_close(fd);
+
+            FRESULT result = f_close(&file_describer_array[fd].data.fat32);
+            if(result != FR_OK){
+                return(-1);
+            }else{
+                erase_file_describer((int)fd);
+                return(0);
+            }
+#undef debug_close
             break;
         }
         case SYS_times:{

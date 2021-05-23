@@ -44,6 +44,8 @@ void init_thread() {
     create_process("getpid");
     create_process("getppid");
     create_process("read");
+    create_process("open");
+//    create_process("openat");
 
     schedule();
 }
