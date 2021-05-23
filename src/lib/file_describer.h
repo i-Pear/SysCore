@@ -8,6 +8,7 @@
 enum File_Describer_Type{
     FILE_DESCRIBER_FILE,
     FILE_DESCRIBER_PIPE,
+    FILE_DESCRIBER_DIR
 };
 
 enum File_Access_Type{
@@ -20,6 +21,7 @@ typedef struct {
     enum File_Access_Type fileAccessType;
     union{
         FIL fat32;
+        DIR fat32_dir;
         int pipe_id;
     } data;
 } File_Describer;

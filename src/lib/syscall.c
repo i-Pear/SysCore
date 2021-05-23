@@ -101,6 +101,19 @@ Context *syscall(Context *context) {
 
             if(flag & O_CREATE)mode |= FA_CREATE_ALWAYS, flag -= O_CREATE;
 
+            // 文件夹，提前返回
+            if(flag & O_DIRECTORY){
+                mode | FA_CREATE_ALWAYS, flag -= O_DIRECTORY;
+                file_describer_array[fd].fileDescriberType = FILE_DESCRIBER_DIR;
+                FRESULT result = f_opendir(&file_describer_array[fd].data.fat32_dir, filename);
+                if(result != FR_OK){
+                    printf("can't open this dir: %s\n", filename);
+                    panic("")
+                }
+                return(fd);
+                break;
+            }
+
             if(flag != 0){
                 printf("SYS_openat unsupported flag: 0x%x\n", flag_bak);
                 panic("")
@@ -112,8 +125,11 @@ Context *syscall(Context *context) {
             file_describer_array[fd].fileDescriberType = FILE_DESCRIBER_FILE;
             FRESULT result = f_open(&file_describer_array[fd].data.fat32, filename, mode);
             if(result != FR_OK){
-                printf("can't open this file: %s\n", filename);
-                panic("")
+                result = f_opendir(&file_describer_array[fd].data.fat32_dir, filename);
+                if(result != FR_OK){
+                    printf("can't open this file: %s\n", filename);
+                    panic("")
+                }
             }
             return(fd);
 #undef debug_openat
