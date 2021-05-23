@@ -14,6 +14,10 @@ typedef struct{
     size_t stack;
     size_t elf_page_base;
     size_t page_table;
+
+    size_t stack_size;
+    size_t elf_page_size;
+
     Context * thread_context;
 } pcb;
 
@@ -50,6 +54,8 @@ int get_running_pid();
 int get_running_ppid();
 
 void create_process(const char *elf_path);
+
+void clone(int flags,size_t stack,int ptid);
 
 void yield();
 

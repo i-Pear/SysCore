@@ -2,8 +2,8 @@
 
 size_t __kernel_heap_base;
 
-__Kernel_SegmentTreeNode kernel_heap_nodes[kernel_heap_size*4];
-int __kernel_alloc_length[kernel_heap_size];
+__Kernel_SegmentTreeNode kernel_heap_nodes[kernel_heap_size*4/__align_unit];
+int __kernel_alloc_length[kernel_heap_size/__align_unit];
 
 #define cnt kernel_heap_nodes[node]
 
@@ -116,12 +116,12 @@ void __kernel_update(int node, int l, int r, int set) {
 
 void init_kernel_heap(){
     __kernel_heap_base=alloc_page(kernel_heap_size);
-    int page_count=kernel_heap_size;
+    int page_count=kernel_heap_size/__align_unit;
     __kernel_init_pages(1, 0, page_count-1);
 }
 
 size_t k_malloc(size_t size){
-    int count=size;
+    int count=(size+__align_unit-1)/__align_unit;
     int start=__kernel_find_space(1, count);
     if(start==-1){
         printf("Can't alloc heap!\n");
@@ -129,11 +129,11 @@ size_t k_malloc(size_t size){
     }
     __kernel_update(1, start, start+count-1, 1);
     __kernel_alloc_length[start]=count;
-    return __kernel_heap_base+start;
+    return __kernel_heap_base+start*__align_unit;
 }
 
 void k_free(size_t p){
-    int start=(p-__kernel_heap_base);
+    int start=(p-__kernel_heap_base)/__align_unit;
     int length=__kernel_alloc_length[start];
     __kernel_update(1, start, start+length-1, -1);
 }

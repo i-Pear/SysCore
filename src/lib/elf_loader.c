@@ -1,6 +1,6 @@
 #include "elf_loader.h"
 
-void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* entry) {
+void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_page_size,size_t* entry) {
     // check magic number
     if (_elf_data[0] != 0x7f || _elf_data[1] != 0x45 || _elf_data[2] != 0x4c || _elf_data[3] != 0x46) {
         printf("[ELF LOADER] Invalid ELF File! \n");
@@ -37,6 +37,7 @@ void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* entry
     printf("[ELF LOADER] ELF entry: %x\n", Ehdr->e_entry);
 
     char *exec = (char *) alloc_page(size);
+    *elf_page_size=size;
 
     Elf64_Phdr *phdr = (Elf64_Phdr *) (elf_start + Ehdr->e_phoff);
     Elf64_Shdr *shdr = (Elf64_Shdr *) (elf_start + Ehdr->e_shoff);

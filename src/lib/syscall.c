@@ -218,8 +218,15 @@ Context *syscall(Context *context) {
             break;
         }
         case SYS_wait4:{
-
+            return(3);
             break;
+        }
+        case SYS_clone:{
+            // specially, sepc has dealt in cloning
+            // so return directly
+            clone(context->a0,context->a1,context->a2);
+            yield();
+            return context;
         }
         case SYS_sched_yield: {
             return(0);

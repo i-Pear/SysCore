@@ -1,7 +1,11 @@
 #include "scheduler.h"
 #include "../driver/fatfs/ff.h"
+#include "self_test.h"
 
 int global_pid=1;
+
+// Warning: when do sth with running, sync with latest running_context first
+Context* running_context= (Context *) (0x80000000 + 6 * 1024 * 1024 - sizeof(Context));
 
 int get_new_pid(){
     return ++global_pid;
@@ -73,6 +77,66 @@ void init_scheduler(){
     running=null;
 }
 
+void clone(int flags,size_t stack,int ptid){
+    if(flags!=17){
+        printf("flag=%d\n",flags);
+        panic("clone flags is not SIGCHLD, unknown todo.\n");
+    }
+
+    // sync with running_context
+    *running->thread_context=*running_context;
+    running->thread_context->sepc+=4;
+
+    // copy context
+    Context * child_context=new(Context);
+    *child_context=*running->thread_context;
+
+    // copy pcb
+    pcb* child_pcb=new(pcb);
+    *child_pcb=*running;
+    child_pcb->thread_context=child_context;
+
+    if(ptid!=0){
+        child_pcb->ppid=ptid;
+    }else{
+        child_pcb->ppid=running->pid;
+    }
+    child_pcb->pid=get_new_pid();
+
+    // set syscall return value
+    running->thread_context->a0=child_pcb->pid;
+    child_context->a0=0;
+
+    if(stack!=0){
+        // fixed stack, will not copy spaces
+        child_pcb->thread_context->sp=stack;
+        child_pcb->thread_context->a0=0;
+        pcb_push_back(&runnable,child_pcb);
+    }else{
+        // fork, generate a new stack
+        size_t stack= alloc_page(running->stack_size);
+        memcpy(stack,running->stack,running->stack_size);
+
+        size_t elf_page_base= alloc_page(running->elf_page_size);
+        memcpy(elf_page_base,running->elf_page_base,running->elf_page_size);
+
+        size_t page_table= alloc_page(4096);
+        memset(page_table,0, 4096);
+        *((size_t *) page_table + 2) = (0x80000 << 10) | 0xdf;
+        child_context->satp = (page_table>>12)|(8LL << 60);
+
+        child_pcb->thread_context->a0=0;
+        child_pcb->stack=stack;
+        child_pcb->thread_context->sp=running->thread_context->sp-running->stack+stack;
+        child_pcb->elf_page_base=elf_page_base;
+        child_pcb->page_table=page_table;
+
+        pcb_push_back(&runnable,child_pcb);
+    }
+    // sync with running_context
+    *running_context=*running->thread_context;
+}
+
 size_t get_running_elf_page(){
     if(running==null)return 0;
     return running->elf_page_base;
@@ -101,8 +165,8 @@ void create_process(const char *elf_path) {
     f_close(&fnew);
     printf("File read successfully.\n");
 
-    size_t elf_page_base,entry;
-    load_elf(elf_file_cache, file_size,&elf_page_base,&entry);
+    size_t elf_page_base,entry,elf_page_size;
+    load_elf(elf_file_cache, file_size,&elf_page_base,&elf_page_size,&entry);
     dealloc_page(elf_file_cache);
 
     Context* thread_context=new(Context);
@@ -148,19 +212,25 @@ void create_process(const char *elf_path) {
     new_pcb->elf_page_base=elf_page_base;
     new_pcb->page_table=page_table_base;
 
+    new_pcb->elf_page_size=elf_page_size;
+    new_pcb->stack_size=4096;
+
     pcb_push_back(&runnable, new_pcb);
 }
 
 void yield(){
+    // sync with running_context
+    *running->thread_context=*running_context;
+
     pcb_push_back(&runnable, running);
     running=null;
     schedule();
 }
 
 void exit_process(){
-    dealloc_page(running->elf_page_base);
+    // dealloc_page(running->elf_page_base);
     // TODO: dealloc_page(running->page_table);
-    dealloc_page(running->stack);
+    // dealloc_page(running->stack);
     k_free(running->thread_context);
     k_free(running);
     running=null;
@@ -169,13 +239,20 @@ void exit_process(){
 
 void schedule(){
     if(running!=null){
-        __restore(running->thread_context);
+        // sync with running_context
+        *running_context=*running->thread_context;
+
+        __restore();
     }else{
         if(pcb_list_is_empty(&runnable)){
-            printf("Nothing to run, halt.\n");
-//            shutdown();
-            while (1);
+            if(has_next_test()){
+                create_process(get_next_test());
+            }else{
+                printf("Nothing to run, halt.\n");
+                while (1);
+            }
         }else{
+            // pick one to run
             running=runnable.start->pcb;
             lty(running);
             lty(running->elf_page_base);
@@ -184,9 +261,10 @@ void schedule(){
             lty(running->thread_context->satp);
             lty(running->thread_context->sepc);
 
-            printf("trying to restore\n");
-            size_t* kernel_restore_context=__memory_end-sizeof(Context);
-            memcpy(kernel_restore_context,running->thread_context, sizeof(Context));
+            // printf("trying to restore\n");
+
+            // sync with running_context
+            *running_context=*running->thread_context;
             __restore();
         }
     }
