@@ -182,7 +182,7 @@ void schedule(){
             lty(running->thread_context->sepc);
 
             printf("trying to restore\n");
-            size_t* kernel_restore_context=0x80000000+5*1024*1024-sizeof(Context);
+            size_t* kernel_restore_context=__memory_end-sizeof(Context);
             memcpy(kernel_restore_context,running->thread_context, sizeof(Context));
             __restore();
         }

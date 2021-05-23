@@ -44,11 +44,11 @@ void init_thread() {
     printf("[OS] init scheduler.\n");
     init_scheduler();
 
-//    create_process("/riscv64/write");
-//    create_process("/riscv64/uname");
+    create_process("/riscv64/write");
+    create_process("/riscv64/uname");
 //    create_process("/riscv64/times");
-    create_process("/riscv64/getpid");
-    create_process("/riscv64/getppid");
+//    create_process("/riscv64/getpid");
+//    create_process("/riscv64/getppid");
 
     schedule();
 }
