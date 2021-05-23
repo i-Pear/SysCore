@@ -5,7 +5,7 @@
 #include "driver/interface.h"
 #include "driver/sdcard.h"
 #include "lib/scheduler.h"
-#include "file_describer.h"
+#include "lib/file_describer.h"
 
 
 void print_satp(){
@@ -53,12 +53,10 @@ int main() {
     printf("[OS] Memory Init.\n");
     init_memory();
     init_kernel_heap();
-//    puts("[OS] Interrupt & Timer Interrupt Open.");
     kernelContext.kernel_satp = register_read_satp() | (8LL << 60);
     lty(kernelContext.kernel_satp);
     kernelContext.kernel_handle_interrupt = (size_t)handle_interrupt;
     kernelContext.kernel_restore = (size_t) __restore;
-//    interrupt_timer_init();
 
     init_thread();
     // unreachable
