@@ -3398,27 +3398,26 @@ static FRESULT mount_volume (	/* FR_OK(0): successful, !=0: an error occurred */
 	fs->fs_type = 0;					/* Clear the filesystem object */
 	fs->pdrv = LD2PD(vol);				/* Volume hosting physical drive */
 	stat = disk_initialize(fs->pdrv);	/* Initialize the physical drive */
-    printf("1\n");
 	if (stat & STA_NOINIT) { 			/* Check if the initialization succeeded */
 		return FR_NOT_READY;			/* Failed to initialize due to no medium or hard error */
 	}
-    printf("2\n");
 	if (!FF_FS_READONLY && mode && (stat & STA_PROTECT)) { /* Check disk write protection if needed */
 		return FR_WRITE_PROTECTED;
 	}
-    printf("3\n");
 #if FF_MAX_SS != FF_MIN_SS				/* Get sector size (multiple sector size cfg only) */
 	if (disk_ioctl(fs->pdrv, GET_SECTOR_SIZE, &SS(fs)) != RES_OK) return FR_DISK_ERR;
-    printf("4\n");
 	if (SS(fs) > FF_MAX_SS || SS(fs) < FF_MIN_SS || (SS(fs) & (SS(fs) - 1))) return FR_DISK_ERR;
-    printf("5\n");
 #endif
+    printf("1-1\n");
 	/* Find an FAT volume on the drive */
 	fmt = find_volume(fs, LD2PT(vol));
+    printf("1-2\n");
 	if (fmt == 4) return FR_DISK_ERR;		/* An error occured in the disk I/O layer */
+    printf("1-3\n");
 	if (fmt >= 2) return FR_NO_FILESYSTEM;	/* No FAT volume is found */
+    printf("1-4\n");
 	bsect = fs->winsect;					/* Volume offset */
-
+    printf("1-5\n");
 	/* An FAT volume is found (bsect). Following code initializes the filesystem object */
 
 #if FF_FS_EXFAT
