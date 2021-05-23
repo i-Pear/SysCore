@@ -13,9 +13,10 @@
 #define __page_size (4096)
 #define __kernel_start (0x80020000)
 #define __memory_end  0x80000000+6*1024*1024
+#define __kernel_stack_size 4096
 extern size_t __kernel_end;
 extern int page_count;
-#define __reserved_page_num ((__memory_end-__kernel_start) / __page_size)
+#define __reserved_page_num ((__memory_end-__kernel_stack_size-__kernel_start) / __page_size)
 
 typedef struct {
     // left  node : [l,mid]
