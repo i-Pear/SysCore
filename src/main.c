@@ -46,7 +46,7 @@ void init_thread() {
     create_process("read");
     create_process("open");
     create_process("close");
-//    create_process("openat");
+    create_process("openat");
 
     schedule();
 }
