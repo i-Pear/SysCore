@@ -16,9 +16,15 @@ enum File_Access_Type{
     FILE_ACCESS_WRITE=2,
 };
 
+enum File_Special_Type{
+    FILE_SPECIAL_TYPE_STDOUT = 1,
+    FILE_SPECIAL_TYPE_OTHER = 3
+};
+
 typedef struct {
     enum File_Describer_Type fileDescriberType;
     enum File_Access_Type fileAccessType;
+    enum File_Special_Type fileSpecialType;
     union{
         FIL fat32;
         DIR fat32_dir;

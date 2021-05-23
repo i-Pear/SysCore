@@ -52,6 +52,7 @@ void init_thread() {
     add_test("close");
     add_test("openat");
     add_test("getcwd");
+    add_test("dup");
 
     schedule();
 }
