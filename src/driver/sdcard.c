@@ -317,7 +317,7 @@ int sdcard_init(void) {
         printf("SD_SECTOR_SIZE = %d\n", SD_SECTOR_SIZE);
         SD_BLOCK_SIZE = (*(uint8 *) (buff + 13)) * SD_SECTOR_SIZE;
         printf("SD_BLOCK_SIZE = %d\n", SD_BLOCK_SIZE);
-        SD_SECTOR_COUNT = *(uint32 *) (buff + 32);
+        SD_SECTOR_COUNT = 524288;
         printf("SD_SECTOR_COUNT = %d\n", SD_SECTOR_COUNT);
     }
     return !result;
