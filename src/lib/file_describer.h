@@ -24,6 +24,7 @@ typedef struct {
         DIR fat32_dir;
         int pipe_id;
     } data;
+    char* dir_name;
 } File_Describer;
 
 #define FILE_DESCRIBER_ARRAY_LENGTH 100

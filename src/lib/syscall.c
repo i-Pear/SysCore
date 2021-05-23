@@ -74,12 +74,8 @@ Context *syscall(Context *context) {
             // flags：必须包含如下访问模式的其中一种：O_RDONLY，O_WRONLY，O_RDWR。还可以包含文件创建标志和文件状态标志。
             // mode：文件的所有权描述。详见`man 7 inode `。
             // int ret = openat(fd, filename, flags, mode);
-            // TODO: 暂不支持通过fd打开
             // TODO: 暂不支持文件所有权描述
             size_t dir_fd = context->a0;
-            if(dir_fd != AT_FDCWD){
-                panic("SYS_openat unsupport open from fd");
-            }
             char* filename = (char*)get_actual_page(context->a1);
             size_t flag = context->a2, flag_bak = flag;
 
@@ -89,6 +85,22 @@ Context *syscall(Context *context) {
             if(filename[0] == '.' && filename[1] == '/'){
                 filename += 2;
             }
+            if(dir_fd != AT_FDCWD){
+                if(file_describer_array[dir_fd].dir_name == null){
+                    printf("fd %d not direct a dir\n", dir_fd);
+                    panic("")
+                }
+                int filename_len = strlen(filename);
+                int dir_filename_len = strlen(file_describer_array[dir_fd].dir_name);
+                // +2 means '/' && '\0'
+                char* new_file_name = (char*) k_malloc(dir_filename_len + filename_len + 2);
+                memcpy(new_file_name, file_describer_array[dir_fd].dir_name, dir_filename_len);
+                new_file_name[dir_filename_len] = '/';
+                memcpy(new_file_name + dir_filename_len + 1, filename, filename_len);
+                new_file_name[dir_filename_len + filename_len] = '\0';
+                filename = new_file_name;
+            }
+
             int fd = get_new_file_describer();
 
             debug_openat(fd);
@@ -110,6 +122,10 @@ Context *syscall(Context *context) {
                     printf("can't open this dir: %s\n", filename);
                     panic("")
                 }
+                int dir_name_len = strlen(filename);
+                file_describer_array[fd].dir_name = (char *)k_malloc((dir_name_len + 1) * sizeof(char));
+                memcpy(file_describer_array[fd].dir_name, filename, dir_name_len);
+                file_describer_array[fd].dir_name[dir_name_len] = '\0';
                 return(fd);
                 break;
             }
@@ -123,13 +139,11 @@ Context *syscall(Context *context) {
             debug_openat(mode);
 
             file_describer_array[fd].fileDescriberType = FILE_DESCRIBER_FILE;
+            file_describer_array[fd].dir_name = null;
             FRESULT result = f_open(&file_describer_array[fd].data.fat32, filename, mode);
             if(result != FR_OK){
-                result = f_opendir(&file_describer_array[fd].data.fat32_dir, filename);
-                if(result != FR_OK){
-                    printf("can't open this file: %s\n", filename);
-                    panic("")
-                }
+                printf("can't open this file: %s\n", filename);
+                panic("")
             }
             return(fd);
 #undef debug_openat

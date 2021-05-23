@@ -1,7 +1,7 @@
 #include "stl.h"
 
-inline pair_int make_pair(int a,int b){
-    pair_int result={a,b};
+inline pair_int make_pair(int a, int b) {
+    pair_int result = {a, b};
     return result;
 }
 
@@ -52,7 +52,6 @@ void Vec_free(Vec **vec) {
     k_free((*vec)->start);
     k_free((*vec));
 }
-
 
 
 void Map_init(Map **map) {
@@ -132,16 +131,22 @@ void memcpy(void *to, void *from, size_t size) {
     }
 }
 
-void memset(void* p,char content,int size){
-    for(int i=0;i<size;i++){
-        *((char*)p+i)=content;
+void memset(void *p, char content, int size) {
+    for (int i = 0; i < size; i++) {
+        *((char *) p + i) = content;
     }
 }
 
-int max(int a,int b){
-    return a>b?a:b;
+int strlen(char *s) {
+    int n;
+    for (n = 0; s[n]; n++);
+    return n;
 }
 
-int min(int a,int b){
-    return a<b?a:b;
+int max(int a, int b) {
+    return a > b ? a : b;
+}
+
+int min(int a, int b) {
+    return a < b ? a : b;
 }
