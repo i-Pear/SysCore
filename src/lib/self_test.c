@@ -1,9 +1,8 @@
 #include "self_test.h"
-#include "scheduler.h"
 
 int test_cnt=0;
 int test_total=11;
-char* tests[]={
+char* tests[20]={
         "fork",
         "clone",
         "write",

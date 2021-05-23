@@ -117,6 +117,7 @@ void __memory_update(int node, int l, int r, int set) {
 
 void init_memory(){
     printf("Reserved page num=%d\n", __reserved_page_num);
+    printf("origin kernel_end: 0x%x\n",get_kernel_end());
     __kernel_end=get_kernel_end();
     __kernel_end=(__kernel_end+__page_size-1)/__page_size*__page_size;
     printf("kernel end= 0x%x\n",__kernel_end);

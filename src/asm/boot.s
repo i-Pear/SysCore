@@ -20,6 +20,7 @@
     .extern __interrupt
     .extern set_next_timeout
     .extern shutdown
+    .extern kernel_end
     
 _start:
     # 计算 boot_page_table 的物理页号

@@ -1,6 +1,5 @@
 #include "scheduler.h"
 #include "../driver/fatfs/ff.h"
-#include "self_test.h"
 
 int global_pid=1;
 
@@ -245,12 +244,12 @@ void schedule(){
         __restore();
     }else{
         if(pcb_list_is_empty(&runnable)){
-            if(has_next_test()){
-                create_process(get_next_test());
-            }else{
-                printf("Nothing to run, halt.\n");
-                while (1);
-            }
+//            if(has_next_test()){
+//                create_process(get_next_test());
+//            }else{
+//                printf("Nothing to run, halt.\n");
+//                while (1);
+//            }
         }else{
             // pick one to run
             running=runnable.start->pcb;
