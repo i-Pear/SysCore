@@ -4,7 +4,7 @@
 #include "driver/interface.h"
 #include "lib/scheduler.h"
 #include "lib/file_describer.h"
-
+#include "lib/self_test.h"
 
 void print_satp(){
     lty(register_read_satp());
@@ -38,15 +38,7 @@ void init_thread() {
     init_scheduler();
     init_file_describer();
 
-    create_process("write");
-    create_process("uname");
-    create_process("times");
-    create_process("getpid");
-    create_process("getppid");
-    create_process("read");
-    create_process("open");
-    create_process("close");
-    create_process("openat");
+    start_self_tests();
 
     schedule();
 }

@@ -102,8 +102,7 @@ Context *syscall(Context *context) {
 
             int fd = get_new_file_describer();
 
-            debug_openat
-            (fd);
+            debug_openat(fd);
 
             BYTE mode = 0;
 
@@ -139,9 +138,8 @@ Context *syscall(Context *context) {
                 panic("")
             }
 
-            debug_openat
-            (flag);debug_openat
-            (mode);
+            debug_openat(flag);
+            debug_openat(mode);
 
             file_describer_array[fd].fileDescriberType = FILE_DESCRIBER_FILE;
             file_describer_array[fd].dir_name = null;
@@ -168,10 +166,9 @@ Context *syscall(Context *context) {
             char *buf = (char *) get_actual_page(context->a1);
             size_t count = context->a2;
 
-            debug_read
-            (fd);debug_read
-            ((size_t) buf);debug_read
-            (count);
+            debug_read(fd);
+            debug_read((size_t)buf);
+            debug_read(count);
 
             FIL fat_file = file_describer_array[fd].data.fat32;
             uint32 ret;
@@ -196,8 +193,7 @@ Context *syscall(Context *context) {
             // 返回值：成功执行，返回0。失败，返回-1。
             size_t fd = context->a0;
 
-            debug_close
-            (fd);
+            debug_close(fd);
 
             FRESULT result = f_close(&file_describer_array[fd].data.fat32);
             if (result != FR_OK) {
@@ -236,8 +232,15 @@ Context *syscall(Context *context) {
             break;
         }
         case SYS_wait4: {
-
+            return(3);
             break;
+        }
+        case SYS_clone:{
+            // specially, sepc has dealt in cloning
+            // so return directly
+            clone(context->a0,context->a1,context->a2);
+            yield();
+            return context;
         }
         case SYS_sched_yield: {
             return(0);
