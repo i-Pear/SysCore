@@ -48,7 +48,7 @@ BYTE memcmp(const void *v1, const void *v2, BYTE n)
     return 0;
 }
 extern void printf(const char *format, ...);
-static int i_want_to_know_where_it_return = 0;
+#define i_want_to_know_where_it_return  (0)
 
 /*--------------------------------------------------------------------------
 
