@@ -1,6 +1,6 @@
 #include "scheduler.h"
 
-int global_pid=20;
+int global_pid=1;
 
 int get_new_pid(){
     return ++global_pid;
@@ -139,7 +139,7 @@ void create_process(const char *elf_path) {
     // push into runnable list
     pcb* new_pcb=k_malloc(sizeof(pcb));
     new_pcb->pid=get_new_pid();
-    new_pcb->ppid=0;
+    new_pcb->ppid=1;
     new_pcb->stack=stack_page;
     new_pcb->thread_context=thread_context;
     new_pcb->elf_page_base=elf_page_base;
