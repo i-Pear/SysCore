@@ -78,7 +78,7 @@ Context *syscall(Context *context) {
                 panic("SYS_openat 不支持通过fd打开");
             }
             char* filename = (char*)get_actual_page(context->a1);
-            size_t flag = context->a2;
+            size_t flag = context->a2, flag_bak = flag;
 
             debug_openat(dir_fd);
             debug_openat(flag);
@@ -91,14 +91,19 @@ Context *syscall(Context *context) {
             debug_openat(fd);
 
             BYTE mode = 0;
-            if(flag == O_RDONLY)file_describer_array[fd].fileAccessType = FILE_ACCESS_READ, mode = FA_READ;
-            else if(flag == O_WRONLY)file_describer_array[fd].fileAccessType = FILE_ACCESS_WRITE, mode = FA_WRITE;
-            else if(flag == O_RDWR)file_describer_array[fd].fileAccessType = FILE_ACCESS_WRITE | FILE_ACCESS_READ, mode = FA_READ | FA_WRITE;
-            else{
-                printf("SYS_openat 不支持的flag: 0x%x\n", flag);
+
+            if(flag == O_RDONLY)file_describer_array[fd].fileAccessType = FILE_ACCESS_READ, mode = FA_READ, flag -= O_RDONLY;
+            else if(flag == O_WRONLY)file_describer_array[fd].fileAccessType = FILE_ACCESS_WRITE, mode = FA_WRITE, flag -= O_WRONLY;
+            else if(flag & O_RDWR)file_describer_array[fd].fileAccessType = FILE_ACCESS_WRITE | FILE_ACCESS_READ, mode = FA_READ | FA_WRITE, flag -= O_RDWR;
+
+            if(flag & O_CREATE)mode |= FA_CREATE_ALWAYS, flag -= O_CREATE;
+
+            if(flag != 0){
+                printf("SYS_openat 不支持的flag: 0x%x\n", flag_bak);
                 panic("")
             }
 
+            debug_openat(flag);
             debug_openat(mode);
 
             file_describer_array[fd].fileDescriberType = FILE_DESCRIBER_FILE;
