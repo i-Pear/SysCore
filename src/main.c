@@ -43,6 +43,7 @@ void init_thread() {
     create_process("times");
     create_process("getpid");
     create_process("getppid");
+    create_process("read");
 
     schedule();
 }

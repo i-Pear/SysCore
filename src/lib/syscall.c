@@ -63,6 +63,9 @@ Context *syscall(Context *context) {
             break;
         }
         case SYS_openat:{
+#define debug_openat(a) printf(#a " = 0x%x\n",a)
+#undef debug_openat
+#define debug_openat ;
             // fd：文件所在目录的文件描述符
             // filename：要打开或创建的文件名。如为绝对路径，则忽略fd。如为相对路径，且fd是AT_FDCWD，则filename是相对于当前工作目录来说的。如为相对路径，且fd是一个文件描述符，则filename是相对于fd所指向的目录来说的。
             // flags：必须包含如下访问模式的其中一种：O_RDONLY，O_WRONLY，O_RDWR。还可以包含文件创建标志和文件状态标志。
@@ -76,10 +79,18 @@ Context *syscall(Context *context) {
             }
             char* filename = (char*)get_actual_page(context->a1);
             size_t flag = context->a2;
+
+            debug_openat(dir_fd);
+            printf("filename = %s\n", filename);
+            debug_openat(flag);
+
             if(filename[0] == '.' && filename[1] == '/'){
                 filename += 2;
             }
             int fd = get_new_file_describer();
+
+            debug_openat(fd);
+
             BYTE mode = 0;
             if(flag == O_RDONLY)file_describer_array[fd].fileAccessType = FILE_ACCESS_READ, mode = FA_READ;
             else if(flag == O_WRONLY)file_describer_array[fd].fileAccessType = FILE_ACCESS_WRITE, mode = FA_WRITE;
@@ -88,22 +99,43 @@ Context *syscall(Context *context) {
                 printf("SYS_openat 不支持的flag: %d\n", flag);
                 panic("")
             }
+
+            debug_openat(mode);
+
             file_describer_array[fd].fileDescriberType = FILE_DESCRIBER_FILE;
-            f_open(&file_describer_array[fd].data.fat32, filename, mode);
+            FRESULT result = f_open(&file_describer_array[fd].data.fat32, filename, mode);
+            if(result != FR_OK){
+                printf("can't open this file: %s\n", filename);
+                panic("")
+            }
             return(fd);
+#undef debug_openat
             break;
         }
         case SYS_read:{
+#define debug_read(a) printf(#a " = 0x%x\n",a)
+#undef debug_read
+#define debug_read ;
             // fd: 文件描述符，buf: 用户空间缓冲区，count：读多少
             // ssize_t ret = read(fd, buf, count)
             // ret: 返回的字节数
             size_t fd = context->a0;
             char* buf = (char*)get_actual_page(context->a1);
             size_t count = context->a2;
+
+            debug_read(fd);
+            debug_read((size_t)buf);
+            debug_read(count);
+
             FIL fat_file = file_describer_array[fd].data.fat32;
             uint32 ret;
-            f_read(&fat_file, buf, count, &ret);
+            FRESULT result = f_read(&fat_file, buf, count, &ret);
+            if(result != FR_OK){
+                printf("can't read this file: fd = %d\n", fd);
+                panic("")
+            }
             return(ret);
+#undef debug_read
             break;
         }
         case SYS_times:{
