@@ -81,6 +81,10 @@ int get_running_pid(){
     return running->pid;
 }
 
+int get_running_ppid(){
+    return running->ppid;
+}
+
 void create_process(const char *elf_path) {
     // read file
     int find = 0;
@@ -135,6 +139,7 @@ void create_process(const char *elf_path) {
     // push into runnable list
     pcb* new_pcb=k_malloc(sizeof(pcb));
     new_pcb->pid=get_new_pid();
+    new_pcb->ppid=0;
     new_pcb->stack=stack_page;
     new_pcb->thread_context=thread_context;
     new_pcb->elf_page_base=elf_page_base;
@@ -164,7 +169,7 @@ void schedule(){
         __restore(running->thread_context);
     }else{
         if(pcb_list_is_empty(&runnable)){
-//            printf("Nothing to run, shutdown.\n");
+            printf("Nothing to run, halt.\n");
 //            shutdown();
             while (1);
         }else{

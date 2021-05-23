@@ -439,7 +439,7 @@ clock_t ret = syscall(SYS_times, tms);
 * 输入：utsname结构体指针用于获得系统信息数据；
 * 返回值：成功返回0，失败返回-1;
 ```
-struct utsname *uts;
+struct ES_utsname *uts;
 int ret = syscall(SYS_uname, uts);
 ```
  */

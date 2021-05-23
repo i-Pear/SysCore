@@ -460,15 +460,4 @@ typedef decltype(nullptr) nullptr_t;
 #endif /* !_STDDEF_H && !_STDDEF_H_ && !_ANSI_STDDEF_H && !__STDDEF_H__        \
           || __need_XXX was not defined before */
 
-struct utsname {
-    char sysname[65];
-    char nodename[65];
-    char release[65];
-    char version[65];
-    char machine[65];
-    char domainname[65];
-};
-
-extern struct utsname uname;
-
 #endif

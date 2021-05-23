@@ -11,6 +11,7 @@ extern int global_pid;
 
 typedef struct{
     int pid;
+    int ppid;
     size_t stack;
     size_t elf_page_base;
     size_t page_table;
@@ -46,6 +47,8 @@ void init_scheduler();
 size_t get_running_elf_page();
 
 int get_running_pid();
+
+int get_running_ppid();
 
 void create_process(const char *elf_path);
 

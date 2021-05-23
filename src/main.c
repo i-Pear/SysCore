@@ -41,13 +41,11 @@ void init_thread() {
     printf("[OS] init scheduler.\n");
     init_scheduler();
 
-    lty(register_read_satp());
-
-    tree_all();
-
-//    create_process("/yield");
-    create_process("/write");
-    create_process("/uname");
+    //create_process("/riscv64/write");
+    //create_process("/riscv64/uname");
+    create_process("/riscv64/times");
+    create_process("/riscv64/getpid");
+    create_process("/riscv64/getppid");
 
     schedule();
 }

@@ -2,6 +2,7 @@
 #include "register.h"
 #include "stl.h"
 #include "scheduler.h"
+#include "external_structs.h"
 
 #define return(x) context->a0=x
 
@@ -40,13 +41,26 @@ Context *syscall(Context *context) {
             exit_process();
             break;
         }
+        case SYS_getppid:{
+            return(get_running_ppid());
+            break;
+        }
         case SYS_getpid: {
             return(get_running_pid());
             break;
         }
+        case SYS_times:{
+            struct ES_tms* tms=context->a0+ get_running_elf_page();
+            tms->tms_utime=1;
+            tms->tms_stime=1;
+            tms->tms_cutime=1;
+            tms->tms_cstime=1;
+            return(1000);
+            break;
+        }
         case SYS_uname: {
-            struct utsname *required_uname = context->a0 + get_running_elf_page();
-            memcpy(required_uname, &uname, sizeof(uname));
+            struct ES_utsname *required_uname = context->a0 + get_running_elf_page();
+            memcpy(required_uname, &ES_uname, sizeof(ES_uname));
             return(0);
             break;
         }

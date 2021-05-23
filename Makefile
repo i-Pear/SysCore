@@ -22,7 +22,7 @@ sd = /dev/sda
 all:
 	# gen build/
 	@test -d $(BUILD) || mkdir -p $(BUILD)
-	$(GCC) -o $(KERNEL_O) -Wall -g -mcmodel=medany -T src/linker.ld -O2 -ffreestanding -nostdlib\
+	$(GCC) -o $(KERNEL_O) -w -g -mcmodel=medany -T src/linker.ld -O2 -ffreestanding -nostdlib\
                                     $(SRC_ALL) \
                                     $(SRC_DRIVER) \
                                     src/main.c
