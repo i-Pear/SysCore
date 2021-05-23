@@ -150,10 +150,10 @@ DRESULT disk_ioctl (
                     *(WORD*)buff = SD_SECTOR_SIZE;
                     break;
                 case GET_BLOCK_SIZE:
-                    *(WORD*)buff = SD_BLOCK_SIZE;
+                    *(DWORD*)buff = SD_BLOCK_SIZE;
                     break;
                 case GET_SECTOR_COUNT:
-                    *(WORD*)buff = SD_SECTOR_COUNT;
+                    *(DWORD*)buff = SD_SECTOR_COUNT;
                     break;
                 case CTRL_SYNC:
                     break;

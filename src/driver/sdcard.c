@@ -5,7 +5,7 @@
 #include "interface.h"
 
 uint16 SD_SECTOR_SIZE;
-uint16 SD_BLOCK_SIZE;
+uint32 SD_BLOCK_SIZE;
 uint32 SD_SECTOR_COUNT;
 
 void SD_CS_HIGH(void) {
@@ -315,7 +315,7 @@ int sdcard_init(void) {
         sdcard_read_sector((uint8*)buff, 0);
         SD_SECTOR_SIZE = *(uint16 *) (buff + 11);
         printf("SD_SECTOR_SIZE = %d\n", SD_SECTOR_SIZE);
-        SD_BLOCK_SIZE = (*(uint8 *) (buff + 13)) * SD_SECTOR_SIZE;
+        SD_BLOCK_SIZE = (*(uint8 *) (buff + 13)) * (uint32)SD_SECTOR_SIZE;
         printf("SD_BLOCK_SIZE = %d\n", SD_BLOCK_SIZE);
 //        SD_SECTOR_COUNT = *(uint32 *) (buff + 32);
         SD_SECTOR_COUNT = 125171712;

@@ -3538,8 +3538,6 @@ static FRESULT mount_volume (	/* FR_OK(0): successful, !=0: an error occurred */
 		if (nclst <= MAX_FAT32) fmt = FS_FAT32;
 		if (nclst <= MAX_FAT16) fmt = FS_FAT16;
 		if (nclst <= MAX_FAT12) fmt = FS_FAT12;
-		// mtl强行修改文件系统为FAT32
-		fmt = FS_FAT32;
         printf("%d\n", __LINE__);
 		if (fmt == 0) return FR_NO_FILESYSTEM;
 		/* Boundaries and Limits */
