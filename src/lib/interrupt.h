@@ -97,6 +97,6 @@ void set_next_timeout();
 
 extern void close_interrupt();
 
-extern void __restore(Context *context);
+extern void __restore();
 
 #endif

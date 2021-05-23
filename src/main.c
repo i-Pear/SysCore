@@ -16,6 +16,9 @@ void test_sdcard_main(){
     printf("[FAT] read %d Bytes\n", len);
 }
 
+void print_satp(){
+    lty(register_read_satp());
+}
 
 /**
  * 此处打算通过 sret 进入u-mode
@@ -41,9 +44,9 @@ void init_thread() {
     printf("[OS] init scheduler.\n");
     init_scheduler();
 
-    //create_process("/riscv64/write");
-    //create_process("/riscv64/uname");
-    create_process("/riscv64/times");
+//    create_process("/riscv64/write");
+//    create_process("/riscv64/uname");
+//    create_process("/riscv64/times");
     create_process("/riscv64/getpid");
     create_process("/riscv64/getppid");
 

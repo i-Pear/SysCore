@@ -22,7 +22,8 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
             if(is_interrupt == 0){
                 // load ins fault
                 mtl("load ins fault");
-                return page_fault(context, stval);
+                page_fault(context, stval);
+                __restore();
             }else{
                 printf("s-mode software interrupt\n");
                 shutdown();
@@ -113,12 +114,14 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
         }
         // breakpoint
         case 3: {
-            return breakpoint(context);
+            breakpoint(context);
+            __restore();
         }
         case 5: {
             if(is_interrupt){
                 // supervisor-level timer interrupt
-                return tick(context);
+                tick(context);
+                __restore();
             }else{
                 // load access fault
                 mtl("Load Access Fault");
@@ -126,14 +129,16 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
 //                printf("sepc: 0x%x\n", context->sepc);
 //                printf("[Shutdown!]\n");
 //                shutdown();
-                return page_fault(context, stval);
+                page_fault(context, stval);
+                __restore();
             }
         }
         case 7:{
             if(is_interrupt == 0){
                 // store access fault
                 mtl("store access fault");
-                return page_fault(context, stval);
+                page_fault(context, stval);
+                __restore();
             }else{
                 printf("machine timer interrupt interrupt\n");
                 shutdown();
@@ -143,7 +148,7 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
         // user ecall
         case 8:{
             Context *ret = syscall(context);
-            return ret;
+            __restore();
         }
         default: {
             printf("scause: %d\n", scause);
@@ -152,7 +157,7 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
             shutdown();
         }
     }
-    return NULL;
+    return NULL; // unreachable
 }
 
 Context *page_fault(Context* context, size_t stval){
@@ -160,6 +165,7 @@ Context *page_fault(Context* context, size_t stval){
 
     size_t vir_addr = stval;
     size_t table_base = satp << 12;
+    lty(context->sepc);
     lty(vir_addr);
     lty(table_base);
 

@@ -180,7 +180,11 @@ void schedule(){
 
             lty(running->thread_context->satp);
             lty(running->thread_context->sepc);
-            __restore(running->thread_context);
+
+            printf("trying to restore\n");
+            size_t* kernel_restore_context=0x80000000+5*1024*1024-sizeof(Context);
+            memcpy(kernel_restore_context,running->thread_context, sizeof(Context));
+            __restore();
         }
     }
 }
