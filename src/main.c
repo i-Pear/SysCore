@@ -1,9 +1,7 @@
 #include "lib/page_table.h"
 #include "lib/interrupt.h"
 #include "lib/register.h"
-#include "lib/elf_loader.h"
 #include "driver/interface.h"
-#include "driver/sdcard.h"
 #include "lib/scheduler.h"
 #include "lib/file_describer.h"
 
