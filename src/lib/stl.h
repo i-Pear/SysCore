@@ -6,7 +6,7 @@
 #define INT_MAX 2147483647
 #define INT_MIN (-INT_MAX-1)
 
-#define debug_mode
+// #define debug_mode
 
 #ifdef debug_mode
 #define lty(a) printf(#a " = 0x%x\n",a)

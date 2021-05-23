@@ -1,6 +1,6 @@
 #include "scheduler.h"
 
-int global_pid=0;
+int global_pid=20;
 
 int get_new_pid(){
     return ++global_pid;

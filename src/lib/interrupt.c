@@ -147,7 +147,7 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
         }
         // user ecall
         case 8:{
-            Context *ret = syscall(context);
+            syscall(context);
             __restore();
         }
         default: {

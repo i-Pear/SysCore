@@ -5,9 +5,9 @@
 #include "external_structs.h"
 
 #define return(x) context->a0=x
+#define get_actual_page(x) ((x>0x80000000)?x:x+ get_running_elf_page())
 
 Context *syscall(Context *context) {
-    lty(context);
     // Check SystemCall Number
     // printf("[SYSCALL] call id=%d\n",context->a7);
     switch (context->a7) {
@@ -23,10 +23,8 @@ Context *syscall(Context *context) {
         }
         case SYS_write: {
             int file = context->a0;
-            char *buf = context->a1 + get_running_elf_page();
+            char *buf = get_actual_page(context->a1);
             int count = context->a2;
-            lty(context->a1);
-            printf("[syscall write] buf=0x%x\n",buf);
             if (file == 1) {
                 // stdout
                 for (int i = 0; i < count; i++)putchar(buf[i]);
@@ -45,15 +43,17 @@ Context *syscall(Context *context) {
             break;
         }
         case SYS_getppid:{
+            lty(get_running_ppid());
             return(get_running_ppid());
             break;
         }
         case SYS_getpid: {
+            lty(get_running_pid());
             return(get_running_pid());
             break;
         }
         case SYS_times:{
-            struct ES_tms* tms=context->a0+ get_running_elf_page();
+            struct ES_tms* tms=get_actual_page(context->a0);
             tms->tms_utime=1;
             tms->tms_stime=1;
             tms->tms_cutime=1;
@@ -62,7 +62,7 @@ Context *syscall(Context *context) {
             break;
         }
         case SYS_uname: {
-            struct ES_utsname *required_uname = context->a0 + get_running_elf_page();
+            struct ES_utsname *required_uname = get_actual_page(context->a0);
             memcpy(required_uname, &ES_uname, sizeof(ES_uname));
             return(0);
             break;
