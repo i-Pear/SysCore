@@ -5,7 +5,7 @@
 #include "driver/interface.h"
 #include "driver/sdcard.h"
 #include "lib/scheduler.h"
-#include "driver/fatfs/ff.h"
+#include "file_describer.h"
 
 
 void print_satp(){
@@ -38,6 +38,7 @@ void init_thread() {
     interrupt_timer_init();
     printf("[OS] init scheduler.\n");
     init_scheduler();
+    init_file_describer();
 
     create_process("write");
     create_process("uname");

@@ -52,6 +52,11 @@ Context *syscall(Context *context) {
             return(get_running_pid());
             break;
         }
+        case SYS_openat:{
+            // O_RDONLY = 0, O_WRONLY = 1
+
+            break;
+        }
         case SYS_times:{
             struct ES_tms* tms=get_actual_page(context->a0);
             tms->tms_utime=1;
