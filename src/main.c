@@ -4,8 +4,9 @@
 #include "driver/interface.h"
 #include "lib/scheduler.h"
 #include "lib/file_describer.h"
+#include "lib/self_test.h"
 
-void print_satp(){
+void print_satp() {
     lty(register_read_satp());
 }
 
@@ -28,7 +29,7 @@ void init_thread() {
     FATFS fs;
     FRESULT res_sd;
     res_sd = f_mount(&fs, "", 1);
-    if(res_sd != FR_OK){
+    if (res_sd != FR_OK) {
         panic("fat init failed")
     }
     printf("[OS] Interrupt & Timer Interrupt Open.\n");
@@ -36,8 +37,20 @@ void init_thread() {
     printf("[OS] init scheduler.\n");
     init_scheduler();
     init_file_describer();
+    init_self_tests();
 
-    create_process("fork");
+//    add_test("yield");
+    add_test("fork");
+    add_test("clone");
+    add_test("write");
+    add_test("uname");
+    add_test("times");
+    add_test("getpid");
+    add_test("getppid");
+    add_test("read");
+    add_test("open");
+    add_test("close");
+    add_test("openat");
 
     schedule();
 }
@@ -46,9 +59,8 @@ int main() {
     printf("[OS] Memory Init.\n");
     init_memory();
     init_kernel_heap();
-    kernelContext.kernel_satp = register_read_satp() | (8LL << 60);
-    lty(kernelContext.kernel_satp);
-    kernelContext.kernel_handle_interrupt = (size_t)handle_interrupt;
+    kernelContext.kernel_satp = register_read_satp() | (8LL << 60);lty(kernelContext.kernel_satp);
+    kernelContext.kernel_handle_interrupt = (size_t) handle_interrupt;
     kernelContext.kernel_restore = (size_t) __restore;
 
     init_thread();

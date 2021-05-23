@@ -5,9 +5,11 @@
 
 extern int test_cnt;
 extern int test_total;
-extern char* tests[];
+extern const char* tests[];
 
-void start_self_tests();
+void add_test(const char* name);
+
+void init_self_tests();
 
 int has_next_test();
 

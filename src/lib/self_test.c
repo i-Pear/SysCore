@@ -1,23 +1,17 @@
 #include "self_test.h"
+#include "stdio.h"
 
-int test_cnt=0;
-int test_total=11;
-char* tests[20]={
-        "fork",
-        "clone",
-        "write",
-        "uname",
-        "times",
-        "getpid",
-        "getppid",
-        "read",
-        "open",
-        "close",
-        "openat",
-};
+int test_cnt;
+int test_total;
+const char* tests[20];
 
-void start_self_tests(){
-    create_process(get_next_test());
+void add_test(const char* name){
+    tests[test_total++]=name;
+}
+
+void init_self_tests(){
+    test_cnt=0;
+    test_total=0;
 }
 
 int has_next_test(){
@@ -25,6 +19,6 @@ int has_next_test(){
 }
 
 const char* get_next_test(){
+    printf("Running %s\n",tests[test_cnt]);
     return tests[test_cnt++];
 }
-
