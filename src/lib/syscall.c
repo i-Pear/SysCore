@@ -3,6 +3,7 @@
 #include "stl.h"
 #include "scheduler.h"
 #include "external_structs.h"
+#include "file_describer.h"
 
 #define return(x) context->a0=x
 #define get_actual_page(x) ((x>0x80000000)?x:x+ get_running_elf_page())
@@ -57,7 +58,20 @@ Context *syscall(Context *context) {
             panic("unhandle sysopenat")
             break;
         }
-
+        case SYS_read:{
+            // fd: 文件描述符，buf: 用户空间缓冲区，count：读多少
+            // ssize_t ret = read(fd, buf, count)
+            // ret: 返回的字节数
+            size_t fd = context->a0;
+            char* buf = (char*)get_actual_page(context->a1);
+            size_t count = context->a2;
+            File_Describer fileDescriber = file_describer_array[fd];
+            FIL fat_file = fileDescriber.data.fat32;
+            uint32 ret;
+            f_read(&fat_file, buf, count, &ret);
+            return(ret);
+            break;
+        }
         case SYS_times:{
             struct ES_tms* tms=get_actual_page(context->a0);
             tms->tms_utime=1;
