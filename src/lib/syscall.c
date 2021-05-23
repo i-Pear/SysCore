@@ -8,6 +8,15 @@
 #define return(x) context->a0=x
 #define get_actual_page(x) ((x>0x80000000)?x:x+ get_running_elf_page())
 
+// 文件系统相关宏
+#define AT_FDCWD (-100) //相对路径
+#define O_RDONLY 0x000
+#define O_WRONLY 0x001
+#define O_RDWR 0x002 // 可读可写
+//#define O_CREATE 0x200
+#define O_CREATE 0x40
+#define O_DIRECTORY 0x0200000
+
 Context *syscall(Context *context) {
     // Check SystemCall Number
     // printf("[SYSCALL] call id=%d\n",context->a7);
@@ -54,8 +63,34 @@ Context *syscall(Context *context) {
             break;
         }
         case SYS_openat:{
-            // O_RDONLY = 0, O_WRONLY = 1
-            panic("unhandle sysopenat")
+            // fd：文件所在目录的文件描述符
+            // filename：要打开或创建的文件名。如为绝对路径，则忽略fd。如为相对路径，且fd是AT_FDCWD，则filename是相对于当前工作目录来说的。如为相对路径，且fd是一个文件描述符，则filename是相对于fd所指向的目录来说的。
+            // flags：必须包含如下访问模式的其中一种：O_RDONLY，O_WRONLY，O_RDWR。还可以包含文件创建标志和文件状态标志。
+            // mode：文件的所有权描述。详见`man 7 inode `。
+            // int ret = openat(fd, filename, flags, mode);
+            // TODO: 暂不支持通过fd打开
+            // TODO: 暂不支持文件所有权描述
+            size_t dir_fd = context->a0;
+            if(dir_fd != AT_FDCWD){
+                panic("SYS_openat 不支持通过fd打开");
+            }
+            char* filename = (char*)get_actual_page(context->a1);
+            size_t flag = context->a2;
+            if(filename[0] == '.' && filename[1] == '/'){
+                filename += 2;
+            }
+            int fd = get_new_file_describer();
+            BYTE mode = 0;
+            if(flag == O_RDONLY)file_describer_array[fd].fileAccessType = FILE_ACCESS_READ, mode = FA_READ;
+            else if(flag == O_WRONLY)file_describer_array[fd].fileAccessType = FILE_ACCESS_WRITE, mode = FA_WRITE;
+            else if(flag == O_RDWR)file_describer_array[fd].fileAccessType = FILE_ACCESS_WRITE | FILE_ACCESS_READ, mode = FA_READ | FA_WRITE;
+            else{
+                printf("SYS_openat 不支持的flag: %d\n", flag);
+                panic("")
+            }
+            file_describer_array[fd].fileDescriberType = FILE_DESCRIBER_FILE;
+            f_open(&file_describer_array[fd].data.fat32, filename, mode);
+            return(fd);
             break;
         }
         case SYS_read:{
@@ -65,8 +100,7 @@ Context *syscall(Context *context) {
             size_t fd = context->a0;
             char* buf = (char*)get_actual_page(context->a1);
             size_t count = context->a2;
-            File_Describer fileDescriber = file_describer_array[fd];
-            FIL fat_file = fileDescriber.data.fat32;
+            FIL fat_file = file_describer_array[fd].data.fat32;
             uint32 ret;
             f_read(&fat_file, buf, count, &ret);
             return(ret);

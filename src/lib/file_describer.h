@@ -6,13 +6,13 @@
 #include "stl.h"
 
 enum File_Describer_Type{
-    FILE,
-    PIPE,
+    FILE_DESCRIBER_FILE,
+    FILE_DESCRIBER_PIPE,
 };
 
 enum File_Access_Type{
-    READ=1,
-    WRITE=2,
+    FILE_ACCESS_READ=1,
+    FILE_ACCESS_WRITE=2,
 };
 
 typedef struct {
