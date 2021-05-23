@@ -3408,16 +3408,11 @@ static FRESULT mount_volume (	/* FR_OK(0): successful, !=0: an error occurred */
 	if (disk_ioctl(fs->pdrv, GET_SECTOR_SIZE, &SS(fs)) != RES_OK) return FR_DISK_ERR;
 	if (SS(fs) > FF_MAX_SS || SS(fs) < FF_MIN_SS || (SS(fs) & (SS(fs) - 1))) return FR_DISK_ERR;
 #endif
-    printf("1-1\n");
 	/* Find an FAT volume on the drive */
 	fmt = find_volume(fs, LD2PT(vol));
-    printf("1-2\n");
 	if (fmt == 4) return FR_DISK_ERR;		/* An error occured in the disk I/O layer */
-    printf("1-3\n");
 	if (fmt >= 2) return FR_NO_FILESYSTEM;	/* No FAT volume is found */
-    printf("1-4\n");
 	bsect = fs->winsect;					/* Volume offset */
-    printf("1-5\n");
 	/* An FAT volume is found (bsect). Following code initializes the filesystem object */
 
 #if FF_FS_EXFAT
