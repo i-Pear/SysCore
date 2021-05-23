@@ -215,6 +215,8 @@ void create_process(const char *elf_path) {
     new_pcb->thread_context=thread_context;
     new_pcb->elf_page_base=elf_page_base;
     new_pcb->page_table=page_table_base;
+    // TODO: 初始化工作目录为空字符串，这不合理
+    memset(new_pcb->cwd, 0, sizeof(new_pcb->cwd));
 
     new_pcb->elf_page_size=elf_page_size;
     new_pcb->stack_size=4096;

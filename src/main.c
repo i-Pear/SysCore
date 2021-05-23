@@ -51,6 +51,7 @@ void init_thread() {
     add_test("open");
     add_test("close");
     add_test("openat");
+    add_test("getcwd");
 
     schedule();
 }

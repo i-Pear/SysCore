@@ -199,6 +199,9 @@ Context *syscall(Context *context) {
             if (result != FR_OK) {
                 return(-1);
             } else {
+                if(file_describer_array[fd].fileDescriberType == FILE_DESCRIBER_DIR){
+                    k_free((size_t)file_describer_array[fd].dir_name);
+                }
                 erase_file_describer((int) fd);
                 return(0);
             }
@@ -212,7 +215,26 @@ Context *syscall(Context *context) {
             printf("-> syscall: getced\n");
 #endif
 #define debug_getcwd ;
-
+            // char *buf：一块缓存区，用于保存当前工作目录的字符串。当buf设为NULL，由系统来分配缓存区。
+            // size：buf缓存区的大小。
+            // long ret = getcwd(buf, size);
+            // 返回值：成功执行，则返回当前工作目录的字符串的指针。失败，则返回NULL。
+            size_t buf = context->a0;
+            size_t size = context->a1;
+            char* ret;
+            char* current_work_dir = get_running_cwd();
+            if(buf == 0){
+                // 系统分配缓冲区
+                // TODO: 分配给进程的缓冲区在文件退出时应该释放
+                ret = (char *)k_malloc(size);
+            }else{
+                ret = (char *)get_actual_page(buf);
+            }
+            size_t len = strlen(current_work_dir);
+            memcpy(ret, current_work_dir, len);
+            ret[len] = '\0';
+            // TODO: 如果用户使用虚拟地址此处会返回真实地址，这不合理
+            return((size_t)ret);
 #undef debug_getcwd
             break;
         }
