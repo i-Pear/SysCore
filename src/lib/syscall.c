@@ -65,6 +65,9 @@ Context *syscall(Context *context) {
         case SYS_openat:{
 #define debug_openat(a) printf(#a " = 0x%x\n",a)
 #undef debug_openat
+#ifdef debug_openat
+        printf("-> syscall: openat\n");
+#endif
 #define debug_openat ;
             // fd：文件所在目录的文件描述符
             // filename：要打开或创建的文件名。如为绝对路径，则忽略fd。如为相对路径，且fd是AT_FDCWD，则filename是相对于当前工作目录来说的。如为相对路径，且fd是一个文件描述符，则filename是相对于fd所指向的目录来说的。
@@ -119,6 +122,9 @@ Context *syscall(Context *context) {
         case SYS_read:{
 #define debug_read(a) printf(#a " = 0x%x\n",a)
 #undef debug_read
+#ifdef debug_read
+            printf("-> syscall: openat\n");
+#endif
 #define debug_read ;
             // fd: 文件描述符，buf: 用户空间缓冲区，count：读多少
             // ssize_t ret = read(fd, buf, count)
@@ -145,6 +151,9 @@ Context *syscall(Context *context) {
         case SYS_close:{
 #define debug_close(a) printf(#a " = 0x%x\n",a)
 #undef debug_close
+#ifdef debug_close
+            printf("-> syscall: openat\n");
+#endif
 #define debug_close ;
             // fd：要关闭的文件描述符。
             // int ret = close(fd);
