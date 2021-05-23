@@ -95,7 +95,7 @@ Context *syscall(Context *context) {
             else if(flag == O_WRONLY)file_describer_array[fd].fileAccessType = FILE_ACCESS_WRITE, mode = FA_WRITE;
             else if(flag == O_RDWR)file_describer_array[fd].fileAccessType = FILE_ACCESS_WRITE | FILE_ACCESS_READ, mode = FA_READ | FA_WRITE;
             else{
-                printf("SYS_openat 不支持的flag: %d\n", flag);
+                printf("SYS_openat 不支持的flag: 0x%x\n", flag);
                 panic("")
             }
 
