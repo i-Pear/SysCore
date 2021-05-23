@@ -78,7 +78,7 @@ Context *syscall(Context *context) {
             // TODO: 暂不支持文件所有权描述
             size_t dir_fd = context->a0;
             if(dir_fd != AT_FDCWD){
-                panic("SYS_openat 不支持通过fd打开");
+                panic("SYS_openat unsupport open from fd");
             }
             char* filename = (char*)get_actual_page(context->a1);
             size_t flag = context->a2, flag_bak = flag;
@@ -102,7 +102,7 @@ Context *syscall(Context *context) {
             if(flag & O_CREATE)mode |= FA_CREATE_ALWAYS, flag -= O_CREATE;
 
             if(flag != 0){
-                printf("SYS_openat 不支持的flag: 0x%x\n", flag_bak);
+                printf("SYS_openat unsupported flag: 0x%x\n", flag_bak);
                 panic("")
             }
 
