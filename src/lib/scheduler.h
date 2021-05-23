@@ -6,6 +6,8 @@
 #include "interrupt.h"
 #include "register.h"
 
+#define MAX_PATH_LENGTH 32
+
 extern int global_pid;
 
 typedef struct{
@@ -19,6 +21,7 @@ typedef struct{
     size_t elf_page_size;
 
     Context * thread_context;
+    char cwd[MAX_PATH_LENGTH];
 } pcb;
 
 typedef struct pcb_listNode{
@@ -36,6 +39,8 @@ extern pcb_List runnable,blocked;
 extern pcb* running;
 
 int get_new_pid();
+
+char* get_running_cwd();
 
 bool pcb_list_is_empty(pcb_List* list);
 

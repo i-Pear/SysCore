@@ -15,6 +15,10 @@ bool pcb_list_is_empty(pcb_List* list){
     return list->start==null;
 }
 
+char* get_running_cwd(){
+    return running->cwd;
+}
+
 void pcb_push_back(pcb_List* list,pcb* pcb){
     if(list->start==null&&list->end==null){
         // empty list
