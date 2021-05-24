@@ -65,10 +65,8 @@ void init_file_describer() {
         file_describer_array_occupied[i] = 1;
     }
     // 初始化stdout
-    File_Describer_Data fakeData;
-    fakeData.redirect_fd = 0;
-    File_Describer_Extra_Data fakeExtraData;
-    fakeExtraData.dir_name = null;
+    File_Describer_Data fakeData = {.redirect_fd = 0};
+    File_Describer_Extra_Data fakeExtraData = {.dir_name = null};
     File_Describer_Create(1, FILE_DESCRIBER_FILE, FILE_ACCESS_WRITE, fakeData, fakeExtraData);
 }
 

@@ -254,8 +254,7 @@ Context *syscall(Context *context) {
             int new_fd = fd_search_a_empty_file_describer();
 
             File_Describer_Plus(fd);
-            File_Describer_Data data;
-            data.redirect_fd = fd;
+            File_Describer_Data data = {.redirect_fd = fd};
             File_Describer_Extra_Data fakeExtraData = {.dir_name = null};
             File_Describer_Create(new_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_READ, data, fakeExtraData);
             return (new_fd);
