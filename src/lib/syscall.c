@@ -252,7 +252,6 @@ Context *syscall(Context *context) {
             // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
             int fd = (int) context->a0;
             int new_fd = fd_search_a_empty_file_describer();
-
             File_Describer_Plus(fd);
             File_Describer_Data data = {.redirect_fd = fd};
             File_Describer_Extra_Data fakeExtraData = {.dir_name = null};
