@@ -16,6 +16,7 @@
     .global flush_tlb
     .global interrupt_timer_init
     .global read_sp
+    .global get_kernel_stack_base
 
     .extern __interrupt
     .extern set_next_timeout
@@ -88,6 +89,10 @@ read_sp:
 
 get_boot_page_table:
     la a0, boot_page_table
+    ret
+
+get_kernel_stack_base:
+    la a0, __kernel_stack
     ret
 
 close_interrupt:

@@ -34,7 +34,8 @@ __interrupt:
     csrw sscratch, sp
 
     # 在栈上开辟 Context 所需的空间
-    li      sp, 0x80000000+6*1024*1024
+    la      sp, __kernel_stack
+    addi    sp, 4096
     addi    sp, sp, -CONTEXT_SIZE*8
 
     # 保存通用寄存器，除了 x0（固定为 0）
@@ -91,7 +92,8 @@ __interrupt:
 __restore:
 
     # receive Context
-    li      sp, 0x80000000+6*1024*1024
+    la      sp, __kernel_stack
+    addi    sp, 4096
     addi    sp, sp, -CONTEXT_SIZE*8
     # 恢复 CSR
     LOAD    s1, 32
