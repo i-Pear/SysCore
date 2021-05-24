@@ -4,7 +4,7 @@
 .set    REG_SIZE, 8
 # Context 的大小
 .set    CONTEXT_SIZE, 37
-.set    KERNEL_STACK_SIZE 4096
+.set    KERNEL_STACK_SIZE, 4096
 
 # 宏：将寄存器存到栈上
 .macro SAVE reg, offset
