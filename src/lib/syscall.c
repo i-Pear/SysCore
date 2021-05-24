@@ -154,7 +154,7 @@ Context *syscall(Context *context) {
                 printf("can't open this file: %s\n", filename);
                 panic("")
             }
-            File_Describer_Extra_Data extraData;
+            File_Describer_Extra_Data extraData = {.dir_name = null};
             File_Describer_Create(fd, FILE_DESCRIBER_FILE, fileAccessType, data, extraData);
 
             return(fd);
