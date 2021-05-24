@@ -68,18 +68,17 @@ Context *syscall(Context *context) {
         }
         case SYS_openat: {
 #define debug_openat(a) printf(#a " = 0x%x\n",a)
-//#undef debug_openat
+#undef debug_openat
 #ifdef debug_openat
             printf("-> syscall: openat\n");
 #endif
-//#define debug_openat NOP
+#define debug_openat NOP
             // fd：文件所在目录的文件描述符
             // filename：要打开或创建的文件名。如为绝对路径，则忽略fd。如为相对路径，且fd是AT_FDCWD，则filename是相对于当前工作目录来说的。如为相对路径，且fd是一个文件描述符，则filename是相对于fd所指向的目录来说的。
             // flags：必须包含如下访问模式的其中一种：O_RDONLY，O_WRONLY，O_RDWR。还可以包含文件创建标志和文件状态标志。
             // mode：文件的所有权描述。详见`man 7 inode `。
             // int ret = openat(fd, filename, flags, mode);
             // TODO: 暂不支持文件所有权描述
-            // TODO: 现在两个进程打开同一个文件会打开不共享的文件，这也许不合理
             size_t dir_fd = context->a0;
             char *filename = (char *) get_actual_page(context->a1);
             size_t flag = context->a2, flag_bak = flag;
@@ -91,7 +90,7 @@ Context *syscall(Context *context) {
                 filename += 2;
             }
             if (dir_fd != AT_FDCWD) {
-                if (file_describer_array[dir_fd].fileDescriberType == FILE_DESCRIBER_DIR) {
+                if (file_describer_array[dir_fd].fileDescriberType != FILE_DESCRIBER_DIR) {
                     printf("fd %d not direct a dir\n", dir_fd);
                     panic("")
                 }
@@ -159,9 +158,6 @@ Context *syscall(Context *context) {
             File_Describer_Create(fd, FILE_DESCRIBER_FILE, fileAccessType, data, extraData);
 
             return(fd);
-#ifdef debug_openat
-            printf("<- syscall: openat\n");
-#endif
             break;
         }
         case SYS_read: {
