@@ -4,6 +4,7 @@
 .set    REG_SIZE, 8
 # Context 的大小
 .set    CONTEXT_SIZE, 37
+.set    KERNEL_STACK_SIZE 4096
 
 # 宏：将寄存器存到栈上
 .macro SAVE reg, offset
@@ -35,7 +36,7 @@ __interrupt:
 
     # 在栈上开辟 Context 所需的空间
     la      sp, __kernel_stack
-    addi    sp, sp, 4096
+    addi    sp, sp, KERNEL_STACK_SIZE
     addi    sp, sp, -CONTEXT_SIZE*8
 
     # 保存通用寄存器，除了 x0（固定为 0）
@@ -93,7 +94,7 @@ __restore:
 
     # receive Context
     la      sp, __kernel_stack
-    addi    sp, sp, 4096
+    addi    sp, sp, KERNEL_STACK_SIZE
     addi    sp, sp, -CONTEXT_SIZE*8
     # 恢复 CSR
     LOAD    s1, 32
