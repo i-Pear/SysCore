@@ -73,6 +73,8 @@ void memset(void* p,char content,int size);
 
 int strlen(char *s);
 
+void strcpy(char* to, char* from);
+
 int max(int a,int b);
 
 int min(int a,int b);

@@ -143,6 +143,12 @@ int strlen(char *s) {
     return n;
 }
 
+void strcpy(char* to, char* from){
+    int len = strlen(from);
+    memcpy(to, from, len * sizeof(char));
+    to[len] = '\0';
+}
+
 int max(int a, int b) {
     return a > b ? a : b;
 }

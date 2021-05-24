@@ -47,22 +47,10 @@ Context *syscall(Context *context) {
             // ssize_t ret = write(fd, buf, count);
             // 返回值：成功执行，返回写入的字节数。错误，则返回-1。
 
-            int file = (int) context->a0;
+            int fd = (int) context->a0;
             char *buf = (char *) get_actual_page(context->a1);
             int count = (int) context->a2;
-            if (file_describer_array[file].fileSpecialType == FILE_SPECIAL_TYPE_STDOUT) {
-                // stdout
-                for (int i = 0; i < count; i++)putchar(buf[i]);
-                return(count);
-            } else {
-                uint32 read_bytes;
-                FRESULT result = f_write(&file_describer_array[file].data.fat32, buf, count, &read_bytes);
-                if (result != FR_OK) {
-                    return(-1);
-                } else {
-                    return(read_bytes);
-                }
-            }
+            return(fd_write_to_file(fd, buf, count));
 #undef debug_write
             break;
         }
@@ -80,17 +68,18 @@ Context *syscall(Context *context) {
         }
         case SYS_openat: {
 #define debug_openat(a) printf(#a " = 0x%x\n",a)
-#undef debug_openat
+//#undef debug_openat
 #ifdef debug_openat
             printf("-> syscall: openat\n");
 #endif
-#define debug_openat NOP
+//#define debug_openat NOP
             // fd：文件所在目录的文件描述符
             // filename：要打开或创建的文件名。如为绝对路径，则忽略fd。如为相对路径，且fd是AT_FDCWD，则filename是相对于当前工作目录来说的。如为相对路径，且fd是一个文件描述符，则filename是相对于fd所指向的目录来说的。
             // flags：必须包含如下访问模式的其中一种：O_RDONLY，O_WRONLY，O_RDWR。还可以包含文件创建标志和文件状态标志。
             // mode：文件的所有权描述。详见`man 7 inode `。
             // int ret = openat(fd, filename, flags, mode);
             // TODO: 暂不支持文件所有权描述
+            // TODO: 现在两个进程打开同一个文件会打开不共享的文件，这也许不合理
             size_t dir_fd = context->a0;
             char *filename = (char *) get_actual_page(context->a1);
             size_t flag = context->a2, flag_bak = flag;
@@ -102,51 +91,52 @@ Context *syscall(Context *context) {
                 filename += 2;
             }
             if (dir_fd != AT_FDCWD) {
-                if (file_describer_array[dir_fd].dir_name == null) {
+                if (file_describer_array[dir_fd].fileDescriberType == FILE_DESCRIBER_DIR) {
                     printf("fd %d not direct a dir\n", dir_fd);
                     panic("")
                 }
                 int filename_len = strlen(filename);
-                int dir_filename_len = strlen(file_describer_array[dir_fd].dir_name);
+                int dir_filename_len = strlen(file_describer_array[dir_fd].extraData.dir_name);
                 // +2 means '/' && '\0'
                 char *new_file_name = (char *) k_malloc(dir_filename_len + filename_len + 2);
-                memcpy(new_file_name, file_describer_array[dir_fd].dir_name, dir_filename_len);
+                memcpy(new_file_name, file_describer_array[dir_fd].extraData.dir_name, dir_filename_len);
                 new_file_name[dir_filename_len] = '/';
                 memcpy(new_file_name + dir_filename_len + 1, filename, filename_len);
                 new_file_name[dir_filename_len + filename_len] = '\0';
                 filename = new_file_name;
             }
 
-            int fd = get_new_file_describer();
+            int fd = fd_search_a_empty_file_describer();
 
             debug_openat(fd);
 
             BYTE mode = 0;
+            enum File_Access_Type fileAccessType;
 
             if (flag == O_RDONLY)
-                file_describer_array[fd].fileAccessType = FILE_ACCESS_READ, mode = FA_READ, flag -= O_RDONLY;
+                fileAccessType = FILE_ACCESS_READ, mode = FA_READ, flag -= O_RDONLY;
             else if (flag == O_WRONLY)
-                file_describer_array[fd].fileAccessType = FILE_ACCESS_WRITE, mode = FA_WRITE, flag -= O_WRONLY;
+                fileAccessType = FILE_ACCESS_WRITE, mode = FA_WRITE, flag -= O_WRONLY;
             else if (flag & O_RDWR)
-                file_describer_array[fd].fileAccessType = FILE_ACCESS_WRITE | FILE_ACCESS_READ, mode = FA_READ |
-                                                                                                       FA_WRITE, flag -= O_RDWR;
+                fileAccessType = FILE_ACCESS_WRITE | FILE_ACCESS_READ, mode = FA_READ | FA_WRITE, flag -= O_RDWR;
 
             if (flag & O_CREATE)mode |= FA_CREATE_ALWAYS, flag -= O_CREATE;
 
             // 文件夹，提前返回
             if (flag & O_DIRECTORY) {
                 mode | FA_CREATE_ALWAYS, flag -= O_DIRECTORY;
-                file_describer_array[fd].fileDescriberType = FILE_DESCRIBER_DIR;
-                file_describer_array[fd].fileSpecialType = FILE_SPECIAL_TYPE_OTHER;
-                FRESULT result = f_opendir(&file_describer_array[fd].data.fat32_dir, filename);
+                File_Describer_Data data;
+                FRESULT result = f_opendir(&data.fat32_dir, filename);
                 if (result != FR_OK) {
                     printf("can't open this dir: %s\n", filename);
                     panic("")
                 }
                 int dir_name_len = strlen(filename);
-                file_describer_array[fd].dir_name = (char *) k_malloc((dir_name_len + 1) * sizeof(char));
-                memcpy(file_describer_array[fd].dir_name, filename, dir_name_len);
-                file_describer_array[fd].dir_name[dir_name_len] = '\0';
+                char *dir_name = (char *) k_malloc((dir_name_len + 1) * sizeof(char));
+                strcpy(dir_name, filename);
+                File_Describer_Extra_Data  extraData;
+                extraData.dir_name = dir_name;
+                File_Describer_Create(fd, FILE_DESCRIBER_DIR, fileAccessType, data, extraData);
                 return(fd);
                 break;
             }
@@ -159,23 +149,26 @@ Context *syscall(Context *context) {
             debug_openat(flag);
             debug_openat(mode);
 
-            file_describer_array[fd].fileDescriberType = FILE_DESCRIBER_FILE;
-            file_describer_array[fd].fileSpecialType = FILE_SPECIAL_TYPE_OTHER;
-            file_describer_array[fd].dir_name = null;
-            FRESULT result = f_open(&file_describer_array[fd].data.fat32, filename, mode);
+            File_Describer_Data data;
+            FRESULT result = f_open(&data.fat32, filename, mode);
             if (result != FR_OK) {
                 printf("can't open this file: %s\n", filename);
                 panic("")
             }
+            File_Describer_Extra_Data extraData;
+            File_Describer_Create(fd, FILE_DESCRIBER_FILE, fileAccessType, data, extraData);
+
             return(fd);
-#undef debug_openat
+#ifdef debug_openat
+            printf("<- syscall: openat\n");
+#endif
             break;
         }
         case SYS_read: {
 #define debug_read(a) printf(#a " = 0x%x\n",a)
 #undef debug_read
 #ifdef debug_read
-            printf("-> syscall: openat\n");
+            printf("-> syscall: read\n");
 #endif
 #define debug_read NOP
             // fd: 文件描述符，buf: 用户空间缓冲区，count：读多少
@@ -189,14 +182,15 @@ Context *syscall(Context *context) {
             debug_read((size_t) buf);
             debug_read(count);
 
-            FIL fat_file = file_describer_array[fd].data.fat32;
+            int origin_fd = fd_get_origin_fd((int)fd);
+            assert(file_describer_array[origin_fd].fileDescriberType == FILE_DESCRIBER_FILE)
             uint32 ret;
-            FRESULT result = f_read(&fat_file, buf, count, &ret);
+            FRESULT result = f_read(&file_describer_array[origin_fd].data.fat32, buf, count, &ret);
             if (result != FR_OK) {
-                printf("can't read this file: fd = %d\n", fd);
-                panic("")
+                return(-1);
+            }else{
+                return(ret);
             }
-            return(ret);
 #undef debug_read
             break;
         }
@@ -204,7 +198,7 @@ Context *syscall(Context *context) {
 #define debug_close(a) printf(#a " = 0x%x\n",a)
 #undef debug_close
 #ifdef debug_close
-            printf("-> syscall: openat\n");
+            printf("-> syscall: close\n");
 #endif
 #define debug_close NOP
             // fd：要关闭的文件描述符。
@@ -214,17 +208,9 @@ Context *syscall(Context *context) {
 
             debug_close(fd);
 
-            FRESULT result = f_close(&file_describer_array[fd].data.fat32);
-            if (result != FR_OK) {
-                return(-1);
-            } else {
-                if (file_describer_array[fd].fileDescriberType == FILE_DESCRIBER_DIR) {
-                    k_free((size_t) file_describer_array[fd].dir_name);
-                }
-                // TODO: 如果不主动调用close系统调用会导致错误，等待进程重构
-                erase_file_describer((int) fd);
-                return(0);
-            }
+            File_Describer_Reduce((int)fd);
+
+            return(0);
 #undef debug_close
             break;
         }
@@ -232,7 +218,7 @@ Context *syscall(Context *context) {
 #define debug_getcwd(a) printf(#a " = 0x%x\n",a)
 #undef debug_getcwd
 #ifdef debug_getcwd
-            printf("-> syscall: getced\n");
+            printf("-> syscall: getcwd\n");
 #endif
 #define debug_getcwd NOP
             // char *buf：一块缓存区，用于保存当前工作目录的字符串。当buf设为NULL，由系统来分配缓存区。
@@ -268,16 +254,15 @@ Context *syscall(Context *context) {
             // fd：被复制的文件描述符。
             // int ret = dup(fd);
             // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
-            // TODO: 直接复制fat describer可能会出问题
             int fd = (int) context->a0;
-            int new_fd = get_new_file_describer();
-            memcpy((char *) &file_describer_array[new_fd], (char *) &file_describer_array[fd], sizeof(File_Describer));
-            if (file_describer_array[fd].fileDescriberType == FILE_DESCRIBER_DIR) {
-                size_t len = strlen(file_describer_array[fd].dir_name);
-                memcpy(file_describer_array[new_fd].dir_name, file_describer_array[fd].dir_name, len);
-            }
-            // TODO: 因为之前的进程退出时没释放fd导致此处fd分配错误，等待进程重构
-            return(new_fd);
+            int new_fd = fd_search_a_empty_file_describer();
+
+            File_Describer_Plus(fd);
+            File_Describer_Data data;
+            data.redirect_fd = fd;
+            File_Describer_Extra_Data fakeExtraData = {.dir_name = null};
+            File_Describer_Create(new_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_READ, data, fakeExtraData);
+            return (new_fd);
 #undef debug_dup
             break;
         }
