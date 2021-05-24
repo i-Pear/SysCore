@@ -5,6 +5,7 @@
 #include "elf_loader.h"
 #include "interrupt.h"
 #include "register.h"
+#include "struct_integer_list.h"
 
 #define MAX_PATH_LENGTH 32
 
@@ -22,6 +23,11 @@ typedef struct{
 
     Context * thread_context;
     char cwd[MAX_PATH_LENGTH];
+
+    size_t_List occupied_file_describer;
+    size_t_List signal_list;
+    size_t_List occupied_kernel_heap;
+    size_t_List occupied_pages;
 } pcb;
 
 typedef struct pcb_listNode{
@@ -37,6 +43,12 @@ typedef struct {
 
 extern pcb_List runnable,blocked;
 extern pcb* running;
+
+void bind_file_describer(int file_describer);
+
+void bind_kernel_heap(size_t addr);
+
+void bind_pages(size_t addr);
 
 int get_new_pid();
 

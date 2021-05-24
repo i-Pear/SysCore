@@ -19,6 +19,18 @@ char* get_running_cwd(){
     return running->cwd;
 }
 
+void bind_file_describer(int file_describer){
+    size_t_push_back(&running->occupied_file_describer,file_describer);
+}
+
+void bind_kernel_heap(size_t addr){
+    size_t_push_back(&running->occupied_kernel_heap,addr);
+}
+
+void bind_pages(size_t addr){
+    size_t_push_back(&running->occupied_pages,addr);
+}
+
 void pcb_push_back(pcb_List* list,pcb* pcb){
     if(list->start==null&&list->end==null){
         // empty list
@@ -110,6 +122,23 @@ void clone(int flags,size_t stack,int ptid){
     // set syscall return value
     running->thread_context->a0=child_pcb->pid;
     child_context->a0=0;
+    
+    // reset resource lists
+    child_pcb->occupied_file_describer.start=child_pcb->occupied_file_describer.end=null;
+    child_pcb->occupied_kernel_heap.start=child_pcb->occupied_kernel_heap.end=null;
+    child_pcb->occupied_pages.start=child_pcb->occupied_pages.end=null;
+    child_pcb->signal_list.start=child_pcb->signal_list.end=null;
+
+    // copy file describer
+    size_t_list_copy(&running->occupied_file_describer,&child_pcb->occupied_file_describer);
+    // alloc file describer count
+    {
+        size_t_listNode * cnt=child_pcb->occupied_file_describer;
+        while (cnt!=null){
+            // increase file describer counter
+            // TODO: increase file describer counter
+        }
+    }
 
     if(stack!=0){
         // fixed stack, will not copy spaces
@@ -208,21 +237,27 @@ void create_process(const char *elf_path) {
     thread_context->satp = (page_table_base>>12)|(8LL << 60);
 
     // push into runnable list
-    pcb* new_pcb=k_malloc(sizeof(pcb));
-    new_pcb->pid=get_new_pid();
-    new_pcb->ppid=1;
-    new_pcb->stack=stack_page;
-    new_pcb->thread_context=thread_context;
-    new_pcb->elf_page_base=elf_page_base;
-    new_pcb->page_table=page_table_base;
+    pcb* child_pcb=k_malloc(sizeof(pcb));
+    child_pcb->pid=get_new_pid();
+    child_pcb->ppid=1;
+    child_pcb->stack=stack_page;
+    child_pcb->thread_context=thread_context;
+    child_pcb->elf_page_base=elf_page_base;
+    child_pcb->page_table=page_table_base;
     // TODO: 初始化工作目录为/，这不合理
-    memset(new_pcb->cwd, 0, sizeof(new_pcb->cwd));
-    new_pcb->cwd[0] = '/';
+    memset(child_pcb->cwd, 0, sizeof(child_pcb->cwd));
+    child_pcb->cwd[0] = '/';
 
-    new_pcb->elf_page_size=elf_page_size;
-    new_pcb->stack_size=4096;
+    child_pcb->elf_page_size=elf_page_size;
+    child_pcb->stack_size=4096;
 
-    pcb_push_back(&runnable, new_pcb);
+    // init lists
+    child_pcb->occupied_file_describer.start=child_pcb->occupied_file_describer.end=null;
+    child_pcb->occupied_kernel_heap.start=child_pcb->occupied_kernel_heap.end=null;
+    child_pcb->occupied_pages.start=child_pcb->occupied_pages.end=null;
+    child_pcb->signal_list.start=child_pcb->signal_list.end=null;
+
+    pcb_push_back(&runnable, child_pcb);
 }
 
 void yield(){
@@ -238,6 +273,12 @@ void exit_process(){
     // dealloc_page(running->elf_page_base);
     // TODO: dealloc_page(running->page_table);
     // dealloc_page(running->stack);
+    
+    // free file describer
+    // TODO: free file describer
+    
+    // TODO: free lists
+    
     k_free(running->thread_context);
     k_free(running);
     running=null;
