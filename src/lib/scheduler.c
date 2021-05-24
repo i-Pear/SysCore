@@ -133,7 +133,7 @@ void clone(int flags,size_t stack,int ptid){
     size_t_list_copy(&running->occupied_file_describer,&child_pcb->occupied_file_describer);
     // alloc file describer count
     {
-        size_t_listNode * cnt=child_pcb->occupied_file_describer;
+        size_t_listNode * cnt=child_pcb->occupied_file_describer.start;
         while (cnt!=null){
             // increase file describer counter
             // TODO: increase file describer counter
