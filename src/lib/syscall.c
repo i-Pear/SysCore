@@ -156,10 +156,8 @@ Context *syscall(Context *context) {
                 panic("")
             }
 
-            debug_openat
-            (flag);
-            debug_openat
-            (mode);
+            debug_openat(flag);
+            debug_openat(mode);
 
             file_describer_array[fd].fileDescriberType = FILE_DESCRIBER_FILE;
             file_describer_array[fd].fileSpecialType = FILE_SPECIAL_TYPE_OTHER;
