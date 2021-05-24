@@ -17,6 +17,9 @@
 #define O_CREATE 0x40
 #define O_DIRECTORY 0x0200000
 
+// 0;
+#define NOP(a) 0
+
 Context *syscall(Context *context) {
     // Check SystemCall Number
     // printf("[SYSCALL] call id=%d\n",context->a7);
@@ -37,26 +40,26 @@ Context *syscall(Context *context) {
 #ifdef debug_write
             printf("-> syscall: write\n");
 #endif
-#define debug_write ;
+#define debug_write NOP
             // fd：要写入文件的文件描述符。
             // buf：一个缓存区，用于存放要写入的内容。
             // count：要写入的字节数。
             // ssize_t ret = write(fd, buf, count);
             // 返回值：成功执行，返回写入的字节数。错误，则返回-1。
 
-            int file = (int)context->a0;
-            char *buf = (char*)get_actual_page(context->a1);
-            int count = (int)context->a2;
+            int file = (int) context->a0;
+            char *buf = (char *) get_actual_page(context->a1);
+            int count = (int) context->a2;
             if (file_describer_array[file].fileSpecialType == FILE_SPECIAL_TYPE_STDOUT) {
                 // stdout
                 for (int i = 0; i < count; i++)putchar(buf[i]);
                 return(count);
-            } else{
+            } else {
                 uint32 read_bytes;
                 FRESULT result = f_write(&file_describer_array[file].data.fat32, buf, count, &read_bytes);
-                if(result != FR_OK){
+                if (result != FR_OK) {
                     return(-1);
-                }else{
+                } else {
                     return(read_bytes);
                 }
             }
@@ -81,7 +84,7 @@ Context *syscall(Context *context) {
 #ifdef debug_openat
             printf("-> syscall: openat\n");
 #endif
-#define debug_openat ;
+#define debug_openat NOP
             // fd：文件所在目录的文件描述符
             // filename：要打开或创建的文件名。如为绝对路径，则忽略fd。如为相对路径，且fd是AT_FDCWD，则filename是相对于当前工作目录来说的。如为相对路径，且fd是一个文件描述符，则filename是相对于fd所指向的目录来说的。
             // flags：必须包含如下访问模式的其中一种：O_RDONLY，O_WRONLY，O_RDWR。还可以包含文件创建标志和文件状态标志。
@@ -92,9 +95,8 @@ Context *syscall(Context *context) {
             char *filename = (char *) get_actual_page(context->a1);
             size_t flag = context->a2, flag_bak = flag;
 
-            debug_openat
-            (dir_fd);debug_openat
-            (flag);
+            debug_openat(dir_fd);
+            debug_openat(flag);
 
             if (filename[0] == '.' && filename[1] == '/') {
                 filename += 2;
@@ -117,8 +119,7 @@ Context *syscall(Context *context) {
 
             int fd = get_new_file_describer();
 
-            debug_openat
-            (fd);
+            debug_openat(fd);
 
             BYTE mode = 0;
 
@@ -156,7 +157,8 @@ Context *syscall(Context *context) {
             }
 
             debug_openat
-            (flag);debug_openat
+            (flag);
+            debug_openat
             (mode);
 
             file_describer_array[fd].fileDescriberType = FILE_DESCRIBER_FILE;
@@ -177,7 +179,7 @@ Context *syscall(Context *context) {
 #ifdef debug_read
             printf("-> syscall: openat\n");
 #endif
-#define debug_read ;
+#define debug_read NOP
             // fd: 文件描述符，buf: 用户空间缓冲区，count：读多少
             // ssize_t ret = read(fd, buf, count)
             // ret: 返回的字节数
@@ -185,10 +187,9 @@ Context *syscall(Context *context) {
             char *buf = (char *) get_actual_page(context->a1);
             size_t count = context->a2;
 
-            debug_read
-            (fd);debug_read
-            ((size_t) buf);debug_read
-            (count);
+            debug_read(fd);
+            debug_read((size_t) buf);
+            debug_read(count);
 
             FIL fat_file = file_describer_array[fd].data.fat32;
             uint32 ret;
@@ -207,14 +208,13 @@ Context *syscall(Context *context) {
 #ifdef debug_close
             printf("-> syscall: openat\n");
 #endif
-#define debug_close ;
+#define debug_close NOP
             // fd：要关闭的文件描述符。
             // int ret = close(fd);
             // 返回值：成功执行，返回0。失败，返回-1。
             size_t fd = context->a0;
 
-            debug_close
-            (fd);
+            debug_close(fd);
 
             FRESULT result = f_close(&file_describer_array[fd].data.fat32);
             if (result != FR_OK) {
@@ -236,7 +236,7 @@ Context *syscall(Context *context) {
 #ifdef debug_getcwd
             printf("-> syscall: getced\n");
 #endif
-#define debug_getcwd ;
+#define debug_getcwd NOP
             // char *buf：一块缓存区，用于保存当前工作目录的字符串。当buf设为NULL，由系统来分配缓存区。
             // size：buf缓存区的大小。
             // long ret = getcwd(buf, size);
@@ -266,15 +266,15 @@ Context *syscall(Context *context) {
 #ifdef debug_dup
             printf("-> syscall: dup\n");
 #endif
-#define debug_dup ;
+#define debug_dup NOP
             // fd：被复制的文件描述符。
             // int ret = dup(fd);
             // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
             // TODO: 直接复制fat describer可能会出问题
-            int fd = (int)context->a0;
+            int fd = (int) context->a0;
             int new_fd = get_new_file_describer();
-            memcpy((char *)&file_describer_array[new_fd], (char *)&file_describer_array[fd], sizeof(File_Describer));
-            if(file_describer_array[fd].fileDescriberType == FILE_DESCRIBER_DIR){
+            memcpy((char *) &file_describer_array[new_fd], (char *) &file_describer_array[fd], sizeof(File_Describer));
+            if (file_describer_array[fd].fileDescriberType == FILE_DESCRIBER_DIR) {
                 size_t len = strlen(file_describer_array[fd].dir_name);
                 memcpy(file_describer_array[new_fd].dir_name, file_describer_array[fd].dir_name, len);
             }
