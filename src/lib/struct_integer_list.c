@@ -55,6 +55,6 @@ void size_t_list_pop_front(size_t_List* list){
 void size_t_list_copy(size_t_List* origin,size_t_List* dest){
     size_t_listNode * cnt=origin->start;
     while (cnt!=null){
-        size_t_list_push_back(dest, cnt->data);
+        size_t_list_push_back(dest,cnt->data);
     }
 }

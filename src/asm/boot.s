@@ -16,6 +16,10 @@
     .global flush_tlb
     .global interrupt_timer_init
     .global read_sp
+    .global get_kernel_stack_end
+    .global get_kernel_stack_base
+    .global __kernel_stack_base
+    .global __kernel_stack_end
 
     .extern __interrupt
     .extern set_next_timeout
@@ -90,6 +94,14 @@ get_boot_page_table:
     la a0, boot_page_table
     ret
 
+get_kernel_stack_end:
+    la a0, __kernel_stack_end
+    ret
+
+get_kernel_stack_base:
+    la a0, __kernel_stack_base
+    ret
+
 close_interrupt:
     csrwi sie, 0
     ret
@@ -135,3 +147,11 @@ boot_page_table:
     .zero 507 * 8
     .quad 0
     .quad 0
+
+    .align 12
+
+__kernel_stack_base:
+    .zero 4096
+__kernel_stack_end:
+    .zero 4096
+    .align 12

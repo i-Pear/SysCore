@@ -5,6 +5,7 @@
 #include "lib/scheduler.h"
 #include "lib/file_describer.h"
 #include "lib/self_test.h"
+#include "lib/kernel_stack.h"
 
 void print_satp() {
     lty(register_read_satp());
