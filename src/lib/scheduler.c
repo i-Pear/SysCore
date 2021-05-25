@@ -1,11 +1,12 @@
 #include "scheduler.h"
 #include "../driver/fatfs/ff.h"
 #include "self_test.h"
+#include "kernel_stack.h"
 
 int global_pid=1;
 
 // Warning: when do sth with running, sync with latest running_context first
-Context* running_context= (Context *) (0x80000000 + 6 * 1024 * 1024 - sizeof(Context));
+Context* running_context;
 
 int get_new_pid(){
     return ++global_pid;
@@ -100,6 +101,7 @@ pcb_List runnable,blocked;
 pcb* running;
 
 void init_scheduler(){
+    running_context=0x80000000+6*1024*1024-sizeof(Context);
     runnable.start=runnable.end=null;
     blocked.start=blocked.end=null;
     running=null;
