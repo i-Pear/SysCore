@@ -20,16 +20,32 @@ char* get_running_cwd(){
     return running->cwd;
 }
 
+void file_describer_bind(size_t file_id,size_t real_file_describer){
+    size_t_map_put(&running->occupied_file_describer,file_id,real_file_describer);
+}
+
+void file_describer_erase(size_t file_id){
+    size_t_map_erase(&running->occupied_file_describer,file_id);
+}
+
+bool file_describer_exists(size_t file_id){
+    return size_t_map_exists(&running->occupied_file_describer,file_id);
+}
+
+size_t file_describer_convert(size_t file_id){
+    return size_t_map_get(&running->occupied_file_describer,file_id);
+}
+
 void bind_file_describer(int file_describer){
-    size_t_push_back(&running->occupied_file_describer,file_describer);
+    size_t_list_push_back(&running->occupied_file_describer, file_describer);
 }
 
 void bind_kernel_heap(size_t addr){
-    size_t_push_back(&running->occupied_kernel_heap,addr);
+    size_t_list_push_back(&running->occupied_kernel_heap, addr);
 }
 
 void bind_pages(size_t addr){
-    size_t_push_back(&running->occupied_pages,addr);
+    size_t_list_push_back(&running->occupied_pages, addr);
 }
 
 void pcb_push_back(pcb_List* list,pcb* pcb){
@@ -89,7 +105,7 @@ pcb_List runnable,blocked;
 pcb* running;
 
 void init_scheduler(){
-    running_context=get_kernel_stack_base()+__kernel_stack_size-sizeof(Context);
+    running_context=get_kernel_stack_end()-sizeof(Context);
     runnable.start=runnable.end=null;
     blocked.start=blocked.end=null;
     running=null;
@@ -126,16 +142,16 @@ void clone(int flags,size_t stack,int ptid){
     child_context->a0=0;
     
     // reset resource lists
-    child_pcb->occupied_file_describer.start=child_pcb->occupied_file_describer.end=null;
+    size_t_map_init(&child_pcb->occupied_file_describer);
     child_pcb->occupied_kernel_heap.start=child_pcb->occupied_kernel_heap.end=null;
     child_pcb->occupied_pages.start=child_pcb->occupied_pages.end=null;
     child_pcb->signal_list.start=child_pcb->signal_list.end=null;
 
     // copy file describer
-    size_t_list_copy(&running->occupied_file_describer,&child_pcb->occupied_file_describer);
-    // alloc file describer count
+    size_t_map_copy(&running->occupied_file_describer,&child_pcb->occupied_file_describer);
+    // alloc file describer
     {
-        size_t_listNode * cnt=child_pcb->occupied_file_describer.start;
+        size_t_mapNode * cnt=child_pcb->occupied_file_describer.start;
         while (cnt!=null){
             // increase file describer counter
             // TODO: increase file describer counter
@@ -254,7 +270,7 @@ void create_process(const char *elf_path) {
     child_pcb->stack_size=4096;
 
     // init lists
-    child_pcb->occupied_file_describer.start=child_pcb->occupied_file_describer.end=null;
+    child_pcb->occupied_file_describer.start=null;
     child_pcb->occupied_kernel_heap.start=child_pcb->occupied_kernel_heap.end=null;
     child_pcb->occupied_pages.start=child_pcb->occupied_pages.end=null;
     child_pcb->signal_list.start=child_pcb->signal_list.end=null;

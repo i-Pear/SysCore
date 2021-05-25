@@ -4,7 +4,8 @@
 #include "stddef.h"
 
 #define __kernel_stack_size 4096
-extern char __kernel_stack[];
+
+extern size_t get_kernel_stack_end();
 
 extern size_t get_kernel_stack_base();
 

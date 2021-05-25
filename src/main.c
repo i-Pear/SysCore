@@ -5,6 +5,7 @@
 #include "lib/scheduler.h"
 #include "lib/file_describer.h"
 #include "lib/self_test.h"
+#include "lib/kernel_stack.h"
 
 void print_satp() {
     lty(register_read_satp());
@@ -40,24 +41,27 @@ void init_thread() {
     init_self_tests();
 
 //    add_test("yield");
-    add_test("fork");
-    add_test("clone");
-    add_test("write");
-    add_test("uname");
-    add_test("times");
-    add_test("getpid");
-    add_test("getppid");
+//    add_test("fork");
+//    add_test("clone");
+//    add_test("write");
+//    add_test("uname");
+//    add_test("times");
+//    add_test("getpid");
+//    add_test("getppid");
     add_test("read");
-    add_test("open");
-    add_test("close");
-    add_test("openat");
-    add_test("getcwd");
-    add_test("dup");
+//    add_test("open");
+//    add_test("close");
+//    add_test("openat");
+//    add_test("getcwd");
+//    add_test("dup");
 
     schedule();
 }
 
 int main() {
+    lty(get_kernel_stack_base());
+    lty(get_kernel_stack_end());
+
     printf("[OS] Memory Init.\n");
     init_memory();
     init_kernel_heap();
