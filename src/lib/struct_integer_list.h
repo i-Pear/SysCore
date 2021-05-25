@@ -16,9 +16,9 @@ typedef struct {
 
 bool size_t_list_is_empty(size_t_List* list);
 
-void size_t_push_back(size_t_List* list, size_t data);
+void size_t_list_push_back(size_t_List* list, size_t data);
 
-void size_t_push_front(size_t_List* list, size_t data);
+void size_t_list_push_front(size_t_List* list, size_t data);
 
 void size_t_list_pop_front(size_t_List* list);
 

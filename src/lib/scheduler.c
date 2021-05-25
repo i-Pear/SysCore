@@ -20,15 +20,15 @@ char* get_running_cwd(){
 }
 
 void bind_file_describer(int file_describer){
-    size_t_push_back(&running->occupied_file_describer,file_describer);
+    size_t_list_push_back(&running->occupied_file_describer, file_describer);
 }
 
 void bind_kernel_heap(size_t addr){
-    size_t_push_back(&running->occupied_kernel_heap,addr);
+    size_t_list_push_back(&running->occupied_kernel_heap, addr);
 }
 
 void bind_pages(size_t addr){
-    size_t_push_back(&running->occupied_pages,addr);
+    size_t_list_push_back(&running->occupied_pages, addr);
 }
 
 void pcb_push_back(pcb_List* list,pcb* pcb){

@@ -5,7 +5,7 @@ bool size_t_list_is_empty(size_t_List* list){
     return list->start==null;
 }
 
-void size_t_push_back(size_t_List* list, size_t data){
+void size_t_list_push_back(size_t_List* list, size_t data){
     if(list->start==null&&list->end==null){
         // empty list
         size_t_listNode* new_node=k_malloc(sizeof(size_t_listNode));
@@ -22,7 +22,7 @@ void size_t_push_back(size_t_List* list, size_t data){
     }
 }
 
-void size_t_push_front(size_t_List* list, size_t data){
+void size_t_list_push_front(size_t_List* list, size_t data){
     if(list->start==null&&list->end==null){
         // empty list
         size_t_listNode* new_node=k_malloc(sizeof(size_t_listNode));
@@ -55,6 +55,6 @@ void size_t_list_pop_front(size_t_List* list){
 void size_t_list_copy(size_t_List* origin,size_t_List* dest){
     size_t_listNode * cnt=origin->start;
     while (cnt!=null){
-        size_t_push_back(dest,cnt->data);
+        size_t_list_push_back(dest, cnt->data);
     }
 }
