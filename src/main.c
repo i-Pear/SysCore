@@ -40,15 +40,15 @@ void init_thread() {
     init_file_describer();
     init_self_tests();
 
-//    add_test("yield");
-//    add_test("fork");
-//    add_test("clone");
-//    add_test("write");
-//    add_test("uname");
-//    add_test("times");
-//    add_test("getpid");
-//    add_test("getppid");
-    add_test("read");
+    add_test("yield");
+    add_test("fork");
+    add_test("clone");
+    add_test("write");
+    add_test("uname");
+    add_test("times");
+    add_test("getpid");
+    add_test("getppid");
+//    add_test("read");
 //    add_test("open");
 //    add_test("close");
 //    add_test("openat");
@@ -61,6 +61,7 @@ void init_thread() {
 int main() {
     lty(get_kernel_stack_base());
     lty(get_kernel_stack_end());
+    lty(__kernel_stack_base);
 
     printf("[OS] Memory Init.\n");
     init_memory();

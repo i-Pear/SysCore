@@ -36,10 +36,6 @@ size_t file_describer_convert(size_t file_id){
     return size_t_map_get(&running->occupied_file_describer,file_id);
 }
 
-void bind_file_describer(int file_describer){
-    size_t_list_push_back(&running->occupied_file_describer, file_describer);
-}
-
 void bind_kernel_heap(size_t addr){
     size_t_list_push_back(&running->occupied_kernel_heap, addr);
 }
@@ -105,7 +101,7 @@ pcb_List runnable,blocked;
 pcb* running;
 
 void init_scheduler(){
-    running_context=get_kernel_stack_end()-sizeof(Context);
+    running_context=0x80000000+6*1024*1024-sizeof(Context);
     runnable.start=runnable.end=null;
     blocked.start=blocked.end=null;
     running=null;
@@ -279,8 +275,11 @@ void create_process(const char *elf_path) {
 }
 
 void yield(){
+    printf(">>> yield\n");
     // sync with running_context
+    lty(running->thread_context->sepc);
     *running->thread_context=*running_context;
+    // running->thread_context->sepc+=4;
 
     pcb_push_back(&runnable, running);
     running=null;
@@ -304,6 +303,7 @@ void exit_process(){
 }
 
 void schedule(){
+    printf(">>> schedule\n");
     if(running!=null){
         // sync with running_context
         *running_context=*running->thread_context;
@@ -321,7 +321,7 @@ void schedule(){
         }else{
             // pick one to run
             running=runnable.start->pcb;
-            lty(running);
+            lty(running->thread_context->sepc);
             lty(running->elf_page_base);
             pcb_list_pop_front(&runnable);
 
