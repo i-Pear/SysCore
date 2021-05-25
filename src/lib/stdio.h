@@ -10,4 +10,6 @@ void puts(char *str);
 
 void printf(const char *format, ...);
 
+void sprintf(char* dist, const char *format, ...);
+
 #endif

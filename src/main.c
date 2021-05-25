@@ -55,6 +55,7 @@ void init_thread() {
     add_test("dup");
 //    add_test("dup2");
     add_test("chdir");
+    add_test("getdents");
 
     schedule();
 }

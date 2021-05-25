@@ -7,7 +7,7 @@ typedef short int16;
 typedef unsigned short uint16;
 typedef int int32;
 typedef unsigned int uint32;
-typedef long long int64;
+typedef unsigned long long uint64;
 typedef unsigned long long uint64;
 typedef unsigned int uint;
 
@@ -69,6 +69,8 @@ struct kstat {
     long st_ctime_nsec;
     unsigned __unused[2];
 };
+
+typedef long long int64;
 
 struct linux_dirent64 {
     uint64        d_ino;

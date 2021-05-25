@@ -278,7 +278,6 @@ void exit_process(){
     // TODO: free file describer
     
     // TODO: free lists
-    
     k_free(running->thread_context);
     k_free(running);
     running=null;

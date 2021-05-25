@@ -88,3 +88,77 @@ void printf(const char *format, ...) {
         format++;
     }
 }
+
+void sprintf__print_pos(char* dist, int* dist_cur, size_t num, int base) {
+    char sta[100];
+    int cur = 0;
+    if (!num) {
+        sta[cur++] = '0';
+    }
+    while (num) {
+        int tail = num % base;
+        if (tail <= 9)
+            sta[cur++] = '0' + tail;
+        else
+            sta[cur++] = 'a' + tail - 10;
+        num /= base;
+    }
+    while (cur != 0)
+        dist[(*dist_cur)++] = sta[--cur];
+}
+
+void sprintf(char* dist, const char *format, ...) {
+    va_list arg;
+    va_start(arg, format);
+    int cur = 0;
+    while (*format) {
+        char ret = *format;
+        if (ret == '%') {
+            switch (*++format) {
+                case 'c': {
+                    char c = va_arg(arg, int);
+                    dist[cur++] = c;
+                    break;
+                }
+                case 'd': {
+                    int d = va_arg(arg, int);
+                    if (d == 0) {
+                        dist[cur++] = '0';
+                    } else {
+                        if (d < 0)
+                            dist[cur++] = '-', d = -d;
+                        sprintf__print_pos(dist, &cur, d, 10);
+                    }
+                    break;
+                }
+                case 'x': {
+                    size_t x = va_arg(arg, size_t);
+                    sprintf__print_pos(dist, &cur, x, 16);
+                    break;
+                }
+                case 'b': {
+                    size_t x = va_arg(arg, size_t);
+                    sprintf__print_pos(dist, &cur, x, 2);
+                    break;
+                }
+                case 's': {
+                    char *str = va_arg(arg, char *);
+                    char *p = str;
+                    while (*p != '\0') {
+                        dist[cur++] = *p;
+                        p++;
+                    }
+                    break;
+                }
+                default:{
+                    puts("!!! unsupport %");
+                    shutdown();
+                }
+            }
+        } else {
+            dist[cur++] = ret;
+        }
+        format++;
+    }
+    dist[cur] = '\0';
+}

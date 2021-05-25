@@ -88,6 +88,9 @@ Context *syscall(Context *context) {
 
             if (filename[0] == '.' && filename[1] == '/') {
                 filename += 2;
+            }else if(filename[0] == '.' && strlen(filename) == 1){
+                // TODO: need VFS
+                filename[0] = '/';
             }
             if (dir_fd != AT_FDCWD) {
                 if (file_describer_array[dir_fd].fileDescriberType != FILE_DESCRIBER_DIR) {
@@ -123,7 +126,7 @@ Context *syscall(Context *context) {
             if (flag & O_CREATE)mode |= FA_CREATE_ALWAYS, flag -= O_CREATE;
 
             // 文件夹，提前返回
-            if (flag & O_DIRECTORY) {
+            if ((flag & O_DIRECTORY) || (filename[0] == '/')) {
                 mode | FA_CREATE_ALWAYS, flag -= O_DIRECTORY;
                 File_Describer_Data data;
                 FRESULT result = f_opendir(&data.fat32_dir, filename);
@@ -307,11 +310,43 @@ Context *syscall(Context *context) {
             // path：需要切换到的目录。
             // int ret = chdir(path);
             // 返回值：成功执行，返回0。失败，返回-1。
-            char* path = (char *)get_actual_page(context->a0);
-            char* current_cwd = get_running_cwd();
+            char *path = (char *) get_actual_page(context->a0);
+            char *current_cwd = get_running_cwd();
             strcpy(current_cwd, path);
             return(0);
 #undef debug_chdir
+            break;
+        }
+        case SYS_getdents64: {
+#define debug_getdents64(a) printf(#a " = 0x%x\n",a)
+#undef debug_getdents64
+#ifdef debug_getdents64
+            printf("-> syscall: getdents64\n");
+#endif
+#define debug_getdents64 NOP
+            // fd：所要读取目录的文件描述符。
+            // buf：一个缓存区，用于保存所读取目录的信息。
+            // len：buf的大小。
+            // int ret = getdents64(fd, buf, len);
+            // 返回值：成功执行，返回读取的字节数。当到目录结尾，则返回0。失败，则返回-1。
+            size_t fd = context->a0;
+            char* buf = (char *)get_actual_page(context->a1);
+            size_t len = context->a2;
+            if(file_describer_array[fd].fileDescriberType != FILE_DESCRIBER_DIR){
+                return (-1);
+                break;
+            }
+            FILINFO fileInfo;
+            int result = f_readdir(&file_describer_array[fd].data.fat32_dir, &fileInfo);
+            if(result != FR_OK){
+                return (-1);
+                break;
+            }
+            // TODO: 只实现了一个文件，一个文件名
+            struct linux_dirent64* dirent64 = (struct linux_dirent64*)buf;
+            strcpy(dirent64->d_name, fileInfo.fname);
+            return(len);
+#undef debug_getdents64
             break;
         }
         case SYS_times: {
