@@ -5,6 +5,7 @@
 #include "lib/scheduler.h"
 #include "lib/file_describer.h"
 #include "lib/self_test.h"
+#include "lib/vfs.h"
 
 void print_satp() {
     lty(register_read_satp());
@@ -32,6 +33,12 @@ void init_thread() {
     if (res_sd != FR_OK) {
         panic("fat init failed")
     }
+    printf("------------- test vfs\n");
+    vfs_init();
+
+
+
+    shutdown();
     printf("[OS] Interrupt & Timer Interrupt Open.\n");
     interrupt_timer_init();
     printf("[OS] init scheduler.\n");

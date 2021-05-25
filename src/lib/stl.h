@@ -75,6 +75,8 @@ int strlen(char *s);
 
 void strcpy(char* to, char* from);
 
+int strcmp(const char *cs, const char *ct);
+
 int max(int a,int b);
 
 int min(int a,int b);

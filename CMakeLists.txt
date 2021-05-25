@@ -18,5 +18,4 @@ add_executable(
         ${SRC_DRIVER}
         ${SRC_LIB}
         ${SRC_FATFS}
-        src/main.c
-)
+        src/main.c)

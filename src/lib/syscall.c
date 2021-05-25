@@ -4,18 +4,12 @@
 #include "scheduler.h"
 #include "external_structs.h"
 #include "file_describer.h"
+#include "vfs.h"
 
 #define return(x) context->a0=x
 #define get_actual_page(x) ((x>0x80000000)?x:x+ get_running_elf_page())
 
-// 文件系统相关宏
-#define AT_FDCWD (-100) //相对路径
-#define O_RDONLY 0x000
-#define O_WRONLY 0x001
-#define O_RDWR 0x002 // 可读可写
-//#define O_CREATE 0x200
-#define O_CREATE 0x40
-#define O_DIRECTORY 0x0200000
+
 
 // 0;
 #define NOP(a) 0
