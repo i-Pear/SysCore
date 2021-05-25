@@ -81,6 +81,10 @@ int fd_search_a_empty_file_describer() {
 }
 
 int fd_write_to_file(int fd, char* buf, int count){
+    if(file_describer_array_occupied[fd] <= 0){
+        printf("error fd: %d!\n", fd);
+        panic("")
+    }
     if(file_describer_array[fd].fileDescriberType == FILE_DESCRIBER_REDIRECT){
         return fd_write_to_file(file_describer_array[fd].data.redirect_fd, buf, count);
     }else{

@@ -106,6 +106,7 @@ Context *syscall(Context *context) {
             }
 
             int fd = fd_search_a_empty_file_describer();
+            bind_file_describer(fd);
 
             debug_openat(fd);
 
@@ -133,7 +134,7 @@ Context *syscall(Context *context) {
                 int dir_name_len = strlen(filename);
                 char *dir_name = (char *) k_malloc((dir_name_len + 1) * sizeof(char));
                 strcpy(dir_name, filename);
-                File_Describer_Extra_Data  extraData;
+                File_Describer_Extra_Data extraData;
                 extraData.dir_name = dir_name;
                 File_Describer_Create(fd, FILE_DESCRIBER_DIR, fileAccessType, data, extraData);
                 return(fd);
@@ -178,13 +179,13 @@ Context *syscall(Context *context) {
             debug_read((size_t) buf);
             debug_read(count);
 
-            int origin_fd = fd_get_origin_fd((int)fd);
+            int origin_fd = fd_get_origin_fd((int) fd);
             assert(file_describer_array[origin_fd].fileDescriberType == FILE_DESCRIBER_FILE)
             uint32 ret;
             FRESULT result = f_read(&file_describer_array[origin_fd].data.fat32, buf, count, &ret);
             if (result != FR_OK) {
                 return(-1);
-            }else{
+            } else {
                 return(ret);
             }
 #undef debug_read
@@ -204,7 +205,9 @@ Context *syscall(Context *context) {
 
             debug_close(fd);
 
-            File_Describer_Reduce((int)fd);
+            File_Describer_Reduce((int) fd);
+
+            // TODO: 应该解绑文件描述符
 
             return(0);
 #undef debug_close
@@ -227,8 +230,8 @@ Context *syscall(Context *context) {
             char *current_work_dir = get_running_cwd();
             if (buf == 0) {
                 // 系统分配缓冲区
-                // TODO: 分配给进程的缓冲区在文件退出时应该释放
                 ret = (char *) k_malloc(size);
+                bind_kernel_heap((size_t) ret);
             } else {
                 ret = (char *) get_actual_page(buf);
             }
@@ -252,12 +255,63 @@ Context *syscall(Context *context) {
             // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
             int fd = (int) context->a0;
             int new_fd = fd_search_a_empty_file_describer();
+            bind_file_describer(new_fd);
             File_Describer_Plus(fd);
             File_Describer_Data data = {.redirect_fd = fd};
             File_Describer_Extra_Data fakeExtraData = {.dir_name = null};
             File_Describer_Create(new_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_READ, data, fakeExtraData);
             return (new_fd);
 #undef debug_dup
+            break;
+        }
+        case SYS_dup3: {
+#define debug_dup3(a) printf(#a " = 0x%x\n",a)
+#undef debug_dup3
+#ifdef debug_dup3
+            printf("-> syscall: dup3\n");
+#endif
+#define debug_dup3 NOP
+            // old：被复制的文件描述符。
+            // new：新的文件描述符。
+            // int ret = dup3(old, new, 0);
+            // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
+            size_t old_fd = context->a0;
+            size_t new_fd = context->a1;
+            // TODO: dup3暂不支持flag参数
+            size_t flags = context->a2;
+
+            if (old_fd == new_fd) {
+                return (-1);
+                break;
+            }
+            int actual_fd = fd_search_a_empty_file_describer();
+
+            File_Describer_Data data = {.redirect_fd = (int) old_fd};
+            File_Describer_Extra_Data extraData = {.dir_name = null};
+            File_Describer_Create(actual_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_WRITE, data, extraData);
+            File_Describer_Plus((int) old_fd);
+            // TODO: 这里返回了new_fd但是还没有建立虚拟映射关系,只建立了系统和actual_fd之间的关系
+            bind_file_describer(actual_fd);
+
+            return(new_fd);
+#undef debug_dup3
+            break;
+        }
+        case SYS_chdir: {
+#define debug_chdir(a) printf(#a " = 0x%x\n",a)
+#undef debug_chdir
+#ifdef debug_chdir
+            printf("-> syscall: chdir\n");
+#endif
+#define debug_chdir NOP
+            // path：需要切换到的目录。
+            // int ret = chdir(path);
+            // 返回值：成功执行，返回0。失败，返回-1。
+            char* path = (char *)get_actual_page(context->a0);
+            char* current_cwd = get_running_cwd();
+            strcpy(current_cwd, path);
+            return(0);
+#undef debug_chdir
             break;
         }
         case SYS_times: {

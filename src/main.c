@@ -53,6 +53,8 @@ void init_thread() {
     add_test("openat");
     add_test("getcwd");
     add_test("dup");
+//    add_test("dup2");
+    add_test("chdir");
 
     schedule();
 }
