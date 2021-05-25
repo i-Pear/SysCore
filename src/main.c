@@ -39,7 +39,7 @@ void init_thread() {
     init_file_describer();
     init_self_tests();
 
-//    add_test("yield");
+    add_test("yield");
     add_test("fork");
     add_test("clone");
     add_test("write");

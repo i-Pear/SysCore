@@ -101,7 +101,6 @@ void clone(int flags,size_t stack,int ptid){
 
     // sync with running_context
     *running->thread_context=*running_context;
-    running->thread_context->sepc+=4;
 
     // copy context
     Context * child_context=new(Context);
@@ -144,6 +143,7 @@ void clone(int flags,size_t stack,int ptid){
         // fixed stack, will not copy spaces
         child_pcb->thread_context->sp=stack;
         child_pcb->thread_context->a0=0;
+        child_context->sepc+=4;
         pcb_push_back(&runnable,child_pcb);
     }else{
         // fork, generate a new stack
@@ -157,6 +157,7 @@ void clone(int flags,size_t stack,int ptid){
         memset(page_table,0, 4096);
         *((size_t *) page_table + 2) = (0x80000 << 10) | 0xdf;
         child_context->satp = (page_table>>12)|(8LL << 60);
+        child_context->sepc+=4;
 
         child_pcb->thread_context->a0=0;
         child_pcb->stack=stack;
@@ -263,6 +264,7 @@ void create_process(const char *elf_path) {
 void yield(){
     // sync with running_context
     *running->thread_context=*running_context;
+    running->thread_context->sepc+=4;
 
     pcb_push_back(&runnable, running);
     running=null;
