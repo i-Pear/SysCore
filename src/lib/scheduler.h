@@ -29,6 +29,7 @@ typedef struct{
     size_t_List signal_list;
     size_t_List occupied_kernel_heap;
     size_t_List occupied_pages;
+
 } pcb;
 
 typedef struct pcb_listNode{

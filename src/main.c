@@ -48,17 +48,21 @@ void init_thread() {
     add_test("times");
     add_test("getpid");
     add_test("getppid");
-    add_test("read");
-    add_test("open");
-    add_test("close");
-    add_test("openat");
-    add_test("getcwd");
-    add_test("dup");
+//    add_test("read");
+//    add_test("open");
+//    add_test("close");
+//    add_test("openat");
+//    add_test("getcwd");
+//    add_test("dup");
 
     schedule();
 }
 
 int main() {
+    lty(get_kernel_stack_base());
+    lty(get_kernel_stack_end());
+    lty(__kernel_stack_base);
+
     printf("[OS] Memory Init.\n");
     init_memory();
     init_kernel_heap();
