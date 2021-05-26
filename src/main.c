@@ -60,6 +60,7 @@ void init_thread() {
     add_test("/getdents");
     add_test("/dup2");
     add_test("/wait");
+    add_test("/exit");
 
     schedule();
 }
