@@ -16,6 +16,7 @@ bool __kernel_isEmpty(int node){
 }
 
 void __kernel_push_up(int node) {
+    assert(cnt.l!=cnt.r);
     if(!__kernel_isEmpty(L(node))){
         cnt.left_boarder_space = kernel_heap_nodes[L(node)].left_boarder_space;
     }else{
@@ -36,6 +37,7 @@ void __kernel_push_up(int node) {
 }
 
 void __kernel_init_pages(int node, int l, int r) {
+    assert(kernel_heap_size*4/__align_unit);
     cnt.set = 0;
     cnt.l = l;
     cnt.r = r;
@@ -76,6 +78,7 @@ int __kernel_find_space(int node, int size) {
 }
 
 void __kernel_push_down(int node) {
+    assert(cnt.l!=cnt.r);
     if (cnt.set == 1) {
         kernel_heap_nodes[L(node)].set = cnt.set;
         kernel_heap_nodes[L(node)].max_space =kernel_heap_nodes[L(node)].left_boarder_space =kernel_heap_nodes[L(node)].right_boarder_space = 0;
@@ -114,14 +117,22 @@ void __kernel_update(int node, int l, int r, int set) {
     }
 }
 
+size_t total_alloc=0;
+
 void init_kernel_heap(){
+    total_alloc=0;
     __kernel_heap_base=alloc_page(kernel_heap_size);
+    memset(kernel_heap_nodes,0,
+           sizeof(__Kernel_SegmentTreeNode)*
+           kernel_heap_size*4/__align_unit);
     int page_count=kernel_heap_size/__align_unit;
     __kernel_init_pages(1, 0, page_count-1);
 }
 
 size_t k_malloc(size_t size){
     int count=(size+__align_unit-1)/__align_unit;
+    total_alloc+=count*__align_unit;
+//    printf("alloc %d mem, tot=%d\n",count*__align_unit,total_alloc);
     int start=__kernel_find_space(1, count);
     if(start==-1){
         printf("Can't alloc heap!\n");
@@ -129,6 +140,7 @@ size_t k_malloc(size_t size){
     }
     __kernel_update(1, start, start+count-1, 1);
     __kernel_alloc_length[start]=count;
+//    printf("[alloc] size=%d %d - %d\n",count,start,start+count-1);
     return __kernel_heap_base+start*__align_unit;
 }
 

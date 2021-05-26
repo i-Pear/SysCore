@@ -6,6 +6,7 @@
 #include "lib/file_describer.h"
 #include "lib/self_test.h"
 #include "lib/kernel_stack.h"
+#include "lib/vfs.h"
 
 void print_sp() {
     lty(register_read_sp());
@@ -26,13 +27,14 @@ void print_sp() {
 void init_thread() {
     printf("[OS] bsp init.\n");
     bsp_init();
-    printf("[OS] Init Fs.\n");
     FATFS fs;
     FRESULT res_sd;
     res_sd = f_mount(&fs, "", 1);
     if (res_sd != FR_OK) {
         panic("fat init failed")
     }
+    printf("[OS] Init VFS.\n");
+    vfs_init();
     printf("[OS] Interrupt & Timer Interrupt Open.\n");
     interrupt_timer_init();
     printf("[OS] init scheduler.\n");
@@ -40,20 +42,22 @@ void init_thread() {
     init_file_describer();
     init_self_tests();
 
-    add_test("clone");
-    add_test("yield");
-    add_test("fork");
-    add_test("write");
-    add_test("uname");
-    add_test("times");
-    add_test("getpid");
-    add_test("getppid");
-    add_test("read");
-    add_test("open");
-    add_test("close");
-    add_test("openat");
-    add_test("getcwd");
-    add_test("dup");
+    add_test("/yield");
+    add_test("/fork");
+    add_test("/clone");
+    add_test("/write");
+    add_test("/uname");
+    add_test("/times");
+    add_test("/getpid");
+    add_test("/getppid");
+    add_test("/open");
+    add_test("/read");
+    add_test("/close");
+    add_test("/openat");
+    add_test("/getcwd");
+    add_test("/dup");
+    add_test("/chdir");
+    add_test("/getdents");
 
     schedule();
 }

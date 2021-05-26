@@ -2268,7 +2268,7 @@ static void create_xdir (
 	dirb[1 * SZDIRE + XDIR_Type] = ET_STREAM;
 
 	/* Create file-name entries */
-	i = SZDIRE * 2;	/* Top of file_name entries */
+	i = SZDIRE * 2;	/* Top of name entries */
 	nlen = nc1 = 0; wc = 1;
 	do {
 		dirb[i++] = ET_FILENAME; dirb[i++] = 0;
