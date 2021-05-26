@@ -26,20 +26,14 @@ void print_satp() {
 void init_thread() {
     printf("[OS] bsp init.\n");
     bsp_init();
-    printf("[OS] Init Fs.\n");
     FATFS fs;
     FRESULT res_sd;
     res_sd = f_mount(&fs, "", 1);
     if (res_sd != FR_OK) {
         panic("fat init failed")
     }
-    printf("------------- test vfs\n");
+    printf("[OS] Init VFS.\n");
     vfs_init();
-
-    Inode * inode = vfs_search(&vfs_super_node.root_inode, "/");
-    printf("%s\n", inode->name);
-
-    shutdown();
     printf("[OS] Interrupt & Timer Interrupt Open.\n");
     interrupt_timer_init();
     printf("[OS] init scheduler.\n");
@@ -48,27 +42,30 @@ void init_thread() {
     init_self_tests();
 
 //    add_test("yield");
-    add_test("fork");
-    add_test("clone");
-    add_test("write");
-    add_test("uname");
-    add_test("times");
-    add_test("getpid");
-    add_test("getppid");
-    add_test("read");
-    add_test("open");
-    add_test("close");
-    add_test("openat");
-    add_test("getcwd");
-    add_test("dup");
-//    add_test("dup2");
-    add_test("chdir");
-    add_test("getdents");
+//    add_test("fork");
+//    add_test("clone");
+//    add_test("write");
+//    add_test("uname");
+//    add_test("times");
+//    add_test("getpid");
+//    add_test("getppid");
+    add_test("/open");
+    add_test("/read");
+    add_test("/close");
+    add_test("/openat");
+    add_test("/getcwd");
+    add_test("/dup");
+    add_test("/chdir");
+    add_test("/getdents");
 
     schedule();
 }
 
 int main() {
+    printf("%d ",sizeof(FIL));
+
+    printf("%d",sizeof(DIR));
+
     printf("[OS] Memory Init.\n");
     init_memory();
     init_kernel_heap();

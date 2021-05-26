@@ -1,6 +1,7 @@
 #include "scheduler.h"
 #include "../driver/fatfs/ff.h"
 #include "self_test.h"
+#include "vfs.h"
 
 int global_pid=1;
 
@@ -184,18 +185,20 @@ int get_running_ppid(){
 }
 
 void create_process(const char *elf_path) {
-    // read file
-    FIL fnew;
-    int res = f_open(&fnew, elf_path, FA_READ);
-    if(res != FR_OK){
-        panic("read error")
+    Inode * inode = vfs_open((char * )elf_path, O_RDONLY, S_IFREG);
+    if(inode == null){
+        printf("open %s fail\n", elf_path);
+        panic("")
     }
-    int file_size = fnew.obj.objsize;
+    int file_size = (int)inode->data->fat32.obj.objsize;
     char *elf_file_cache = alloc_page(file_size);
-    printf("Start read file...\n");
-    uint32_t read_bytes;
-    f_read(&fnew, elf_file_cache, file_size, &read_bytes);
-    f_close(&fnew);
+    printf("Start read file %s\n", elf_path);
+    int read_bytes = vfs_read(inode, elf_file_cache, file_size);
+    if(read_bytes < 0){
+        printf("read %s fail\n", elf_path);
+        panic("")
+    }
+    vfs_close(inode);
     printf("File read successfully.\n");
 
     size_t elf_page_base,entry,elf_page_size;

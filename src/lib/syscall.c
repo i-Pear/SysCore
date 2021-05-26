@@ -44,7 +44,7 @@ Context *syscall(Context *context) {
             int fd = (int) context->a0;
             char *buf = (char *) get_actual_page(context->a1);
             int count = (int) context->a2;
-            return(fd_write_to_file(fd, buf, count));
+            return(vfs_write(file_describer_array[fd].data.inode, buf, count));
 #undef debug_write
             break;
         }
@@ -75,85 +75,73 @@ Context *syscall(Context *context) {
             // TODO: 暂不支持文件所有权描述
             size_t dir_fd = context->a0;
             char *filename = (char *) get_actual_page(context->a1);
-            size_t flag = context->a2, flag_bak = flag;
+            size_t flag = context->a2;
 
             debug_openat(dir_fd);
             debug_openat(flag);
 
             if (filename[0] == '.' && filename[1] == '/') {
-                filename += 2;
+                char* cwd = get_running_cwd();
+//                printf("cwd: %s\n", cwd);
+                char* new_filename = (char *)k_malloc(strlen(cwd) + 2 + strlen(filename + 2));
+                sprintf(new_filename, "%s/%s", cwd, filename + 2);
+                filename = new_filename + 1;
             }else if(filename[0] == '.' && strlen(filename) == 1){
-                // TODO: need VFS
-                filename[0] = '/';
+                filename = get_running_cwd();
+                // 他不是个文件夹，就让他是个文件夹
+                flag |= O_DIRECTORY;
             }
             if (dir_fd != AT_FDCWD) {
-                if (file_describer_array[dir_fd].fileDescriberType != FILE_DESCRIBER_DIR) {
+                int origin_fd = fd_get_origin_fd((int)dir_fd);
+                if(!(file_describer_array[origin_fd].data.inode->flag & S_IFDIR)){
                     printf("fd %d not direct a dir\n", dir_fd);
                     panic("")
                 }
-                int filename_len = strlen(filename);
-                int dir_filename_len = strlen(file_describer_array[dir_fd].extraData.dir_name);
-                // +2 means '/' && '\0'
-                char *new_file_name = (char *) k_malloc(dir_filename_len + filename_len + 2);
-                memcpy(new_file_name, file_describer_array[dir_fd].extraData.dir_name, dir_filename_len);
-                new_file_name[dir_filename_len] = '/';
-                memcpy(new_file_name + dir_filename_len + 1, filename, filename_len);
-                new_file_name[dir_filename_len + filename_len] = '\0';
-                filename = new_file_name;
+                char* dir_path = file_describer_array[origin_fd].path;
+                char* new_filename = (char*) k_malloc(strlen(dir_path) + 2 + strlen(filename));
+                sprintf(new_filename, "%s/%s", dir_path, filename);
+                filename = new_filename;
             }
-
+//            printf("filename: %s\n", filename);
             int fd = fd_search_a_empty_file_describer();
             bind_file_describer(fd);
 
             debug_openat(fd);
 
-            BYTE mode = 0;
             enum File_Access_Type fileAccessType;
 
             if (flag == O_RDONLY)
-                fileAccessType = FILE_ACCESS_READ, mode = FA_READ, flag -= O_RDONLY;
+                fileAccessType = FILE_ACCESS_READ;
             else if (flag == O_WRONLY)
-                fileAccessType = FILE_ACCESS_WRITE, mode = FA_WRITE, flag -= O_WRONLY;
+                fileAccessType = FILE_ACCESS_WRITE;
             else if (flag & O_RDWR)
-                fileAccessType = FILE_ACCESS_WRITE | FILE_ACCESS_READ, mode = FA_READ | FA_WRITE, flag -= O_RDWR;
+                fileAccessType = FILE_ACCESS_WRITE | FILE_ACCESS_READ;
 
-            if (flag & O_CREATE)mode |= FA_CREATE_ALWAYS, flag -= O_CREATE;
-
+//            printf("flag: 0x%x\n", flag);
             // 文件夹，提前返回
-            if ((flag & O_DIRECTORY) || (filename[0] == '/')) {
-                mode | FA_CREATE_ALWAYS, flag -= O_DIRECTORY;
+            if ((flag & O_DIRECTORY)) {
                 File_Describer_Data data;
-                FRESULT result = f_opendir(&data.fat32_dir, filename);
-                if (result != FR_OK) {
+                data.inode = vfs_open(filename, (int)flag, S_IFDIR);
+                if (data.inode == null) {
                     printf("can't open this dir: %s\n", filename);
                     panic("")
                 }
-                int dir_name_len = strlen(filename);
-                char *dir_name = (char *) k_malloc((dir_name_len + 1) * sizeof(char));
-                strcpy(dir_name, filename);
-                File_Describer_Extra_Data extraData;
-                extraData.dir_name = dir_name;
-                File_Describer_Create(fd, FILE_DESCRIBER_DIR, fileAccessType, data, extraData);
+                File_Describer_Create(fd, FILE_DESCRIBER_REGULAR, fileAccessType, data, filename);
                 return(fd);
                 break;
             }
 
-            if (flag != 0) {
-                printf("SYS_openat unsupported flag: 0x%x\n", flag_bak);
-                panic("")
-            }
-
             debug_openat(flag);
-            debug_openat(mode);
 
             File_Describer_Data data;
-            FRESULT result = f_open(&data.fat32, filename, mode);
-            if (result != FR_OK) {
+
+            data.inode = vfs_open(filename, (int)flag, S_IFREG);
+
+            if (data.inode == null) {
                 printf("can't open this file: %s\n", filename);
                 panic("")
             }
-            File_Describer_Extra_Data extraData = {.dir_name = null};
-            File_Describer_Create(fd, FILE_DESCRIBER_FILE, fileAccessType, data, extraData);
+            File_Describer_Create(fd, FILE_DESCRIBER_REGULAR, fileAccessType, data, filename);
 
             return(fd);
             break;
@@ -177,13 +165,11 @@ Context *syscall(Context *context) {
             debug_read(count);
 
             int origin_fd = fd_get_origin_fd((int) fd);
-            assert(file_describer_array[origin_fd].fileDescriberType == FILE_DESCRIBER_FILE)
-            uint32 ret;
-            FRESULT result = f_read(&file_describer_array[origin_fd].data.fat32, buf, count, &ret);
-            if (result != FR_OK) {
+            int read_bytes = vfs_read(file_describer_array[origin_fd].data.inode, buf, (int)count);
+            if (read_bytes < 0) {
                 return(-1);
             } else {
-                return(ret);
+                return(read_bytes);
             }
 #undef debug_read
             break;
@@ -255,8 +241,7 @@ Context *syscall(Context *context) {
             bind_file_describer(new_fd);
             File_Describer_Plus(fd);
             File_Describer_Data data = {.redirect_fd = fd};
-            File_Describer_Extra_Data fakeExtraData = {.dir_name = null};
-            File_Describer_Create(new_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_READ, data, fakeExtraData);
+            File_Describer_Create(new_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_READ, data, null);
             return (new_fd);
 #undef debug_dup
             break;
@@ -284,8 +269,7 @@ Context *syscall(Context *context) {
             int actual_fd = fd_search_a_empty_file_describer();
 
             File_Describer_Data data = {.redirect_fd = (int) old_fd};
-            File_Describer_Extra_Data extraData = {.dir_name = null};
-            File_Describer_Create(actual_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_WRITE, data, extraData);
+            File_Describer_Create(actual_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_WRITE, data,null);
             File_Describer_Plus((int) old_fd);
             // TODO: 这里返回了new_fd但是还没有建立虚拟映射关系,只建立了系统和actual_fd之间的关系
             bind_file_describer(actual_fd);
@@ -326,19 +310,20 @@ Context *syscall(Context *context) {
             size_t fd = context->a0;
             char* buf = (char *)get_actual_page(context->a1);
             size_t len = context->a2;
-            if(file_describer_array[fd].fileDescriberType != FILE_DESCRIBER_DIR){
+            if(!(file_describer_array[fd].data.inode->flag & S_IFDIR)){
                 return (-1);
                 break;
             }
-            FILINFO fileInfo;
-            int result = f_readdir(&file_describer_array[fd].data.fat32_dir, &fileInfo);
-            if(result != FR_OK){
-                return (-1);
+
+            Inode * inode = vfs_search(&vfs_super_node.root_inode, file_describer_array[fd].path);
+            if(inode == null || inode->first_child == null){
+                return(-1);
                 break;
             }
-            // TODO: 只实现了一个文件，一个文件名
-            struct linux_dirent64* dirent64 = (struct linux_dirent64*)buf;
-            strcpy(dirent64->d_name, fileInfo.fname);
+
+            struct linux_dirent64* res = (struct linux_dirent64*)buf;
+            strcpy(res->d_name, inode->first_child->name);
+
             return(len);
 #undef debug_getdents64
             break;

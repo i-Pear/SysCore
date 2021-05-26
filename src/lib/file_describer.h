@@ -4,11 +4,10 @@
 #include "../driver/fatfs/ff.h"
 #include "stdbool.h"
 #include "stl.h"
+#include "vfs.h"
 
 enum File_Describer_Type{
-    FILE_DESCRIBER_FILE,
-    FILE_DESCRIBER_PIPE,
-    FILE_DESCRIBER_DIR,
+    FILE_DESCRIBER_REGULAR,
     FILE_DESCRIBER_REDIRECT
 };
 
@@ -18,26 +17,21 @@ enum File_Access_Type{
 };
 
 typedef union{
-    FIL fat32;
-    DIR fat32_dir;
-    int pipe_id;
+    Inode *inode;
     int redirect_fd;
 } File_Describer_Data;
-
-typedef union {
-    char* dir_name;
-} File_Describer_Extra_Data;
 
 typedef struct {
     enum File_Describer_Type fileDescriberType;
     enum File_Access_Type fileAccessType;
     File_Describer_Data data;
-    File_Describer_Extra_Data extraData;
+    char* path;
 } File_Describer;
 
 #define FILE_DESCRIBER_ARRAY_LENGTH 100
 
 extern File_Describer file_describer_array[];
+extern int file_describer_array_occupied[];
 
 /**
  * 初始化VFS
@@ -57,7 +51,7 @@ void File_Describer_Create(
         enum File_Describer_Type fileDescriberType,
         enum File_Access_Type fileAccessType,
         File_Describer_Data data,
-        File_Describer_Extra_Data extraData);
+        char* path);
 
 /**
  * fd引用计数加一
