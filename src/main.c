@@ -36,7 +36,8 @@ void init_thread() {
     printf("------------- test vfs\n");
     vfs_init();
 
-
+    Inode * inode = vfs_search(&vfs_super_node.root_inode, "/");
+    printf("%s\n", inode->name);
 
     shutdown();
     printf("[OS] Interrupt & Timer Interrupt Open.\n");
