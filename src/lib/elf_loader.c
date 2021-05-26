@@ -4,6 +4,7 @@ void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_p
     // check magic number
     if (_elf_data[0] != 0x7f || _elf_data[1] != 0x45 || _elf_data[2] != 0x4c || _elf_data[3] != 0x46) {
         printf("[ELF LOADER] Invalid ELF File! \n");
+        shutdown();
         return;
     }
     void *elf_start = (void *) _elf_data;
@@ -48,16 +49,18 @@ void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_p
         if (phdr[i].p_type != PT_LOAD)continue;
         if (phdr[i].p_filesz == 0)continue;
 
-        printf("[ELF LOADER] Copying Segment of size %d\n", phdr[i].p_filesz);
+//        printf("[ELF LOADER] Copying Segment of size %d\n", phdr[i].p_filesz);
 
         char *start = elf_start + phdr[i].p_offset;
         char *target_addr = phdr[i].p_vaddr + exec;
-        printf("[ELF LOADER] p_vaddr: 0x%x  exec: 0x%x\n", phdr[i].p_vaddr, exec);
-        printf("[ELF LOADER] Start memcpy! from 0x%x to 0x%x \n", start, target_addr);
+//        printf("[ELF LOADER] p_vaddr: 0x%x  exec: 0x%x\n", phdr[i].p_vaddr, exec);
+//        printf("[ELF LOADER] Start memcpy! from 0x%x to 0x%x \n", start, target_addr);
 
         memcpy(target_addr, start, phdr[i].p_filesz);
     }
 
     *elf_page_base=(size_t)exec;
     *entry=Ehdr->e_entry;
+
+    printf("[ELF LOADER] ELF loaded successfully\n");
 }

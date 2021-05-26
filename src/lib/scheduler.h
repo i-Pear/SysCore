@@ -26,9 +26,12 @@ typedef struct{
     char cwd[MAX_PATH_LENGTH];
 
     size_t_map occupied_file_describer;
-    size_t_List signal_list;
     size_t_List occupied_kernel_heap;
     size_t_List occupied_pages;
+
+    // wait related
+    size_t_List signal_list;
+    size_t wait_pid;
 
 } pcb;
 
@@ -84,7 +87,9 @@ void clone(int flags,size_t stack,int ptid);
 
 void yield();
 
-void exit_process();
+int wait();
+
+void exit_process(int exit_ret);
 
 void schedule();
 

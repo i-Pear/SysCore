@@ -9,6 +9,26 @@ int global_pid=1;
 // Warning: when do sth with running, sync with latest running_context first
 Context* running_context;
 
+pcb* search_by_pid(int pid){
+    // search in running
+    if(running!=null&&running->pid==pid)return running;
+    // search in runnable
+    pcb_listNode * cnt=runnable.start;
+    while (cnt!=null){
+        // printf(">> runnable pid=%d\n",cnt->pcb->pid);
+        if(cnt->pcb->pid==pid)return cnt->pcb;
+        cnt=cnt->next;
+    }
+    // search in blocked
+    cnt=blocked.start;
+    while (cnt!=null){
+        // printf(">> blocked pid=%d\n",cnt->pcb->pid);
+        if(cnt->pcb->pid==pid)return cnt->pcb;
+        cnt=cnt->next;
+    }
+    return null;
+}
+
 int get_new_pid(){
     return ++global_pid;
 }
@@ -49,7 +69,6 @@ void pcb_push_back(pcb_List* list,pcb* pcb){
     if(list->start==null&&list->end==null){
         // empty list
         pcb_listNode* new_node=k_malloc(sizeof(pcb_listNode));
-        lty(new_node);
         new_node->pcb=pcb;
         new_node->previous=null;
         new_node->next=null;
@@ -59,6 +78,7 @@ void pcb_push_back(pcb_List* list,pcb* pcb){
         pcb_listNode* new_node=k_malloc(sizeof(pcb_listNode));
         new_node->pcb=pcb;
         // link
+        new_node->next=null;
         new_node->previous=list->end;
         list->end->next=new_node;
         list->end=new_node;
@@ -78,6 +98,7 @@ void pcb_push_front(pcb_List* list,pcb* pcb){
         pcb_listNode* new_node=k_malloc(sizeof(pcb_listNode));
         new_node->pcb=pcb;
         // link
+        new_node->previous=null;
         new_node->next=list->start;
         list->start->previous=new_node;
         list->start=new_node;
@@ -126,7 +147,7 @@ void clone(int flags,size_t stack,int ptid){
     *child_pcb=*running;
     child_pcb->thread_context=child_context;
 
-    if(ptid!=0){
+    if(stack!=0&&ptid!=0){
         child_pcb->ppid=ptid;
     }else{
         child_pcb->ppid=running->pid;
@@ -271,7 +292,7 @@ void create_process(const char *elf_path) {
     child_pcb->stack_size=4096;
 
     // init lists
-    child_pcb->occupied_file_describer.start=null;
+    size_t_map_init(&child_pcb->occupied_file_describer);
     child_pcb->occupied_kernel_heap.start=child_pcb->occupied_kernel_heap.end=null;
     child_pcb->occupied_pages.start=child_pcb->occupied_pages.end=null;
     child_pcb->signal_list.start=child_pcb->signal_list.end=null;
@@ -289,7 +310,14 @@ void yield(){
     schedule();
 }
 
-void exit_process(){
+void exit_process(int exit_ret){
+    // printf("process %d start to exit\n",running->pid);
+    // send signal
+    pcb* parent= search_by_pid(running->ppid);
+    if(parent!=null){
+        // printf("unfreeze pid=%d\n",parent->pid);
+        size_t_list_push_back(&parent->signal_list,running->pid);
+    }
 //     dealloc_page(running->elf_page_base);
     // TODO: dealloc_page(running->page_table);
     // dealloc_page(running->stack);
@@ -312,15 +340,7 @@ void schedule(){
 
         __restore();
     }else{
-        if(pcb_list_is_empty(&runnable)){
-            if(has_next_test()){
-                create_process(get_next_test());
-                schedule();
-            }else{
-                printf("Nothing to run, halt.\n");
-                while (1);
-            }
-        }else{
+        if(!pcb_list_is_empty(&runnable)){
             // pick one to run
             running=runnable.start->pcb;
             lty(running);
@@ -334,7 +354,61 @@ void schedule(){
 
             // sync with running_context
             *running_context=*running->thread_context;
+
             __restore();
+        }else if(!pcb_list_is_empty(&blocked)){
+            // search one to unfreeze
+            pcb_listNode* cnt=blocked.start;
+            while (cnt!=null){
+//                printf("in blocked: %d\n",cnt->pcb->pid);
+                if(!size_t_list_is_empty(&cnt->pcb->signal_list)){
+                    // has signal, wake up
+                    running=cnt->pcb;
+                    // remove it from blocked list
+                    if(blocked.start==cnt)blocked.start=cnt->next;
+                    if(blocked.end==cnt)blocked.end=cnt->previous;
+                    if(cnt->previous!=null)cnt->previous->next=cnt->next;
+                    if(cnt->next!=null)cnt->next->previous=cnt->previous;
+                    k_free(cnt);
+                    // get signal to return value
+                    running->thread_context->a0=running->signal_list.start->data;
+                    size_t_list_pop_front(&running->signal_list);
+
+                    schedule();
+                }
+                cnt=cnt->next;
+            }
+            panic("There exists a dead waiting loop. All processes are blocked.");
+        }else{
+            if(has_next_test()){
+                create_process(get_next_test());
+                schedule();
+            }
+            else{
+                printf("Nothing to run, halt.\n");
+                while (1);
+            }
         }
     }
+}
+
+int wait(){
+//    printf("process %d start to wait\n",running->pid);
+    if(!size_t_list_is_empty(&running->signal_list)){
+        // return immediately
+        int ret=running->signal_list.start->data;
+        size_t_list_pop_front(&running->signal_list);
+        return ret;
+    }
+
+    // move to blocked list
+
+    // sync with running_context
+    *running->thread_context=*running_context;
+    running->thread_context->sepc+=4;
+    running->wait_pid=0;
+
+    pcb_push_back(&blocked, running);
+    running=null;
+    schedule();
 }

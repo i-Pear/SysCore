@@ -16,6 +16,7 @@ void size_t_list_push_back(size_t_List* list, size_t data){
     }else{
         size_t_listNode* new_node=k_malloc(sizeof(size_t_listNode));
         new_node->data=data;
+        new_node->next=null;
         // link
         list->end->next=new_node;
         list->end=new_node;
@@ -33,6 +34,7 @@ void size_t_list_push_front(size_t_List* list, size_t data){
     }else{
         size_t_listNode* new_node=k_malloc(sizeof(size_t_listNode));
         new_node->data=data;
+        new_node->next=null;
         // link
         new_node->next=list->start;
         list->start=new_node;

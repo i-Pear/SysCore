@@ -62,7 +62,7 @@ Context *syscall(Context *context) {
             break;
         }
         case SYS_exit: {
-            exit_process();
+            exit_process(context->a0);
             break;
         }
         case SYS_getppid: { lty(get_running_ppid());
@@ -359,7 +359,7 @@ Context *syscall(Context *context) {
             break;
         }
         case SYS_wait4: {
-            return(3);
+            return(wait());
             break;
         }
         case SYS_clone: {
