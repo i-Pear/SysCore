@@ -104,7 +104,7 @@ Context *syscall(Context *context) {
             }
 //            printf("filename: %s\n", filename);
             int fd = fd_search_a_empty_file_describer();
-            bind_file_describer(fd);
+            file_describer_bind(fd, fd);
 
             debug_openat(fd);
 
@@ -238,7 +238,7 @@ Context *syscall(Context *context) {
             // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
             int fd = (int) context->a0;
             int new_fd = fd_search_a_empty_file_describer();
-            bind_file_describer(new_fd);
+            file_describer_bind(new_fd, new_fd);
             File_Describer_Plus(fd);
             File_Describer_Data data = {.redirect_fd = fd};
             File_Describer_Create(new_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_READ, data, null);
@@ -272,7 +272,7 @@ Context *syscall(Context *context) {
             File_Describer_Create(actual_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_WRITE, data,null);
             File_Describer_Plus((int) old_fd);
             // TODO: 这里返回了new_fd但是还没有建立虚拟映射关系,只建立了系统和actual_fd之间的关系
-            bind_file_describer(actual_fd);
+            file_describer_bind(new_fd,actual_fd);
 
             return(new_fd);
 #undef debug_dup3
