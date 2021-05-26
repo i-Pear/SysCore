@@ -1,7 +1,5 @@
 #include "file_describer.h"
 
-// 最大文件描述符个数
-#define FILE_DESCRIBER_ARRAY_LENGTH 100
 // 保留文件描述符个数 fd = 1：stdout
 #define FILE_DESCRIBER_RESERVED_FD_COUNT 3
 
@@ -12,7 +10,7 @@ int fd_get_origin_fd(int fd){
     assert(fd >= 0)
     assert(fd < FILE_DESCRIBER_ARRAY_LENGTH)
     if(file_describer_array[fd].fileDescriberType == FILE_DESCRIBER_REDIRECT){
-        return fd_get_origin_fd(fd);
+        return fd_get_origin_fd(file_describer_array[fd].data.redirect_fd);
     }
     return fd;
 }

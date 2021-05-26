@@ -28,7 +28,8 @@ typedef struct {
     char* path;
 } File_Describer;
 
-#define FILE_DESCRIBER_ARRAY_LENGTH 100
+// 最大文件描述符个数
+#define FILE_DESCRIBER_ARRAY_LENGTH 120
 
 extern File_Describer file_describer_array[];
 extern int file_describer_array_occupied[];

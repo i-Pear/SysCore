@@ -40,11 +40,24 @@ Context *syscall(Context *context) {
             // count：要写入的字节数。
             // ssize_t ret = write(fd, buf, count);
             // 返回值：成功执行，返回写入的字节数。错误，则返回-1。
-
             int fd = (int) context->a0;
+
+//            printf("fd %d\n", fd);
+            if(file_describer_exists(fd)){
+                fd = (int)file_describer_convert(fd);
+            }
+//            printf("fd %d\n", fd);
+            fd = fd_get_origin_fd(fd);
+//            printf("fd %d\n", fd);
+
             char *buf = (char *) get_actual_page(context->a1);
             int count = (int) context->a2;
-            return(vfs_write(file_describer_array[fd].data.inode, buf, count));
+
+//            printf("fd %d\n", fd);
+
+
+            int write_bytes = vfs_write(file_describer_array[fd].data.inode, buf, count);
+            return(write_bytes);
 #undef debug_write
             break;
         }
@@ -272,6 +285,8 @@ Context *syscall(Context *context) {
             File_Describer_Create(actual_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_WRITE, data,null);
             File_Describer_Plus((int) old_fd);
             // TODO: 这里返回了new_fd但是还没有建立虚拟映射关系,只建立了系统和actual_fd之间的关系
+//            printf("new fd: %d\n", new_fd);
+//            printf("actual fd: %d\n", actual_fd);
             file_describer_bind(new_fd,actual_fd);
 
             return(new_fd);

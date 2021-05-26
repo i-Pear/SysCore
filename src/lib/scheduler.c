@@ -290,7 +290,7 @@ void yield(){
 }
 
 void exit_process(){
-    // dealloc_page(running->elf_page_base);
+//     dealloc_page(running->elf_page_base);
     // TODO: dealloc_page(running->page_table);
     // dealloc_page(running->stack);
     

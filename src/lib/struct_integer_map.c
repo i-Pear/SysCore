@@ -79,6 +79,7 @@ size_t size_t_map_get(size_t_map* map,size_t key){
         }
         cnt=cnt->next;
     }
-    panic("in map_get: key not exist!");
+    printf("in map_get: key %d not exist!\n", key);
+    panic("");
     return 0;
 }

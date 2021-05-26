@@ -202,6 +202,8 @@ int vfs_read(Inode *inode,  char buf[], int count){
 }
 
 int vfs_write(Inode* inode, char buf[], int count){
+//    printf("inode 0x%x\n", inode);
+//    printf("flag %x\n", inode->flag);
     if(inode->flag & S_IFCHR){
         for (int i = 0; i < count; ++i) {
             putchar(buf[i]);

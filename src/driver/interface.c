@@ -24,4 +24,6 @@ void *memmove(void *dst, const void *src, uint n) {
 
 void bsp_init(){
     fpioa_pin_init();
+//    sysctl_pll_enable(SYSCTL_PLL1);
+//    syscyl_clock_enable(SYSCTL_CLOCK_PLL1);
 }
