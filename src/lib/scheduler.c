@@ -336,7 +336,7 @@ void exit_process(int exit_ret){
     pcb* parent= search_by_pid(running->ppid);
     if(parent!=null){
         // printf("unfreeze pid=%d\n",parent->pid);
-        size_t_list_push_back(&parent->signal_list,running->pid);
+        pair_int_list_push_back(&parent->signal_list, make_pair(running->pid,exit_ret));
     }
 //     dealloc_page(running->elf_page_base);
     // TODO: dealloc_page(running->page_table);
@@ -391,7 +391,8 @@ void schedule(){
                     if(cnt->next!=null)cnt->next->previous=cnt->previous;
                     k_free(cnt);
                     // get signal to return value
-                    running->thread_context->a0=running->signal_list.start->data;
+                    running->thread_context->a0=running->signal_list.start->data.first;
+                    *running->wstatus=running->signal_list.start->data.second<<8;
                     size_t_list_pop_front(&running->signal_list);
 
                     schedule();
@@ -412,11 +413,12 @@ void schedule(){
     }
 }
 
-int wait(){
+int wait(int* wstatus){
 //    printf("process %d start to wait\n",running->pid);
     if(!size_t_list_is_empty(&running->signal_list)){
         // return immediately
-        int ret=running->signal_list.start->data;
+        int ret=running->signal_list.start->data.first;
+        *wstatus=running->signal_list.start->data.second<<8;
         size_t_list_pop_front(&running->signal_list);
         return ret;
     }
@@ -427,6 +429,7 @@ int wait(){
     *running->thread_context=*running_context;
     running->thread_context->sepc+=4;
     running->wait_pid=0;
+    running->wstatus=wstatus;
 
     pcb_push_back(&blocked, running);
     running=null;

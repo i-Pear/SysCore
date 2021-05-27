@@ -7,6 +7,7 @@
 #include "lib/self_test.h"
 #include "lib/kernel_stack.h"
 #include "lib/vfs.h"
+#include "lib/times.h"
 
 void print_sp()  {
     lty(register_read_sp());
@@ -25,6 +26,8 @@ void print_sp()  {
  * 所以这里需要恢复现场+将模拟硬件自动完成的动作。
  */
 void init_thread() {
+    printf("[OS] times init.\n");
+    init_times();
     printf("[OS] bsp init.\n");
     bsp_init();
     FATFS fs;
@@ -42,14 +45,14 @@ void init_thread() {
     init_file_describer();
     init_self_tests();
 
-    add_test("/yield");
-    add_test("/fork");
-    add_test("/clone");
-    add_test("/write");
-    add_test("/uname");
-    add_test("/times");
-    add_test("/getpid");
-    add_test("/getppid");
+//    add_test("/yield");
+//    add_test("/fork");
+//    add_test("/clone");
+//    add_test("/write");
+//    add_test("/uname");
+//    add_test("/times");
+//    add_test("/getpid");
+//    add_test("/getppid");
     add_test("/open");
     add_test("/read");
     add_test("/close");
@@ -61,9 +64,11 @@ void init_thread() {
     add_test("/wait");
     add_test("/exit");
     add_test("/execve");
-    add_test("/gettimeofday");
+//    add_test("/gettimeofday");
     add_test("/mkdir_");
     add_test("/chdir");
+//    add_test("/waitpid");
+//    add_test("/sleep");
 
     schedule();
 }

@@ -28,7 +28,7 @@ typedef struct {
 } Vec;
 
 typedef struct {
-    int first,second;
+    size_t first,second;
 } pair_int;
 
 pair_int make_pair(int a,int b);

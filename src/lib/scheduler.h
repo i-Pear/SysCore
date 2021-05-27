@@ -6,6 +6,7 @@
 #include "interrupt.h"
 #include "register.h"
 #include "struct_integer_list.h"
+#include "struct_pair_list.h"
 #include "struct_integer_map.h"
 
 #define MAX_PATH_LENGTH 32
@@ -30,7 +31,8 @@ typedef struct{
     size_t_List occupied_pages;
 
     // wait related
-    size_t_List signal_list;
+    pair_int_List signal_list;
+    int* wstatus;
     size_t wait_pid;
 
 } pcb;
@@ -87,7 +89,7 @@ void clone(int flags,size_t stack,int ptid);
 
 void yield();
 
-int wait();
+int wait(int* wstatus);
 
 void execute(const char* exec_path);
 

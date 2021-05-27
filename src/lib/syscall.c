@@ -413,7 +413,13 @@ Context *syscall(Context *context) {
             break;
         }
         case SYS_wait4: {
-            return(wait());
+            return(wait(get_actual_page(context->a1)));
+            break;
+        }
+        case SYS_nanosleep:{
+            TimeVal* timeVal=get_actual_page(context->a0);
+            time_seconds+=timeVal->sec;
+            time_macro_seconds+=timeVal->usec;
             break;
         }
         case SYS_clone: {

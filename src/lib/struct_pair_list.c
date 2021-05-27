@@ -1,20 +1,19 @@
-#include "struct_integer_list.h"
-#include "kernel_heap.h"
+#include "struct_pair_list.h"
 
-bool size_t_list_is_empty(size_t_List* list){
+bool pair_int_list_is_empty(pair_int_List* list){
     return list->start==null;
 }
 
-void size_t_list_push_back(size_t_List* list, size_t data){
+void pair_int_list_push_back(pair_int_List* list, pair_int data){
     if(list->start==null&&list->end==null){
         // empty list
-        size_t_listNode* new_node=k_malloc(sizeof(size_t_listNode));
+        pair_int_listNode* new_node=k_malloc(sizeof(pair_int_listNode));
         new_node->data=data;
         new_node->next=null;
 
         list->start=list->end=new_node;
     }else{
-        size_t_listNode* new_node=k_malloc(sizeof(size_t_listNode));
+        pair_int_listNode* new_node=k_malloc(sizeof(pair_int_listNode));
         new_node->data=data;
         new_node->next=null;
         // link
@@ -23,16 +22,16 @@ void size_t_list_push_back(size_t_List* list, size_t data){
     }
 }
 
-void size_t_list_push_front(size_t_List* list, size_t data){
+void pair_int_list_push_front(pair_int_List* list, pair_int data){
     if(list->start==null&&list->end==null){
         // empty list
-        size_t_listNode* new_node=k_malloc(sizeof(size_t_listNode));
+        pair_int_listNode* new_node=k_malloc(sizeof(pair_int_listNode));
         new_node->data=data;
         new_node->next=null;
 
         list->start=list->end=new_node;
     }else{
-        size_t_listNode* new_node=k_malloc(sizeof(size_t_listNode));
+        pair_int_listNode* new_node=k_malloc(sizeof(pair_int_listNode));
         new_node->data=data;
         new_node->next=null;
         // link
@@ -41,23 +40,22 @@ void size_t_list_push_front(size_t_List* list, size_t data){
     }
 }
 
-void size_t_list_pop_front(size_t_List* list){
+void pair_int_list_pop_front(pair_int_List* list){
     if(list->start==list->end){
         // has only one
-        size_t_listNode* firstNode=list->start;
+        pair_int_listNode* firstNode=list->start;
         list->start=list->end=null;
         k_free(firstNode);
     }else{
-        size_t_listNode* firstNode=list->start;
+        pair_int_listNode* firstNode=list->start;
         list->start=firstNode->next;
         k_free(firstNode);
     }
 }
 
-void size_t_list_copy(size_t_List* origin,size_t_List* dest){
-    size_t_listNode * cnt=origin->start;
+void pair_int_list_copy(pair_int_List* origin,pair_int_List* dest){
+    pair_int_listNode * cnt=origin->start;
     while (cnt!=null){
-        size_t_list_push_back(dest,cnt->data);
+        pair_int_list_push_back(dest,cnt->data);
     }
 }
-
