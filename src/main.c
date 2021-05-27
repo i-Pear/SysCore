@@ -8,7 +8,7 @@
 #include "lib/kernel_stack.h"
 #include "lib/vfs.h"
 
-void print_sp() {
+void print_sp()  {
     lty(register_read_sp());
 }
 
