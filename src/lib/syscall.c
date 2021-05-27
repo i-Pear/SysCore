@@ -478,6 +478,14 @@ Context *syscall(Context *context) {
             yield();
             break;
         }
+        case SYS_mount: {
+            return (0);
+            break;
+        }
+        case SYS_umount2: {
+            return (0);
+            break;
+        }
         default: {
             printf("[SYSCALL] Unhandled Syscall: %d\n", context->a7);
             // shutdown();
