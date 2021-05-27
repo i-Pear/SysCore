@@ -20,6 +20,7 @@
     .global get_kernel_stack_base
     .global __kernel_stack_base
     .global __kernel_stack_end
+    .global __get_time
 
     .extern __interrupt
     .extern set_next_timeout
@@ -100,6 +101,10 @@ get_kernel_stack_end:
 
 get_kernel_stack_base:
     la a0, __kernel_stack_base
+    ret
+
+__get_time:
+    rdtime a0
     ret
 
 close_interrupt:

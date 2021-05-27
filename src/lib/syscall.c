@@ -5,6 +5,7 @@
 #include "external_structs.h"
 #include "file_describer.h"
 #include "vfs.h"
+#include "times.h"
 
 #define return(x) context->a0=x
 #define get_actual_page(x) ((x>0x80000000)?x:x+ get_running_elf_page())
@@ -63,6 +64,10 @@ Context *syscall(Context *context) {
         }
         case SYS_execve:{
             execute(get_actual_page(context->a0));
+            break;
+        }
+        case SYS_gettimeofday:{
+            get_timespec(get_actual_page(context->a0));
             break;
         }
         case SYS_exit: {
