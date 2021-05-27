@@ -10,7 +10,7 @@
 #define L(x) (x*2)
 #define R(x) (x*2+1)
 
-#define kernel_heap_size 4096*22
+#define kernel_heap_size 4096*29
 #define __align_unit 16
 
 typedef struct {
