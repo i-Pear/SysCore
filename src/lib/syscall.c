@@ -458,6 +458,7 @@ Context *syscall(Context *context) {
             TimeVal *timeVal = get_actual_page(context->a0);
             time_seconds += timeVal->sec;
             time_macro_seconds += timeVal->usec;
+            return(0);
             break;
         }
         case SYS_clone: {
