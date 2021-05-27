@@ -62,7 +62,7 @@ Context *syscall(Context *context) {
             break;
         }
         case SYS_execve:{
-            execute(context->a0);
+            execute(get_actual_page(context->a0));
             break;
         }
         case SYS_exit: {
