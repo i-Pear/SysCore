@@ -103,10 +103,6 @@ get_kernel_stack_base:
     la a0, __kernel_stack_base
     ret
 
-__get_time:
-    rdtime a0
-    ret
-
 close_interrupt:
     csrwi sie, 0
     ret

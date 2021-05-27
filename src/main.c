@@ -62,6 +62,7 @@ void init_thread() {
     add_test("/wait");
     add_test("/exit");
     add_test("/execve");
+    add_test("/gettimeofday");
 
     schedule();
 }

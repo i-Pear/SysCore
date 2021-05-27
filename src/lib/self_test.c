@@ -3,7 +3,7 @@
 
 int test_cnt;
 int test_total;
-const char* tests[20];
+const char* tests[50];
 
 void add_test(const char* name){
     tests[test_total++]=name;

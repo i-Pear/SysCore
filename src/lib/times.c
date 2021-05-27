@@ -1,7 +1,8 @@
 #include "times.h"
+#include "sbi.h"
 
 void get_timespec(TimeVal* timeVal){
-    size_t time=__get_time();
+    size_t time=read_time();
     size_t ms=time/1000;
 
     // seconds since 1970
