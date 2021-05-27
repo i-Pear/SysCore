@@ -51,7 +51,14 @@ Context *syscall(Context *context) {
             fd = fd_get_origin_fd(fd);
 //            printf("fd %d\n", fd);
 
+//            printf("[PRINT] origin buf=0x%x\n",context->a1);
             char *buf = (char *) get_actual_page(context->a1);
+//            printf("----------------------\n");
+//            for(int i=0;i<10;i++){
+//                printf("0x%x ",buf[i]);
+//            }
+//            printf("\n----------------------\n");
+//            printf("[PRINT] buf=0x%x\n",buf);
             int count = (int) context->a2;
 
 //            printf("fd %d\n", fd);

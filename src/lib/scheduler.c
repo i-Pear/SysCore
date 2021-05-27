@@ -252,7 +252,8 @@ void create_process(const char *elf_path) {
      * 栈通常向低地址方向增长，故此处增加__page_size
      */
      size_t stack_page=(size_t) alloc_page(4096);
-     thread_context->sp = stack_page + __page_size;
+     memset(stack_page,0,4096);
+     thread_context->sp = stack_page + __page_size-2*8;
 //    size_t stack=(size_t) alloc_page(4096);
 //    thread_context.sp=4096+0x40000000;
     /**
