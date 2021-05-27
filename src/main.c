@@ -61,6 +61,7 @@ void init_thread() {
     add_test("/dup2");
     add_test("/wait");
     add_test("/exit");
+    add_test("/execve");
 
     schedule();
 }
