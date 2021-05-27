@@ -61,6 +61,10 @@ Context *syscall(Context *context) {
 #undef debug_write
             break;
         }
+        case SYS_execve:{
+            execute(context->a0);
+            break;
+        }
         case SYS_exit: {
             exit_process(context->a0);
             break;

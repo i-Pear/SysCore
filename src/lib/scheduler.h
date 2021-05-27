@@ -89,6 +89,8 @@ void yield();
 
 int wait();
 
+void execute(const char* exec_path);
+
 void exit_process(int exit_ret);
 
 void schedule();

@@ -310,6 +310,11 @@ void yield(){
     schedule();
 }
 
+void execute(const char* exec_path){
+    create_process(exec_path);
+    exit_process(0);
+}
+
 void exit_process(int exit_ret){
     // printf("process %d start to exit\n",running->pid);
     // send signal
