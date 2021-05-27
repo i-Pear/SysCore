@@ -68,6 +68,7 @@ Context *syscall(Context *context) {
         }
         case SYS_gettimeofday: {
             get_timespec(get_actual_page(context->a0));
+            return(0);
             break;
         }
         case SYS_exit: {
