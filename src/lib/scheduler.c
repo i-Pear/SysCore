@@ -311,8 +311,20 @@ void yield(){
 }
 
 void execute(const char* exec_path){
-    create_process(exec_path);
-    exit_process(0);
+    // deal with path "/"
+    if(exec_path[0]!='/'){
+        char buf[strlen(exec_path)+ strlen(running->cwd)+2];
+        if(strcmp(running->cwd,"/")==0){
+            sprintf(buf,"/%s",exec_path);
+        }else{
+            sprintf(buf,"%s/%s",running->cwd,exec_path);
+        }
+        create_process(exec_path);
+        exit_process(0);
+    }else{
+        create_process(exec_path);
+        exit_process(0);
+    }
 }
 
 void exit_process(int exit_ret){

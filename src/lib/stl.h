@@ -71,7 +71,7 @@ void memcpy(void *to, void *from, size_t size);
 
 void memset(void* p,char content,int size);
 
-int strlen(char *s);
+int strlen(const char *s);
 
 void strcpy(char* to, char* from);
 
