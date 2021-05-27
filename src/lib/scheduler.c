@@ -381,7 +381,7 @@ void schedule(){
             pcb_listNode* cnt=blocked.start;
             while (cnt!=null){
 //                printf("in blocked: %d\n",cnt->pcb->pid);
-                if(!size_t_list_is_empty(&cnt->pcb->signal_list)){
+                if(!pair_int_list_is_empty(&cnt->pcb->signal_list)){
                     // has signal, wake up
                     running=cnt->pcb;
                     // remove it from blocked list
@@ -393,7 +393,7 @@ void schedule(){
                     // get signal to return value
                     running->thread_context->a0=running->signal_list.start->data.first;
                     *running->wstatus=running->signal_list.start->data.second<<8;
-                    size_t_list_pop_front(&running->signal_list);
+                    pair_int_list_pop_front(&running->signal_list);
 
                     schedule();
                 }
@@ -415,11 +415,11 @@ void schedule(){
 
 int wait(int* wstatus){
 //    printf("process %d start to wait\n",running->pid);
-    if(!size_t_list_is_empty(&running->signal_list)){
+    if(!pair_int_list_is_empty(&running->signal_list)){
         // return immediately
         int ret=running->signal_list.start->data.first;
         *wstatus=running->signal_list.start->data.second<<8;
-        size_t_list_pop_front(&running->signal_list);
+        pair_int_list_pop_front(&running->signal_list);
         return ret;
     }
 

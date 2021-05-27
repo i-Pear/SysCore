@@ -1,11 +1,12 @@
 #include "times.h"
 #include "sbi.h"
+#include "stdio.h"
 
 size_t time_seconds=0;
 size_t time_macro_seconds=0;
 
 void init_times(){
-    time_seconds=time_macro_seconds=0;
+    time_seconds=time_macro_seconds=100;
 }
 
 void get_timespec(TimeVal* timeVal){
@@ -16,4 +17,7 @@ void get_timespec(TimeVal* timeVal){
     timeVal->sec=time_seconds;
     // micro-seconds
     timeVal->usec=time_macro_seconds;
+
+//    printf("sec 0x%x\n",time_seconds);
+//    printf("usec 0x%x\n",time_macro_seconds);
 }
