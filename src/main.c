@@ -69,6 +69,7 @@ void init_thread() {
     add_test("/chdir");
     add_test("/waitpid");
     add_test("/sleep");
+    add_test("/unlink");
 
     schedule();
 }

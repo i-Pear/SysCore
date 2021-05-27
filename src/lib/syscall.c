@@ -68,7 +68,6 @@ Context *syscall(Context *context) {
         }
         case SYS_gettimeofday: {
             get_timespec(get_actual_page(context->a0));
-            return(0);
             break;
         }
         case SYS_exit: {
@@ -95,6 +94,7 @@ Context *syscall(Context *context) {
             // flags：必须包含如下访问模式的其中一种：O_RDONLY，O_WRONLY，O_RDWR。还可以包含文件创建标志和文件状态标志。
             // mode：文件的所有权描述。详见`man 7 inode `。
             // int ret = openat(fd, filename, flags, mode);
+            // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
             // TODO: 暂不支持文件所有权描述
             size_t dir_fd = context->a0;
             char *filename = (char *) get_actual_page(context->a1);
@@ -160,9 +160,11 @@ Context *syscall(Context *context) {
 
             data.inode = vfs_open(filename, (int) flag, S_IFREG);
 
+//            printf("-> open 0x%x\n", data.inode);
+
             if (data.inode == null) {
-                printf("can't open this file: %s\n", filename);
-                panic("")
+                return(-1);
+                break;
             }
             File_Describer_Create(fd, FILE_DESCRIBER_REGULAR, fileAccessType, data, filename);
 
@@ -369,33 +371,68 @@ Context *syscall(Context *context) {
             // int ret = mkdirat(dirfd, path, mode);
             // 返回值：成功执行，返回0。失败，返回-1。
             // TODO: mode不支持
-            int dir_fd = (int)context->a0;
-            char* path = (char*)get_actual_page(context->a1);
-            int mode = (int)context->a2;
-            if(dir_fd == AT_FDCWD){
-                char* cwd = get_running_cwd();
+            int dir_fd = (int) context->a0;
+            char *path = (char *) get_actual_page(context->a1);
+            int mode = (int) context->a2;
+            if (dir_fd == AT_FDCWD) {
+                char *cwd = get_running_cwd();
                 char buff[strlen(path) + strlen(cwd) + 2];
 
 //                printf("cwd: %s\n", cwd);
 
-                if(strcmp(cwd, "/") == 0){
+                if (strcmp(cwd, "/") == 0) {
                     sprintf(buff, "/%s", path);
-                }else{
+                } else {
                     sprintf(buff, "%s/%s", cwd, path);
                 }
 
 //                printf("buff: %s\n", buff);
 
-                Inode * ret = vfs_mkdir(buff, mode);
-                if(ret == null){
+                Inode *ret = vfs_mkdir(buff, mode);
+                if (ret == null) {
                     return(-1);
-                }else{
+                } else {
                     return(0);
                 }
-            }else{
+            } else {
                 panic("un implement in mkdir")
             }
 #undef debug_mkdirat
+            break;
+        }
+        case SYS_unlinkat: {
+#define debug_unlinkat(a) printf(#a " = 0x%x\n",a)
+#undef debug_unlinkat
+#ifdef debug_unlinkat
+            printf("-> syscall: unlinkat\n");
+#endif
+#define debug_unlinkat NOP
+            // dirfd：要删除的链接所在的目录。
+            // path：要删除的链接的名字。如果path是相对路径，则它是相对于dirfd目录而言的。如果path是相对路径，且dirfd的值为AT_FDCWD，则它是相对于当前路径而言的。如果path是绝对路径，则dirfd被忽略。
+            // flags：可设置为0或AT_REMOVEDIR。
+            // int ret = unlinkat(dirfd, path, flags);
+            // 返回值：成功执行，返回0。失败，返回-1。
+            // TODO: 没管flag
+            int dir_fd = (int)context->a0;
+            char* path = (char *)get_actual_page(context->a1);
+            if(dir_fd == AT_FDCWD){
+                char *cwd = get_running_cwd();
+                char buff[strlen(path) + strlen(cwd) + 2];
+
+//                printf("cwd: %s\n", cwd);
+
+                if (strcmp(cwd, "/") == 0) {
+                    sprintf(buff, "/%s", path);
+                } else {
+                    sprintf(buff, "%s/%s", cwd, path);
+                }
+                vfs_delete_inode(buff);
+                return(0);
+
+            }else {
+                panic("un implement in unlinkat")
+            }
+#undef debug_unlinkat
             break;
         }
         case SYS_times: {
@@ -417,11 +454,10 @@ Context *syscall(Context *context) {
             return(wait(get_actual_page(context->a1)));
             break;
         }
-        case SYS_nanosleep:{
-            TimeVal* timeVal=get_actual_page(context->a0);
-            time_seconds+=timeVal->sec;
-            time_macro_seconds+=timeVal->usec;
-            return(0);
+        case SYS_nanosleep: {
+            TimeVal *timeVal = get_actual_page(context->a0);
+            time_seconds += timeVal->sec;
+            time_macro_seconds += timeVal->usec;
             break;
         }
         case SYS_clone: {
