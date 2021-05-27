@@ -64,11 +64,12 @@ void init_thread() {
     add_test("/wait");
     add_test("/exit");
     add_test("/execve");
-//    add_test("/gettimeofday");
+    add_test("/gettimeofday");
     add_test("/mkdir_");
     add_test("/chdir");
-//    add_test("/waitpid");
-//    add_test("/sleep");
+    add_test("/waitpid");
+    add_test("/sleep");
+    add_test("/unlink");
 
     schedule();
 }

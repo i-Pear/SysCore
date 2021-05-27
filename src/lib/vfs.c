@@ -135,8 +135,45 @@ Inode *vfs_create_file(char* path, int flag){
     return ret;
 }
 
+int vfs_delete_inode(char* path){
+    int len = strlen(path);
+
+    int i = len - 1;
+    while(i >= 0 && path[i] != '/')i--;
+    char* father = (char*) k_malloc(i + 2);
+    memcpy(father, path, i + 1);
+    // 根目录是/， 其他目录是/dev/，所以其他目录需要更短一些
+    father[i + 1] = '\0';
+    if(strlen(father) > 1){
+        father[i] = '\0';
+    }
+
+    // TODO: just simply delte /.
+    father = "/";
+
+    Inode *parent = vfs_search(&vfs_super_node.root_inode, father);
+
+    Inode* p = parent->first_child;
+    if(p == null){
+        return 0;
+    }
+//    printf("delete path: %s\n", path + i + 1);
+    while(p){
+        if(strcmp(p->name, path + i + 1) == 0){
+//            printf("!!!!!!!!!!!!\n");
+            // TODO: 内存泄漏
+            parent->next = parent->next->next;
+            return 0;
+        }
+        parent = p;
+        p = p->next;
+    }
+    return 0;
+}
+
 Inode* vfs_open(char* path, int o_flag, int s_flag){
     Inode * find = vfs_search(&vfs_super_node.root_inode, path);
+//    printf("=> 0x%x o_flag 0x%x\n", find, o_flag);
 
 //    printf("vfs find = 0x%x\n", find);
     // 检查是否有新建标记
@@ -153,20 +190,19 @@ Inode* vfs_open(char* path, int o_flag, int s_flag){
         return find;
     }
     BYTE mode = 0;
-    if (o_flag == O_RDONLY)
+    if (o_flag & O_RDONLY)
         mode = FA_READ;
-    else if (o_flag == O_WRONLY)
+    if (o_flag & O_WRONLY)
          mode = FA_WRITE;
-    else if (o_flag & O_RDWR)
+    if (o_flag & O_RDWR)
         mode = FA_READ | FA_WRITE;
-    else if(o_flag & O_DIRECTORY){
+    if(o_flag & O_DIRECTORY){
         if(!(s_flag & S_IFDIR)){
             panic("O_DIRECTORY must be used with S_IFDIR")
         }
     }
-    else{
-        printf("error o_flag: 0x%x\n", o_flag);
-        panic("")
+    if(o_flag == 0){
+        mode = FA_READ | FA_WRITE;
     }
 
 //    printf("vfs mode = 0x%x\n", mode);
