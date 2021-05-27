@@ -234,8 +234,10 @@ void vfs_close(Inode* inode){
     }
 }
 
-void vfs_read_dir(){
-
+Inode *vfs_mkdir(char* path, int flag){
+//    printf("mkdir path: %s\n", path);
+    flag |= S_IFDIR;
+    return vfs_create_file(path, flag);
 }
 
 void vfs_init(){

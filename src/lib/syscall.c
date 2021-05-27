@@ -44,8 +44,8 @@ Context *syscall(Context *context) {
             int fd = (int) context->a0;
 
 //            printf("fd %d\n", fd);
-            if(file_describer_exists(fd)){
-                fd = (int)file_describer_convert(fd);
+            if (file_describer_exists(fd)) {
+                fd = (int) file_describer_convert(fd);
             }
 //            printf("fd %d\n", fd);
             fd = fd_get_origin_fd(fd);
@@ -62,11 +62,11 @@ Context *syscall(Context *context) {
 #undef debug_write
             break;
         }
-        case SYS_execve:{
+        case SYS_execve: {
             execute(get_actual_page(context->a0));
             break;
         }
-        case SYS_gettimeofday:{
+        case SYS_gettimeofday: {
             get_timespec(get_actual_page(context->a0));
             break;
         }
@@ -103,24 +103,24 @@ Context *syscall(Context *context) {
             debug_openat(flag);
 
             if (filename[0] == '.' && filename[1] == '/') {
-                char* cwd = get_running_cwd();
+                char *cwd = get_running_cwd();
 //                printf("cwd: %s\n", cwd);
-                char* new_filename = (char *)k_malloc(strlen(cwd) + 2 + strlen(filename + 2));
+                char *new_filename = (char *) k_malloc(strlen(cwd) + 2 + strlen(filename + 2));
                 sprintf(new_filename, "%s/%s", cwd, filename + 2);
                 filename = new_filename + 1;
-            }else if(filename[0] == '.' && strlen(filename) == 1){
+            } else if (filename[0] == '.' && strlen(filename) == 1) {
                 filename = get_running_cwd();
                 // 他不是个文件夹，就让他是个文件夹
                 flag |= O_DIRECTORY;
             }
             if (dir_fd != AT_FDCWD) {
-                int origin_fd = fd_get_origin_fd((int)dir_fd);
-                if(!(file_describer_array[origin_fd].data.inode->flag & S_IFDIR)){
+                int origin_fd = fd_get_origin_fd((int) dir_fd);
+                if (!(file_describer_array[origin_fd].data.inode->flag & S_IFDIR)) {
                     printf("fd %d not direct a dir\n", dir_fd);
                     panic("")
                 }
-                char* dir_path = file_describer_array[origin_fd].path;
-                char* new_filename = (char*) k_malloc(strlen(dir_path) + 2 + strlen(filename));
+                char *dir_path = file_describer_array[origin_fd].path;
+                char *new_filename = (char *) k_malloc(strlen(dir_path) + 2 + strlen(filename));
                 sprintf(new_filename, "%s/%s", dir_path, filename);
                 filename = new_filename;
             }
@@ -143,7 +143,7 @@ Context *syscall(Context *context) {
             // 文件夹，提前返回
             if ((flag & O_DIRECTORY)) {
                 File_Describer_Data data;
-                data.inode = vfs_open(filename, (int)flag, S_IFDIR);
+                data.inode = vfs_open(filename, (int) flag, S_IFDIR);
                 if (data.inode == null) {
                     printf("can't open this dir: %s\n", filename);
                     panic("")
@@ -157,7 +157,7 @@ Context *syscall(Context *context) {
 
             File_Describer_Data data;
 
-            data.inode = vfs_open(filename, (int)flag, S_IFREG);
+            data.inode = vfs_open(filename, (int) flag, S_IFREG);
 
             if (data.inode == null) {
                 printf("can't open this file: %s\n", filename);
@@ -187,7 +187,7 @@ Context *syscall(Context *context) {
             debug_read(count);
 
             int origin_fd = fd_get_origin_fd((int) fd);
-            int read_bytes = vfs_read(file_describer_array[origin_fd].data.inode, buf, (int)count);
+            int read_bytes = vfs_read(file_describer_array[origin_fd].data.inode, buf, (int) count);
             if (read_bytes < 0) {
                 return(-1);
             } else {
@@ -291,12 +291,12 @@ Context *syscall(Context *context) {
             int actual_fd = fd_search_a_empty_file_describer();
 
             File_Describer_Data data = {.redirect_fd = (int) old_fd};
-            File_Describer_Create(actual_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_WRITE, data,null);
+            File_Describer_Create(actual_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_WRITE, data, null);
             File_Describer_Plus((int) old_fd);
             // TODO: 这里返回了new_fd但是还没有建立虚拟映射关系,只建立了系统和actual_fd之间的关系
 //            printf("new fd: %d\n", new_fd);
 //            printf("actual fd: %d\n", actual_fd);
-            file_describer_bind(new_fd,actual_fd);
+            file_describer_bind(new_fd, actual_fd);
 
             return(new_fd);
 #undef debug_dup3
@@ -332,24 +332,69 @@ Context *syscall(Context *context) {
             // int ret = getdents64(fd, buf, len);
             // 返回值：成功执行，返回读取的字节数。当到目录结尾，则返回0。失败，则返回-1。
             size_t fd = context->a0;
-            char* buf = (char *)get_actual_page(context->a1);
+            char *buf = (char *) get_actual_page(context->a1);
             size_t len = context->a2;
-            if(!(file_describer_array[fd].data.inode->flag & S_IFDIR)){
+            if (!(file_describer_array[fd].data.inode->flag & S_IFDIR)) {
                 return (-1);
                 break;
             }
 
-            Inode * inode = vfs_search(&vfs_super_node.root_inode, file_describer_array[fd].path);
-            if(inode == null || inode->first_child == null){
+            Inode *inode = vfs_search(&vfs_super_node.root_inode, file_describer_array[fd].path);
+            if (inode == null || inode->first_child == null) {
                 return(-1);
                 break;
             }
 
-            struct linux_dirent64* res = (struct linux_dirent64*)buf;
+            struct linux_dirent64 *res = (struct linux_dirent64 *) buf;
             strcpy(res->d_name, inode->first_child->name);
 
             return(len);
 #undef debug_getdents64
+            break;
+        }
+        case SYS_mkdirat: {
+#define debug_mkdirat(a) printf(#a " = 0x%x\n",a)
+#undef debug_mkdirat
+#ifdef debug_mkdirat
+            printf("-> syscall: mkdirat\n");
+#endif
+#define debug_mkdirat NOP
+            // dirfd：要创建的目录所在的目录的文件描述符。
+            // path：要创建的目录的名称。
+            //      如果path是相对路径，则它是相对于dirfd目录而言的。
+            //      如果path是相对路径，且dirfd的值为AT_FDCWD，则它是相对于当前路径而言的。
+            //      如果path是绝对路径，则dirfd被忽略。
+            // mode：文件的所有权描述。详见`man 7 inode `。
+            // int ret = mkdirat(dirfd, path, mode);
+            // 返回值：成功执行，返回0。失败，返回-1。
+            // TODO: mode不支持
+            int dir_fd = (int)context->a0;
+            char* path = (char*)get_actual_page(context->a1);
+            int mode = (int)context->a2;
+            if(dir_fd == AT_FDCWD){
+                char* cwd = get_running_cwd();
+                char buff[strlen(path) + strlen(cwd) + 2];
+
+//                printf("cwd: %s\n", cwd);
+
+                if(strcmp(cwd, "/") == 0){
+                    sprintf(buff, "/%s", path);
+                }else{
+                    sprintf(buff, "%s/%s", cwd, path);
+                }
+
+//                printf("buff: %s\n", buff);
+
+                Inode * ret = vfs_mkdir(buff, mode);
+                if(ret == null){
+                    return(-1);
+                }else{
+                    return(0);
+                }
+            }else{
+                panic("un implement in mkdir")
+            }
+#undef debug_mkdirat
             break;
         }
         case SYS_times: {

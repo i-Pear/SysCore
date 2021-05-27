@@ -229,15 +229,18 @@ void create_process(const char *elf_path) {
     }
     int file_size = (int)inode->data->fat32.obj.objsize;
     char *elf_file_cache = alloc_page(file_size);
+#ifdef DEBUG_ELF
     printf("Start read file %s\n", elf_path);
+#endif
     int read_bytes = vfs_read(inode, elf_file_cache, file_size);
     if(read_bytes < 0){
         printf("read %s fail\n", elf_path);
         panic("")
     }
     vfs_close(inode);
+#ifdef DEBUG_ELF
     printf("File read successfully.\n");
-
+#endif
     size_t elf_page_base,entry,elf_page_size;
     load_elf(elf_file_cache, file_size,&elf_page_base,&elf_page_size,&entry);
     dealloc_page(elf_file_cache);

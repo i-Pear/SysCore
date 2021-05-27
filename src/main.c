@@ -56,13 +56,14 @@ void init_thread() {
     add_test("/openat");
     add_test("/getcwd");
     add_test("/dup");
-    add_test("/chdir");
     add_test("/getdents");
     add_test("/dup2");
     add_test("/wait");
     add_test("/exit");
     add_test("/execve");
     add_test("/gettimeofday");
+    add_test("/mkdir_");
+    add_test("/chdir");
 
     schedule();
 }

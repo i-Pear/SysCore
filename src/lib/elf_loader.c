@@ -10,7 +10,9 @@ void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_p
     void *elf_start = (void *) _elf_data;
 
     // read elf header
+#ifdef DEBUG_ELF
     printf("[ELF LOADER] elf size = %d\n", size);
+#endif
     /**
      * typedef struct {
      * unsigned char	e_ident[EI_NIDENT];
@@ -33,10 +35,13 @@ void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_p
     // Elf64_Ehdr *header = elf_read(&elf_start, sizeof(Elf64_Ehdr));
     Elf64_Ehdr *Ehdr = elf_start;
     if (Ehdr->e_type == 2) {
+#ifdef DEBUG_ELF
         printf("[ELF LOADER] This a Executable file. OK.\n");
+#endif
     }
+#ifdef DEBUG_ELF
     printf("[ELF LOADER] ELF entry: %x\n", Ehdr->e_entry);
-
+#endif
     char *exec = (char *) alloc_page(size);
     *elf_page_size=size;
 
@@ -61,6 +66,7 @@ void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_p
 
     *elf_page_base=(size_t)exec;
     *entry=Ehdr->e_entry;
-
+#ifdef DEBUG_ELF
     printf("[ELF LOADER] ELF loaded successfully\n");
+#endif
 }
