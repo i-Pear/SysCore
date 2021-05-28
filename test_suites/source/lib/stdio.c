@@ -8,9 +8,9 @@
 
 int getchar()
 {
-    char byte = 0;
+    char byte = getchar_996();
     // read(stdin, &byte, 1);
-    return getchar_996();
+    putchar(byte);
     return byte;
 }
 

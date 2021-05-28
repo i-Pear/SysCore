@@ -46,9 +46,13 @@ void __memory_init_pages(int node, int l, int r) {
     if(l!=r){
         __memory_init_pages(L(node),l,cnt.mid);
         __memory_init_pages(R(node),cnt.mid+1,r);
+        cnt.right_max_space =cnt.right_boarder_space = cnt.right_left_space = global_pages[R(node)].max_space;
+        cnt.left_max_space =cnt.left_right_space = cnt.left_boarder_space = global_pages[L(node)].max_space;
+    }else{
+        cnt.right_max_space =cnt.right_boarder_space = cnt.right_left_space = 1;
+        cnt.left_max_space =cnt.left_right_space = cnt.left_boarder_space = 1;
     }
-    cnt.right_max_space =cnt.right_boarder_space = cnt.right_left_space = global_pages[R(node)].max_space;
-    cnt.left_max_space =cnt.left_right_space = cnt.left_boarder_space = global_pages[L(node)].max_space;
+
 }
 
 int __memory_find_space(int node, int size) {
