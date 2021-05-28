@@ -502,6 +502,8 @@ static inline _u64 internal_syscall(long n, _u64 _a0, _u64 _a1, _u64 _a2, _u64
 ```
  */
 
+#define SYS_getchar 996
+
 Context* syscall(Context* context);
 
 #endif

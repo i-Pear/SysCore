@@ -21,6 +21,10 @@ Context *syscall(Context *context) {
     switch (context->a7) {
         // Print Register
         // @param: x: register number
+        case SYS_getchar:{
+            return(getchar_blocked());
+            break;
+        }
         case 0: {
             printf("[DEBUG] x%d = %d\n", context->a0, *((size_t *) context + context->a0));
             break;

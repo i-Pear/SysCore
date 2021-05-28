@@ -1,6 +1,6 @@
 #include "stdio.h"
 
-size_t getchar() {
+size_t getchar_blocked() {
     size_t res = sbi_call(SBI_CONSOLE_GETCHAR, 0, 0, 0);
     while (res == -1) {
         res = sbi_call(SBI_CONSOLE_GETCHAR, 0, 0, 0);
