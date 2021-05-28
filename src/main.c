@@ -70,7 +70,7 @@ void init_thread() {
     add_test("/umount");
 
     // IO tests
-//    add_test("/test_output");
+    add_test("/test_output");
 
     schedule();
 }
