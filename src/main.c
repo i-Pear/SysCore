@@ -9,10 +9,6 @@
 #include "lib/vfs.h"
 #include "lib/times.h"
 
-void print_sp()  {
-    lty(register_read_sp());
-}
-
 /**
  * 此处打算通过 sret 进入u-mode
  * 中断后硬件会执行以下动作：
@@ -72,6 +68,8 @@ void init_thread() {
     add_test("/unlink");
     add_test("/mount");
     add_test("/umount");
+
+    // IO tests
     add_test("/test_output");
 
     schedule();
