@@ -1,6 +1,29 @@
-# 编译须知
-* 暂时需要将工具链的bin文件夹释放到环境变量
-* 虽然cmake也能正常工作但是不建议使用，建议使用make
+# SysCore
+* 2021全国大学生计算机系统能力大赛 - 操作系统赛- 内核实现赛道
+* 学校：东北大学
+* 参赛队伍：0x80200000
+
+## Compile
+```shell
+# 将工具链bin目录释放至环境变量
+```
+```shell
+# 编译出k210.bin
+make
+```
+```shell
+# 烧录到板子
+make up
+# 通过串口查看
+make see
+# 也可以直接make run，会完成从编译到烧录到串口查看的全过程
+make run
+```
+## Img
+```shell
+# 构建fat.img
+make sd
+```
 
 ## 格式化SD卡的命令
 ```shell
