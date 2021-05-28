@@ -22,7 +22,7 @@ make run
 ## Img
 ```shell
 # 构建fat.img
-make sd
+make img
 ```
 
 ## 格式化SD卡的命令
