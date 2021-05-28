@@ -12,4 +12,6 @@ void printf(const char *format, ...);
 
 void sprintf(char* dist, const char *format, ...);
 
+size_t getchar_blocked();
+
 #endif

@@ -221,3 +221,6 @@ int umount(const char *special)
         return syscall(SYS_umount2, special, 0);
 }
 
+char getchar_996(){
+    return syscall(996);
+}
