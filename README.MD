@@ -21,7 +21,10 @@ make see
 # 也可以直接make run，会完成从编译到烧录到串口查看的全过程
 make run
 ```
+<img src="doc\assets\make_run_demo.gif" alt="make_run_demo" style="zoom:60%;" />
+
 ## Img
+
 ```shell
 # 构建fat.img
 make img
