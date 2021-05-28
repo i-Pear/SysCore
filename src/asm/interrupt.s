@@ -78,8 +78,6 @@ __interrupt:
     mv      a0, sp
     # scause: Scause
     csrr    a1, scause
-    # PERHAPS BROKEN: scause's value is 0x8000000000000005????, so try to fix
-    # andi a1, a1, 31
     # stval: usize
     csrr    a2, stval
 
