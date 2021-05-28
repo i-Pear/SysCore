@@ -2,6 +2,8 @@
 * 2021全国大学生计算机系统能力大赛 - 操作系统赛- 内核实现赛道
 * 学校：东北大学
 * 参赛队伍：0x80200000
+* iPear@https://github.com/i-Pear
+* Waitti@https://github.com/Waitti-long
 
 ## Compile
 ```shell
