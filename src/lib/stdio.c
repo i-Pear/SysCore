@@ -70,6 +70,11 @@ void printf(const char *format, ...) {
                     __print_pos(x, 2);
                     break;
                 }
+                case 'o': {
+                    size_t x = va_arg(arg, size_t);
+                    __print_pos(x, 8);
+                    break;
+                }
                 case 's': {
                     char *str = va_arg(arg, char *);
                     char *p = str;

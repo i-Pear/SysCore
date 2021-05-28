@@ -222,7 +222,7 @@ int get_running_ppid(){
 }
 
 void create_process(const char *elf_path) {
-    Inode * inode = vfs_open((char * )elf_path, O_RDONLY, S_IFREG);
+    Inode * inode = vfs_open((char * )elf_path, null, O_RDONLY, S_IFREG);
     if(inode == null){
         printf("open %s fail\n", elf_path);
         panic("")

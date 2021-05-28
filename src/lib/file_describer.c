@@ -55,7 +55,7 @@ void init_file_describer() {
     for (int i = 0; i < FILE_DESCRIBER_RESERVED_FD_COUNT; ++i) {
         file_describer_array_occupied[i] = 1;
     }
-    Inode * stdout_inode = vfs_open("/dev/console", O_CREATE, S_IFCHR);
+    Inode * stdout_inode = vfs_open("/dev/console", null, O_CREATE, S_IFCHR);
     if(stdout_inode == null){
         panic("stdout init error")
     }

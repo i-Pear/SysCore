@@ -48,8 +48,10 @@ typedef struct Inode{
     InodeData* data;
     int flag;
     char* name;
+    struct Inode* previous;
     struct Inode* next;
     struct Inode* first_child;
+    struct Inode* father;
 }Inode;
 
 typedef struct {
@@ -57,8 +59,8 @@ typedef struct {
 }Supernode;
 
 void vfs_init();
-Inode* vfs_search(Inode *inode, char* path);
-Inode* vfs_open(char* path, int o_flag, int s_flag);
+Inode* vfs_search(char* path, char* cwd);
+Inode* vfs_open(char* path, char* cwd, int o_flag, int s_flag);
 int vfs_read(Inode *inode,  char buf[], int count);
 int vfs_write(Inode* inode, char buf[], int count);
 void vfs_close(Inode* inode);

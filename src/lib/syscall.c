@@ -115,17 +115,6 @@ Context *syscall(Context *context) {
             debug_openat(dir_fd);
             debug_openat(flag);
 
-            if (filename[0] == '.' && filename[1] == '/') {
-                char *cwd = get_running_cwd();
-//                printf("cwd: %s\n", cwd);
-                char *new_filename = (char *) k_malloc(strlen(cwd) + 2 + strlen(filename + 2));
-                sprintf(new_filename, "%s/%s", cwd, filename + 2);
-                filename = new_filename + 1;
-            } else if (filename[0] == '.' && strlen(filename) == 1) {
-                filename = get_running_cwd();
-                // 他不是个文件夹，就让他是个文件夹
-                flag |= O_DIRECTORY;
-            }
             if (dir_fd != AT_FDCWD) {
                 int origin_fd = fd_get_origin_fd((int) dir_fd);
                 if (!(file_describer_array[origin_fd].data.inode->flag & S_IFDIR)) {
@@ -152,11 +141,15 @@ Context *syscall(Context *context) {
             else if (flag & O_RDWR)
                 fileAccessType = FILE_ACCESS_WRITE | FILE_ACCESS_READ;
 
-//            printf("flag: 0x%x\n", flag);
+            // TODO: 先简单处理一下.
+            if(strcmp(filename, ".") == 0){
+                flag |= O_DIRECTORY;
+                filename[0] = '/';
+            }
             // 文件夹，提前返回
             if ((flag & O_DIRECTORY)) {
                 File_Describer_Data data;
-                data.inode = vfs_open(filename, (int) flag, S_IFDIR);
+                data.inode = vfs_open(filename, get_running_cwd(), (int) flag, S_IFDIR);
                 if (data.inode == null) {
                     printf("can't open this dir: %s\n", filename);
                     panic("")
@@ -170,9 +163,9 @@ Context *syscall(Context *context) {
 
             File_Describer_Data data;
 
-            data.inode = vfs_open(filename, (int) flag, S_IFREG);
+            data.inode = vfs_open(filename, get_running_cwd(), (int) flag, S_IFREG);
 
-//            printf("-> open 0x%x\n", data.inode);
+//            printf("-> open 0x%x, %s\n", data.inode, data.inode->name);
 
             if (data.inode == null) {
                 return(-1);
@@ -354,7 +347,7 @@ Context *syscall(Context *context) {
                 break;
             }
 
-            Inode *inode = vfs_search(&vfs_super_node.root_inode, file_describer_array[fd].path);
+            Inode *inode = vfs_search(file_describer_array[fd].path, get_running_cwd());
             if (inode == null || inode->first_child == null) {
                 return(-1);
                 break;
