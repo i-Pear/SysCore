@@ -68,6 +68,7 @@ void init_thread() {
     add_test("/unlink");
     add_test("/mount");
     add_test("/umount");
+    add_test("/fstat");
 
     // IO tests
 //    add_test("/test_output");

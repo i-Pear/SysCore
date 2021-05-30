@@ -21,7 +21,7 @@ Context *syscall(Context *context) {
     switch (context->a7) {
         // Print Register
         // @param: x: register number
-        case SYS_getchar:{
+        case SYS_getchar: {
             return(getchar_blocked());
             break;
         }
@@ -425,9 +425,9 @@ Context *syscall(Context *context) {
             // int ret = unlinkat(dirfd, path, flags);
             // 返回值：成功执行，返回0。失败，返回-1。
             // TODO: 没管flag
-            int dir_fd = (int)context->a0;
-            char* path = (char *)get_actual_page(context->a1);
-            if(dir_fd == AT_FDCWD){
+            int dir_fd = (int) context->a0;
+            char *path = (char *) get_actual_page(context->a1);
+            if (dir_fd == AT_FDCWD) {
                 char *cwd = get_running_cwd();
                 char buff[strlen(path) + strlen(cwd) + 2];
 
@@ -441,7 +441,7 @@ Context *syscall(Context *context) {
                 vfs_delete_inode(buff);
                 return(0);
 
-            }else {
+            } else {
                 panic("un implement in unlinkat")
             }
 #undef debug_unlinkat
@@ -488,6 +488,41 @@ Context *syscall(Context *context) {
         }
         case SYS_umount2: {
             return (0);
+            break;
+        }
+        case SYS_fstat: {
+            // 功能：获取文件状态；
+            // 输入：
+            // fd: 文件句柄；
+            // kst: 接收保存文件状态的指针；
+            // int ret = fstat(fd, &kst);
+            // 返回值：成功返回0，失败返回-1；
+            int fd = (int)context->a0;
+            assert(fd >= 0 && fd < FILE_DESCRIBER_ARRAY_LENGTH);
+            assert(file_describer_array[fd].data.inode->flag & S_IFREG);
+            size_t res = get_actual_page(context->a1);
+            FILINFO fileInfo;
+            FRESULT result = f_stat(file_describer_array[fd].path, &fileInfo);
+            if(result != FR_OK){
+                panic("f_stat error")
+            }
+            struct kstat* stat = (struct kstat*)(char *)res;
+            stat->st_uid = 0;
+            stat->st_atime_nsec = fileInfo.ftime;
+            stat->st_atime_sec = fileInfo.ftime;
+            stat->st_blksize = 512;
+            stat->st_blocks = fileInfo.fsize / 512;
+            stat->st_dev = 0;
+            stat->st_ctime_nsec = fileInfo.ftime;
+            stat->st_ctime_sec = fileInfo.ftime;
+            stat->st_mtime_nsec = fileInfo.ftime;
+            stat->st_mtime_sec = fileInfo.ftime;
+            stat->st_gid = 0;
+            stat->st_size = fileInfo.fsize;
+            stat->st_nlink = 0;
+            stat->st_rdev = 0;
+            stat->st_ino = 0;
+            return(0);
             break;
         }
         default: {
