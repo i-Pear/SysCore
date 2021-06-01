@@ -1,7 +1,7 @@
 BUILD = build
 SRC = src
 
-K210-SERIALPORT = /dev/ttyUSB0
+K210-SERIALPORT = /dev/ttyS3
 K210-BURNER = platform/k210/kflash.py
 BOOTLOADER = platform/k210/rustsbi-k210.bin
 K210_BOOTLOADER_SIZE = 131072
@@ -9,10 +9,10 @@ K210_BOOTLOADER_SIZE = 131072
 KERNEL_BIN = k210.bin
 KERNEL_O = $(BUILD)/kernel.o
 
-GCC = riscv64-unknown-elf-gcc
+GCC = riscv64-unknown-elf-g++
 OBJCOPY = riscv64-unknown-elf-objcopy
 
-SRC_ALL = $(wildcard src/asm/*.s src/lib/*.h src/lib/*.c)
+SRC_ALL = $(wildcard src/asm/*.s src/lib/*.h src/lib/*.cpp)
 SRC_DRIVER = $(wildcard src/driver/*.h src/driver/*.c)
 SRC_FATFS = $(wildcard src/driver/fatfs/*.h src/driver/fatfs/*.c)
 
@@ -23,11 +23,9 @@ sd = /dev/sda
 all:
 	# gen build/
 	@test -d $(BUILD) || mkdir -p $(BUILD)
-	$(GCC) -o $(KERNEL_O) -w -g -mcmodel=medany -T src/linker.ld -O1 -ffreestanding -nostdlib\
+	$(GCC) -o $(KERNEL_O) -w -g -mcmodel=medany -T src/linker.ld -O0 -ffreestanding -nostdlib -Wextra -fno-exceptions -fno-rtti \
                                     $(SRC_ALL) \
-                                    $(SRC_DRIVER) \
-                                    $(SRC_FATFS) \
-                                    src/main.c
+                                    src/main.cpp
 	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)
 	@cp $(BOOTLOADER) $(BOOTLOADER).copy
 	@dd if=$(KERNEL_BIN) of=$(BOOTLOADER).copy bs=$(K210_BOOTLOADER_SIZE) seek=1

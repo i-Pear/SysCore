@@ -226,6 +226,8 @@ void create_process(const char *elf_path) {
     load_elf(elf_write_data, sizeof(elf_write_data),&elf_page_base,&elf_page_size,&entry);
     // dealloc_page(elf_file_cache);
 
+
+
     Context* thread_context=new(Context);
     thread_context->sstatus = register_read_sstatus();
     /**
