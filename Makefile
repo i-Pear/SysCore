@@ -23,7 +23,7 @@ sd = /dev/sda
 all:
 	# gen build/
 	@test -d $(BUILD) || mkdir -p $(BUILD)
-	$(GCC) -o $(KERNEL_O) -w -g -mcmodel=medany -T src/linker.ld -O0 -ffreestanding -nostdlib -Wextra -fno-exceptions -fno-rtti \
+	$(GCC) -o $(KERNEL_O) -w -g -mcmodel=medany -T src/linker.ld -O0 -ffreestanding -nostdlib -Wextra -fno-exceptions -fno-rtti -Wwrite-strings \
                                     $(SRC_ALL) \
                                     src/main.cpp
 	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)

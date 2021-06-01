@@ -13,7 +13,7 @@
 
 extern int global_pid;
 
-typedef struct{
+struct pcb{
     int pid;
     int ppid;
     size_t stack;
@@ -35,18 +35,18 @@ typedef struct{
     int* wstatus;
     size_t wait_pid;
 
-} pcb;
+};
 
-typedef struct pcb_listNode{
+struct pcb_listNode{
     pcb* pcb;
-    struct pcb_listNode* previous;
-    struct pcb_listNode* next;
-} pcb_listNode;
+    pcb_listNode* previous;
+    pcb_listNode* next;
+};
 
-typedef struct {
+struct pcb_List{
     pcb_listNode* start;
     pcb_listNode* end;
-} pcb_List;
+} ;
 
 extern pcb_List runnable,blocked;
 extern pcb* running;

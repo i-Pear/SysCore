@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(os_risc_v C ASM)
+project(os_risc_v CXX ASM)
 
 set(CMAKE_C_STANDARD 11)
 
