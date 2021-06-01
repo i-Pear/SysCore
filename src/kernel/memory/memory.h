@@ -1,10 +1,10 @@
 #ifndef OS_RISC_V_MEMORY_H
 #define OS_RISC_V_MEMORY_H
 
-#include "stdbool.h"
-#include "stddef.h"
-#include "stdio.h"
-#include "stl.h"
+#include "../stdbool.h"
+#include "../stddef.h"
+#include "../stdio.h"
+#include "../../lib/stl/stl.h"
 
 #define L(x) (x*2)
 #define R(x) (x*2+1)

@@ -12,7 +12,7 @@ KERNEL_O = $(BUILD)/kernel.o
 GCC = riscv64-unknown-elf-c++
 OBJCOPY = riscv64-unknown-elf-objcopy
 
-SRC_ALL = $(wildcard src/asm/*.s src/lib/*.h src/lib/*.cpp)
+SRC_ALL = $(wildcard src/asm/*.s src/lib/*.h src/lib/*.cpp src/stl/*.h src/stl/*.cpp src/kernel/*.h src/kernel/*.cpp src/kernel/memory/*.h src/kernel/memory/*.cpp)
 SRC_DRIVER = $(wildcard src/driver/*.h src/driver/*.c)
 SRC_FATFS = $(wildcard src/driver/fatfs/*.h src/driver/fatfs/*.c)
 

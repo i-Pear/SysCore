@@ -1,7 +1,7 @@
 #ifndef __KERNEL_HEAP_H__
 #define __KERNEL_HEAP_H__
 
-#include "stl.h"
+#include "../../lib/stl/stl.h"
 #include "memory.h"
 
 #define L(x) (x*2)

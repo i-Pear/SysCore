@@ -1,7 +1,7 @@
 #ifndef OS_RISC_V_KERNEL_STACK_H
 #define OS_RISC_V_KERNEL_STACK_H
 
-#include "stddef.h"
+#include "../stddef.h"
 
 #define __kernel_stack_size 4096
 

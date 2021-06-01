@@ -1,9 +1,9 @@
 #ifndef __STL_H__
 #define __STL_H__
 
-#include "kernel_heap.h"
-#include "stdio.h"
-#include "sbi.h"
+#include "../../kernel/memory/kernel_heap.h"
+#include "../../kernel/stdio.h"
+#include "../../kernel/sbi.h"
 
 #define INT_MAX 2147483647
 #define INT_MIN (-INT_MAX-1)

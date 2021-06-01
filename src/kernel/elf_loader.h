@@ -3,7 +3,7 @@
 
 #include <elf.h>
 #include "stdio.h"
-#include "kernel_heap.h"
+#include "memory/kernel_heap.h"
 
 //#define DEBUG_ELF
 

@@ -1,9 +1,9 @@
-#include "lib/interrupt.h"
-#include "lib/register.h"
-#include "lib/scheduler.h"
-#include "lib/self_test.h"
-#include "lib/kernel_stack.h"
-#include "lib/times.h"
+#include "kernel/interrupt.h"
+#include "kernel/register.h"
+#include "kernel/scheduler.h"
+#include "kernel/self_test.h"
+#include "kernel/memory/kernel_stack.h"
+#include "kernel/times.h"
 
 /**
  * 此处打算通过 sret 进入u-mode

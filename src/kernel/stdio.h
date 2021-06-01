@@ -3,7 +3,7 @@
 
 #include "sbi.h"
 #include "stdarg.h"
-#include "kernel_heap.h"
+#include "memory/kernel_heap.h"
 
 void putchar(char c);
 

@@ -1,6 +1,6 @@
 #include "syscall.h"
 #include "register.h"
-#include "stl.h"
+#include "../lib/stl/stl.h"
 #include "scheduler.h"
 #include "external_structs.h"
 #include "times.h"

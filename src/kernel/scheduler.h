@@ -1,12 +1,12 @@
 #ifndef OS_RISC_V_SCHEDULER_H
 #define OS_RISC_V_SCHEDULER_H
 
-#include "stl.h"
+#include "../lib/stl/stl.h"
 #include "elf_loader.h"
 #include "interrupt.h"
 #include "register.h"
-#include "list.h"
-#include "map.h"
+#include "../lib/stl/list.h"
+#include "../lib/stl/map.h"
 
 #define MAX_PATH_LENGTH 32
 

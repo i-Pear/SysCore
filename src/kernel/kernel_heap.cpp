@@ -1,4 +1,4 @@
-#include "kernel_heap.h"
+#include "memory/kernel_heap.h"
 
 size_t __kernel_heap_base;
 

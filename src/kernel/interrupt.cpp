@@ -1,7 +1,7 @@
 #include "interrupt.h"
 #include "syscall.h"
 #include "register.h"
-#include "stl.h"
+#include "../lib/stl/stl.h"
 #include "scheduler.h"
 
 static size_t INTERVAL = 1e5;

@@ -1,6 +1,6 @@
 #include "scheduler.h"
 #include "self_test.h"
-#include "kernel_stack.h"
+#include "memory/kernel_stack.h"
 #include "elf_data.h"
 
 int global_pid=1;
