@@ -8,32 +8,28 @@ int global_pid=1;
 // Warning: when do sth with running, sync with latest running_context first
 Context* running_context;
 
-pcb* search_by_pid(int pid){
+PCB* search_by_pid(int pid){
     // search in running
-    if(running!=null&&running->pid==pid)return running;
+    if(running!=nullptr&&running->pid==pid)return running;
     // search in runnable
-    pcb_listNode * cnt=runnable.start;
-    while (cnt!=null){
-        // printf(">> runnable pid=%d\n",cnt->pcb->pid);
-        if(cnt->pcb->pid==pid)return cnt->pcb;
+    auto cnt=runnable.start;
+    while (cnt!=nullptr){
+        // printf(">> runnable pid=%d\n",cnt->PCB->pid);
+        if(cnt->data->pid==pid)return cnt->data;
         cnt=cnt->next;
     }
     // search in blocked
     cnt=blocked.start;
-    while (cnt!=null){
-        // printf(">> blocked pid=%d\n",cnt->pcb->pid);
-        if(cnt->pcb->pid==pid)return cnt->pcb;
+    while (cnt!=nullptr){
+        // printf(">> blocked pid=%d\n",cnt->PCB->pid);
+        if(cnt->data->pid==pid)return cnt->data;
         cnt=cnt->next;
     }
-    return null;
+    return nullptr;
 }
 
 int get_new_pid(){
     return ++global_pid;
-}
-
-bool pcb_list_is_empty(pcb_List* list){
-    return list->start==null;
 }
 
 char* get_running_cwd(){
@@ -41,174 +37,120 @@ char* get_running_cwd(){
 }
 
 void file_describer_bind(size_t file_id,size_t real_file_describer){
-    size_t_map_put(&running->occupied_file_describer,file_id,real_file_describer);
+    running->occupied_file_describer.put(file_id,real_file_describer);
 }
 
 void file_describer_erase(size_t file_id){
-    size_t_map_erase(&running->occupied_file_describer,file_id);
+    running->occupied_file_describer.erase(file_id);
 }
 
 bool file_describer_exists(size_t file_id){
-    return size_t_map_exists(&running->occupied_file_describer,file_id);
+    return running->occupied_file_describer.exists(file_id);
 }
 
 size_t file_describer_convert(size_t file_id){
-    return size_t_map_get(&running->occupied_file_describer,file_id);
+    return running->occupied_file_describer.get(file_id);
 }
 
 void bind_kernel_heap(size_t addr){
-    size_t_list_push_back(&running->occupied_kernel_heap, addr);
+    running->occupied_kernel_heap.push_back(addr);
 }
 
 void bind_pages(size_t addr){
-    size_t_list_push_back(&running->occupied_pages, addr);
+    running->occupied_pages.push_back(addr);
 }
 
-void pcb_push_back(pcb_List* list,pcb* pcb){
-    if(list->start==null&&list->end==null){
-        // empty list
-        pcb_listNode* new_node=k_malloc(sizeof(pcb_listNode));
-        new_node->pcb=pcb;
-        new_node->previous=null;
-        new_node->next=null;
-
-        list->start=list->end=new_node;
-    }else{
-        pcb_listNode* new_node=k_malloc(sizeof(pcb_listNode));
-        new_node->pcb=pcb;
-        // link
-        new_node->next=null;
-        new_node->previous=list->end;
-        list->end->next=new_node;
-        list->end=new_node;
-    }
-}
-
-void pcb_push_front(pcb_List* list,pcb* pcb){
-    if(list->start==null&&list->end==null){
-        // empty list
-        pcb_listNode* new_node=k_malloc(sizeof(pcb_listNode));
-        new_node->pcb=pcb;
-        new_node->previous=null;
-        new_node->next=null;
-
-        list->start=list->end=new_node;
-    }else{
-        pcb_listNode* new_node=k_malloc(sizeof(pcb_listNode));
-        new_node->pcb=pcb;
-        // link
-        new_node->previous=null;
-        new_node->next=list->start;
-        list->start->previous=new_node;
-        list->start=new_node;
-    }
-}
-
-void pcb_list_pop_front(pcb_List* list){
-    if(list->start==list->end){
-        // has only one
-        pcb_listNode* firstNode=list->start;
-        list->start=list->end=null;
-        k_free(firstNode);
-    }else{
-        pcb_listNode* firstNode=list->start;
-        firstNode->next->previous=null;
-        list->start=firstNode->next;
-        k_free(firstNode);
-    }
-}
-
-pcb_List runnable,blocked;
-pcb* running;
+List<PCB*> runnable,blocked;
+PCB* running;
 
 void init_scheduler(){
-    running_context=0x80000000+6*1024*1024-sizeof(Context);
-    runnable.start=runnable.end=null;
-    blocked.start=blocked.end=null;
-    running=null;
+    running_context= reinterpret_cast<Context *>(0x80000000 + 6 * 1024 * 1024 - sizeof(Context));
+    runnable.start=runnable.end=nullptr;
+    blocked.start=blocked.end=nullptr;
+    running=nullptr;
 }
 
 void clone(int flags,size_t stack,int ptid){
-    if(flags!=17){
-        printf("flag=%d\n",flags);
-        panic("clone flags is not SIGCHLD, unknown todo.\n");
-    }
-
-    // sync with running_context
-    *running->thread_context=*running_context;
-
-    // copy context
-    Context * child_context=new(Context);
-    *child_context=*running->thread_context;
-
-    // copy pcb
-    pcb* child_pcb=new(pcb);
-    *child_pcb=*running;
-    child_pcb->thread_context=child_context;
-
-    if(stack!=0&&ptid!=0){
-        child_pcb->ppid=ptid;
-    }else{
-        child_pcb->ppid=running->pid;
-    }
-    child_pcb->pid=get_new_pid();
-
-    // set syscall return value
-    running->thread_context->a0=child_pcb->pid;
-    child_context->a0=0;
-    
-    // reset resource lists
-    size_t_map_init(&child_pcb->occupied_file_describer);
-    child_pcb->occupied_kernel_heap.start=child_pcb->occupied_kernel_heap.end=null;
-    child_pcb->occupied_pages.start=child_pcb->occupied_pages.end=null;
-    child_pcb->signal_list.start=child_pcb->signal_list.end=null;
-
-    // copy file describer
-    size_t_map_copy(&running->occupied_file_describer,&child_pcb->occupied_file_describer);
-    // alloc file describer
-    {
-        size_t_mapNode * cnt=child_pcb->occupied_file_describer.start;
-        while (cnt!=null){
-            // increase file describer counter
-            // TODO: increase file describer counter
-            cnt=cnt->next;
-        }
-    }
-
-    if(stack!=0){
-        // fixed stack, will not copy spaces
-        child_pcb->thread_context->sp=stack;
-        child_pcb->thread_context->a0=0;
-        child_context->sepc+=4;
-        pcb_push_back(&runnable,child_pcb);
-    }else{
-        // fork, generate a new stack
-        size_t stack= alloc_page(running->stack_size);
-        memcpy(stack,running->stack,running->stack_size);
-
-        size_t elf_page_base= alloc_page(running->elf_page_size);
-        memcpy(elf_page_base,running->elf_page_base,running->elf_page_size);
-
-        size_t page_table= alloc_page(4096);
-        memset(page_table,0, 4096);
-        *((size_t *) page_table + 2) = (0x80000 << 10) | 0xdf;
-        child_context->satp = (page_table>>12)|(8LL << 60);
-        child_context->sepc+=4;
-
-        child_pcb->thread_context->a0=0;
-        child_pcb->stack=stack;
-        child_pcb->thread_context->sp=running->thread_context->sp-running->stack+stack;
-        child_pcb->elf_page_base=elf_page_base;
-        child_pcb->page_table=page_table;
-
-        pcb_push_back(&runnable,child_pcb);
-    }
-    // sync with running_context
-    *running_context=*running->thread_context;
+//    if(flags!=17){
+//        printf("flag=%d\n",flags);
+//        panic("clone flags is not SIGCHLD, unknown todo.\n");
+//    }
+//
+//    // sync with running_context
+//    *running->thread_context=*running_context;
+//
+//    // copy context
+//    Context * child_context=new(Context);
+//    *child_context=*running->thread_context;
+//
+//    // copy PCB
+//    PCB* child_pcb=new(PCB);
+//    *child_pcb=*running;
+//    child_pcb->thread_context=child_context;
+//
+//    if(stack!=0&&ptid!=0){
+//        child_pcb->ppid=ptid;
+//    }else{
+//        child_pcb->ppid=running->pid;
+//    }
+//    child_pcb->pid=get_new_pid();
+//
+//    // set syscall return value
+//    running->thread_context->a0=child_pcb->pid;
+//    child_context->a0=0;
+//    
+//    // reset resource lists
+//    size_t_map_init(&child_pcb->occupied_file_describer);
+//    child_pcb->occupied_kernel_heap.start=child_pcb->occupied_kernel_heap.end=null;
+//    child_pcb->occupied_pages.start=child_pcb->occupied_pages.end=null;
+//    child_pcb->signal_list.start=child_pcb->signal_list.end=null;
+//
+//    // copy file describer
+//    size_t_map_copy(&running->occupied_file_describer,&child_pcb->occupied_file_describer);
+//    // alloc file describer
+//    {
+//        size_t_mapNode * cnt=child_pcb->occupied_file_describer.start;
+//        while (cnt!=null){
+//            // increase file describer counter
+//            // TODO: increase file describer counter
+//            cnt=cnt->next;
+//        }
+//    }
+//
+//    if(stack!=0){
+//        // fixed stack, will not copy spaces
+//        child_pcb->thread_context->sp=stack;
+//        child_pcb->thread_context->a0=0;
+//        child_context->sepc+=4;
+//        runnable.push_back(child_pcb);
+//    }else{
+//        // fork, generate a new stack
+//        size_t stack= alloc_page(running->stack_size);
+//        memcpy(stack,running->stack,running->stack_size);
+//
+//        size_t elf_page_base= alloc_page(running->elf_page_size);
+//        memcpy(elf_page_base,running->elf_page_base,running->elf_page_size);
+//
+//        size_t page_table= alloc_page(4096);
+//        memset(page_table,0, 4096);
+//        *((size_t *) page_table + 2) = (0x80000 << 10) | 0xdf;
+//        child_context->satp = (page_table>>12)|(8LL << 60);
+//        child_context->sepc+=4;
+//
+//        child_pcb->thread_context->a0=0;
+//        child_pcb->stack=stack;
+//        child_pcb->thread_context->sp=running->thread_context->sp-running->stack+stack;
+//        child_pcb->elf_page_base=elf_page_base;
+//        child_pcb->page_table=page_table;
+//
+//        pcb_push_back(&runnable,child_pcb);
+//    }
+//    // sync with running_context
+//    *running_context=*running->thread_context;
 }
 
 size_t get_running_elf_page(){
-    if(running==null)return 0;
+    if(running==nullptr)return 0;
     return running->elf_page_base;
 }
 
@@ -223,10 +165,8 @@ int get_running_ppid(){
 void create_process(const char *elf_path) {
 
     size_t elf_page_base,entry,elf_page_size;
-    load_elf(elf_write_data, sizeof(elf_write_data),&elf_page_base,&elf_page_size,&entry);
+    load_elf(reinterpret_cast<const char *>(elf_write_data), sizeof(elf_write_data), &elf_page_base, &elf_page_size, &entry);
     // dealloc_page(elf_file_cache);
-
-
 
     Context* thread_context=new(Context);
     thread_context->sstatus = register_read_sstatus();
@@ -235,7 +175,7 @@ void create_process(const char *elf_path) {
      * 栈通常向低地址方向增长，故此处增加__page_size
      */
      size_t stack_page=(size_t) alloc_page(4096);
-     memset(stack_page,0,4096);
+     memset(reinterpret_cast<void *>(stack_page), 0, 4096);
      thread_context->sp = stack_page + __page_size-2*8;
 //    size_t stack=(size_t) alloc_page(4096);
 //    thread_context.sp=4096+0x40000000;
@@ -258,33 +198,27 @@ void create_process(const char *elf_path) {
      * 2. 未使用的页表项应该置0
      */
     size_t page_table_base = (size_t) alloc_page(4096);
-    memset(page_table_base,0,4096);
+    memset(reinterpret_cast<void *>(page_table_base), 0, 4096);
     // 0x8000_0000 -> 0x8000_0000
     *((size_t *) page_table_base + 2) = (0x80000 << 10) | 0xdf;
     thread_context->satp = (page_table_base>>12)|(8LL << 60);
 
     // push into runnable list
-    pcb* child_pcb=k_malloc(sizeof(pcb));
-    child_pcb->pid=get_new_pid();
-    child_pcb->ppid=1;
-    child_pcb->stack=stack_page;
-    child_pcb->thread_context=thread_context;
-    child_pcb->elf_page_base=elf_page_base;
-    child_pcb->page_table=page_table_base;
+    PCB* new_pcb= new PCB;
+    new_pcb->pid=get_new_pid();
+    new_pcb->ppid=1;
+    new_pcb->stack=stack_page;
+    new_pcb->thread_context=thread_context;
+    new_pcb->elf_page_base=elf_page_base;
+    new_pcb->page_table=page_table_base;
     // TODO: 初始化工作目录为/，这不合理
-    memset(child_pcb->cwd, 0, sizeof(child_pcb->cwd));
-    child_pcb->cwd[0] = '/';
+    memset(new_pcb->cwd, 0, sizeof(new_pcb->cwd));
+    new_pcb->cwd[0] = '/';
 
-    child_pcb->elf_page_size=elf_page_size;
-    child_pcb->stack_size=4096;
+    new_pcb->elf_page_size=elf_page_size;
+    new_pcb->stack_size=4096;
 
-    // init lists
-    size_t_map_init(&child_pcb->occupied_file_describer);
-    child_pcb->occupied_kernel_heap.start=child_pcb->occupied_kernel_heap.end=null;
-    child_pcb->occupied_pages.start=child_pcb->occupied_pages.end=null;
-    child_pcb->signal_list.start=child_pcb->signal_list.end=null;
-
-    pcb_push_back(&runnable, child_pcb);
+    runnable.push_back(new_pcb);
 }
 
 void yield(){
@@ -292,8 +226,8 @@ void yield(){
     *running->thread_context=*running_context;
     running->thread_context->sepc+=4;
 
-    pcb_push_back(&runnable, running);
-    running=null;
+    runnable.push_back(running);
+    running=nullptr;
     schedule();
 }
 
@@ -317,39 +251,39 @@ void execute(const char* exec_path){
 void exit_process(int exit_ret){
     // printf("process %d start to exit\n",running->pid);
     // send signal
-    pcb* parent= search_by_pid(running->ppid);
-    if(parent!=null){
-        // printf("unfreeze pid=%d\n",parent->pid);
-        pair_int_list_push_back(&parent->signal_list, make_pair(running->pid,exit_ret));
-    }
+//    PCB* parent= search_by_pid(running->ppid);
+//    if(parent!=nullptr){
+//        // printf("unfreeze pid=%d\n",parent->pid);
+//        parent->signal_list.push_back(make_pair(running->pid,exit_ret));
+//    }
 //     dealloc_page(running->elf_page_base);
     // TODO: dealloc_page(running->page_table);
     // dealloc_page(running->stack);
-    
+
     // free file describer
     // TODO: free file describer
-    
+
     // TODO: free lists
-    
-    k_free(running->thread_context);
-    k_free(running);
-    running=null;
+
+    delete running->thread_context;
+    delete running;
+    running=nullptr;
     schedule();
 }
 
 void schedule(){
-    if(running!=null){
+    if(running!=nullptr){
         // sync with running_context
         *running_context=*running->thread_context;
 
         __restore();
     }else{
-        if(!pcb_list_is_empty(&runnable)){
+        if(!runnable.is_empty()){
             // pick one to run
-            running=runnable.start->pcb;
+            running=runnable.start->data;
             lty(running);
             lty(running->elf_page_base);
-            pcb_list_pop_front(&runnable);
+            runnable.pop_front();
 
             lty(running->thread_context->satp);
             lty(running->thread_context->sepc);
@@ -360,24 +294,19 @@ void schedule(){
             *running_context=*running->thread_context;
 
             __restore();
-        }else if(!pcb_list_is_empty(&blocked)){
+        }else if(!blocked.is_empty()){
             // search one to unfreeze
-            pcb_listNode* cnt=blocked.start;
-            while (cnt!=null){
-//                printf("in blocked: %d\n",cnt->pcb->pid);
-                if(!pair_int_list_is_empty(&cnt->pcb->signal_list)){
+            auto cnt=blocked.start;
+            while (cnt!=nullptr){
+                if(!cnt->data->signal_list.is_empty()){
                     // has signal, wake up
-                    running=cnt->pcb;
+                    running=cnt->data;
                     // remove it from blocked list
-                    if(blocked.start==cnt)blocked.start=cnt->next;
-                    if(blocked.end==cnt)blocked.end=cnt->previous;
-                    if(cnt->previous!=null)cnt->previous->next=cnt->next;
-                    if(cnt->next!=null)cnt->next->previous=cnt->previous;
-                    k_free(cnt);
+                    blocked.erase(cnt);
                     // get signal to return value
                     running->thread_context->a0=running->signal_list.start->data.first;
                     *running->wstatus=running->signal_list.start->data.second<<8;
-                    pair_int_list_pop_front(&running->signal_list);
+                    running->signal_list.pop_front();
 
                     schedule();
                 }
@@ -399,11 +328,11 @@ void schedule(){
 
 int wait(int* wstatus){
 //    printf("process %d start to wait\n",running->pid);
-    if(!pair_int_list_is_empty(&running->signal_list)){
+    if(!running->signal_list.is_empty()){
         // return immediately
         int ret=running->signal_list.start->data.first;
         *wstatus=running->signal_list.start->data.second<<8;
-        pair_int_list_pop_front(&running->signal_list);
+        running->signal_list.pop_front();
         return ret;
     }
 
@@ -415,7 +344,7 @@ int wait(int* wstatus){
     running->wait_pid=0;
     running->wstatus=wstatus;
 
-    pcb_push_back(&blocked, running);
-    running=null;
+    blocked.push_back(running);
+    running=nullptr;
     schedule();
 }

@@ -2,6 +2,8 @@
 #define __STL_H__
 
 #include "kernel_heap.h"
+#include "stdio.h"
+#include "sbi.h"
 
 #define INT_MAX 2147483647
 #define INT_MIN (-INT_MAX-1)
@@ -16,69 +18,27 @@
 #define mtl(x) ;
 #endif
 
-#define new(x) k_malloc(sizeof(x))
 #define panic(message) printf("[panic] %s:%d  %s\n",__FILE__,__LINE__,message);shutdown();
 #define assert(equal) if(!(equal)){printf("[assert] %s:%d error\n",__FILE__,__LINE__);shutdown();}
 
-typedef struct {
-    char *start;
-    size_t length;
-    size_t capacity;
-    size_t type_size;
-} Vec;
+extern "C" void memcpy(void *to,const void *from, size_t size);
 
-typedef struct {
-    size_t first,second;
-} pair_int;
-
-pair_int make_pair(int a,int b);
-
-void Vec_init(Vec **vec, size_t type_size);
-
-void Vec_push(Vec *vec, void *x);
-
-void Vec_pop(Vec *vec, void *x);
-
-void Vec_get(Vec *vec, size_t index, void *x);
-
-void Vec_set(Vec *vec, size_t index, void *x);
-
-void Vec_clear(Vec *vec);
-
-void Vec_free(Vec **vec);
-
-size_t Vec_empty(Vec *vec);
-
-typedef struct MapNode {
-    size_t key;
-    size_t value;
-    struct MapNode *left;
-    struct MapNode *right;
-} MapNode;
-
-typedef struct {
-    MapNode *start;
-    size_t length;
-} Map;
-
-void Map_init(Map **map);
-
-void Map_put(Map *map, size_t key, size_t value);
-
-int Map_get(Map *map, size_t key, size_t *value);
-
-void memcpy(void *to, void *from, size_t size);
-
-void memset(void* p,char content,int size);
+void memset(void* p,char content,size_t size);
 
 int strlen(const char *s);
 
-void strcpy(char* to, char* from);
+void strcpy(char* to,const char* from);
 
 int strcmp(const char *cs, const char *ct);
 
-int max(int a,int b);
+template<typename T>
+T max(const T& a,const T& b) {
+    return a > b ? a : b;
+}
 
-int min(int a,int b);
+template<typename T>
+T min(const T& a,const T& b) {
+    return a < b ? a : b;
+}
 
 #endif

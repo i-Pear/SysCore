@@ -51,7 +51,6 @@ _start:
     # ebreak
 
     call main
-    call shutdown
 hlt:
     j hlt
 

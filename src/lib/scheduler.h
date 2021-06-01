@@ -5,15 +5,14 @@
 #include "elf_loader.h"
 #include "interrupt.h"
 #include "register.h"
-#include "struct_integer_list.h"
-#include "struct_pair_list.h"
-#include "struct_integer_map.h"
+#include "list.h"
+#include "map.h"
 
 #define MAX_PATH_LENGTH 32
 
 extern int global_pid;
 
-struct pcb{
+struct PCB{
     int pid;
     int ppid;
     size_t stack;
@@ -26,30 +25,19 @@ struct pcb{
     Context * thread_context;
     char cwd[MAX_PATH_LENGTH];
 
-    size_t_map occupied_file_describer;
-    size_t_List occupied_kernel_heap;
-    size_t_List occupied_pages;
+    Map<size_t,size_t> occupied_file_describer;
+    List<size_t> occupied_kernel_heap;
+    List<size_t> occupied_pages;
 
     // wait related
-    pair_int_List signal_list;
+    List<pair<int,int>> signal_list;
     int* wstatus;
     size_t wait_pid;
 
 };
 
-struct pcb_listNode{
-    pcb* pcb;
-    pcb_listNode* previous;
-    pcb_listNode* next;
-};
-
-struct pcb_List{
-    pcb_listNode* start;
-    pcb_listNode* end;
-} ;
-
-extern pcb_List runnable,blocked;
-extern pcb* running;
+extern List<PCB*> runnable,blocked;
+extern PCB* running;
 
 void file_describer_bind(size_t file_id,size_t real_file_describer);
 
@@ -66,14 +54,6 @@ void bind_pages(size_t addr);
 int get_new_pid();
 
 char* get_running_cwd();
-
-bool pcb_list_is_empty(pcb_List* list);
-
-void pcb_push_back(pcb_List* list,pcb* pcb);
-
-void pcb_push_front(pcb_List* list,pcb* pcb);
-
-void pcb_list_pop_front(pcb_List* list);
 
 void init_scheduler();
 

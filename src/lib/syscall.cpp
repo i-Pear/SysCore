@@ -5,12 +5,9 @@
 #include "external_structs.h"
 #include "times.h"
 
-#define return(x) context->a0=x
-#define get_actual_page(x) ((x>0x80000000)?x:x+ get_running_elf_page())
-
-
-// 0;
-#define NOP(a) 0
+size_t get_actual_page(size_t x){
+    return x > 0x80000000?x:x+ get_running_elf_page();
+}
 
 Context *syscall(Context *context) {
     // Check SystemCall Number
@@ -19,7 +16,7 @@ Context *syscall(Context *context) {
         // Print Register
         // @param: x: register number
         case SYS_getchar: {
-            return(getchar_blocked());
+            context->a0 = getchar_blocked();
             break;
         }
         case 0: {
@@ -33,22 +30,22 @@ Context *syscall(Context *context) {
         case SYS_write:{
             int fd=context->a0;
             assert(fd==1);
-            char* buf=get_actual_page(context->a1);
+            char* buf=(char*)get_actual_page(context->a1);
             int count=context->a2;
             for(int i=0;i<count;i++){
                 putchar(buf[i]);
             }
-            return(count);
+            context->a0 = count;
             break;
         }
         case SYS_execve: {
-            execute(get_actual_page(context->a0));
+            execute((char*)get_actual_page(context->a0));
             break;
         }
         case SYS_gettimeofday: {
-            get_timespec(get_actual_page(context->a0));
+            get_timespec((TimeVal*)get_actual_page(context->a0));
             time_seconds++;
-            return(0);
+            context->a0 = 0;
             break;
         }
         case SYS_exit: {
@@ -56,37 +53,37 @@ Context *syscall(Context *context) {
             break;
         }
         case SYS_getppid: { lty(get_running_ppid());
-            return(get_running_ppid());
+            context->a0 = get_running_ppid();
             break;
         }
         case SYS_getpid: { lty(get_running_pid());
-            return(get_running_pid());
+            context->a0 = get_running_pid();
             break;
         }
         case SYS_times: {
-            struct ES_tms *tms = get_actual_page(context->a0);
+            struct ES_tms *tms = (ES_tms*)get_actual_page(context->a0);
             tms->tms_utime = 1;
             tms->tms_stime = 1;
             tms->tms_cutime = 1;
             tms->tms_cstime = 1;
-            return(1000);
+            context->a0 = 1000;
             break;
         }
         case SYS_uname: {
-            struct ES_utsname *required_uname = get_actual_page(context->a0);
+            struct ES_utsname *required_uname = (ES_utsname *)get_actual_page(context->a0);
             memcpy(required_uname, &ES_uname, sizeof(ES_uname));
-            return(0);
+            context->a0 = 0;
             break;
         }
         case SYS_wait4: {
-            return(wait(get_actual_page(context->a1)));
+            context->a0 = wait((int*)get_actual_page(context->a1));
             break;
         }
         case SYS_nanosleep: {
-            TimeVal *timeVal = get_actual_page(context->a0);
+            TimeVal *timeVal = (TimeVal *)get_actual_page(context->a0);
             time_seconds += timeVal->sec;
             time_macro_seconds += timeVal->usec;
-            return(0);
+            context->a0 = 0;
             break;
         }
         case SYS_clone: {
@@ -94,7 +91,7 @@ Context *syscall(Context *context) {
             break;
         }
         case SYS_sched_yield: {
-            return(0);
+            context->a0 = 0;
             yield();
             break;
         }

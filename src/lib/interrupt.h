@@ -42,7 +42,7 @@
  * x30/t5 Temporary
  * x31/t6 Temporary
  */
-typedef struct {
+struct Context{
     size_t zero;  // Hard-wired zero
     size_t ra;    // Return address
     size_t sp;    // Stack pointer
@@ -80,14 +80,14 @@ typedef struct {
     size_t stval;
     size_t scause;
     size_t satp;
-} Context;
+};
 
-typedef struct {
+struct KernelContext{
     size_t kernel_satp;
     size_t kernel_sp;
     size_t kernel_handle_interrupt;
     size_t kernel_restore;
-} KernelContext;
+};
 
 extern KernelContext kernelContext;
 
@@ -97,6 +97,6 @@ void set_next_timeout();
 
 extern void close_interrupt();
 
-extern void __restore();
+extern "C" void __restore();
 
 #endif

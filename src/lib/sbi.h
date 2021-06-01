@@ -13,24 +13,22 @@
 #define SBI_REMOTE_SFENCE_VMA_ASID 7
 #define SBI_SHUTDOWN 8
 
-extern size_t sbi_call(size_t which, size_t arg0, size_t arg1, size_t arg2);
+extern "C" size_t sbi_call(size_t which, size_t arg0, size_t arg1, size_t arg2);
 
-extern size_t read_time();
+extern "C" size_t read_time();
 
-extern size_t get_kernel_end();
+extern "C" size_t get_kernel_end();
 
-extern void interrupt_timer_init();
+extern "C" void interrupt_timer_init();
 
-extern void* get_boot_page_table();
+extern "C" void* get_boot_page_table();
 
-extern size_t get_restore();
+extern "C" size_t get_restore();
 
-extern void flush_tlb();
+extern "C" void flush_tlb();
 
 void shutdown();
 
 void set_timer(size_t time);
-
-size_t getchar();
 
 #endif

@@ -1,16 +1,13 @@
-#ifndef __MEMORY_H__
-#define __MEMORY_H__
+#ifndef __KERNEL_HEAP_H__
+#define __KERNEL_HEAP_H__
 
-#include "stdbool.h"
-#include "stddef.h"
-#include "stdio.h"
 #include "stl.h"
 #include "memory.h"
 
 #define L(x) (x*2)
 #define R(x) (x*2+1)
 
-#define kernel_heap_size 4096*22
+#define kernel_heap_size 4096*5
 #define __align_unit 16
 
 typedef struct {
@@ -54,8 +51,16 @@ void __kernel_update(int node, int l, int r, int set);
 
 void init_kernel_heap();
 
-size_t k_malloc(size_t size);
+void* k_malloc(size_t size);
 
 void k_free(size_t p);
+
+void *operator new (size_t size);
+
+void *operator new[](size_t size);
+
+void operator delete(void *p);
+
+void operator delete[](void *p);
 
 #endif

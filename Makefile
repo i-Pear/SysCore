@@ -1,7 +1,7 @@
 BUILD = build
 SRC = src
 
-K210-SERIALPORT = /dev/ttyS3
+K210-SERIALPORT = /dev/ttyUSB0
 K210-BURNER = platform/k210/kflash.py
 BOOTLOADER = platform/k210/rustsbi-k210.bin
 K210_BOOTLOADER_SIZE = 131072
@@ -9,7 +9,7 @@ K210_BOOTLOADER_SIZE = 131072
 KERNEL_BIN = k210.bin
 KERNEL_O = $(BUILD)/kernel.o
 
-GCC = riscv64-unknown-elf-g++
+GCC = riscv64-unknown-elf-c++
 OBJCOPY = riscv64-unknown-elf-objcopy
 
 SRC_ALL = $(wildcard src/asm/*.s src/lib/*.h src/lib/*.cpp)
@@ -23,7 +23,7 @@ sd = /dev/sda
 all:
 	# gen build/
 	@test -d $(BUILD) || mkdir -p $(BUILD)
-	$(GCC) -o $(KERNEL_O) -w -g -mcmodel=medany -T src/linker.ld -O0 -ffreestanding -nostdlib -Wextra -fno-exceptions -fno-rtti -Wwrite-strings \
+	$(GCC) -o $(KERNEL_O) -std=c++11 -w -g -mcmodel=medany -T src/linker.ld -O0 -ffreestanding -nostdlib -fno-exceptions -fno-rtti -Wwrite-strings \
                                     $(SRC_ALL) \
                                     src/main.cpp
 	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)

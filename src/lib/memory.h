@@ -1,7 +1,6 @@
 #ifndef OS_RISC_V_MEMORY_H
 #define OS_RISC_V_MEMORY_H
 
-
 #include "stdbool.h"
 #include "stddef.h"
 #include "stdio.h"
