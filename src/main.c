@@ -1,12 +1,9 @@
 #include "lib/page_table.h"
 #include "lib/interrupt.h"
 #include "lib/register.h"
-#include "driver/interface.h"
 #include "lib/scheduler.h"
-#include "lib/file_describer.h"
 #include "lib/self_test.h"
 #include "lib/kernel_stack.h"
-#include "lib/vfs.h"
 #include "lib/times.h"
 
 /**
@@ -24,51 +21,51 @@
 void init_thread() {
     printf("[OS] times init.\n");
     init_times();
-    printf("[OS] bsp init.\n");
-    bsp_init();
-    FATFS fs;
-    FRESULT res_sd;
-    res_sd = f_mount(&fs, "", 1);
-    if (res_sd != FR_OK) {
-        panic("fat init failed")
-    }
-    printf("[OS] Init VFS.\n");
-    vfs_init();
+//    printf("[OS] bsp init.\n");
+//    bsp_init();
+//    FATFS fs;
+//    FRESULT res_sd;
+//    res_sd = f_mount(&fs, "", 1);
+//    if (res_sd != FR_OK) {
+//        panic("fat init failed")
+//    }
+//    printf("[OS] Init VFS.\n");
+//    vfs_init();
     printf("[OS] Interrupt & Timer Interrupt Open.\n");
     interrupt_timer_init();
     printf("[OS] init scheduler.\n");
     init_scheduler();
-    init_file_describer();
+//    init_file_describer();
     init_self_tests();
 
-    add_test("/yield");
-    add_test("/fork");
-    add_test("/clone");
+//    add_test("/yield");
+//    add_test("/fork");
+//    add_test("/clone");
     add_test("/write");
-    add_test("/uname");
-    add_test("/times");
-    add_test("/getpid");
-    add_test("/getppid");
-    add_test("/open");
-    add_test("/read");
-    add_test("/close");
-    add_test("/openat");
-    add_test("/getcwd");
-    add_test("/dup");
-    add_test("/getdents");
-    add_test("/dup2");
-    add_test("/wait");
-    add_test("/exit");
-    add_test("/execve");
-    add_test("/gettimeofday");
-    add_test("/mkdir_");
-    add_test("/chdir");
-    add_test("/waitpid");
-    add_test("/sleep");
-    add_test("/unlink");
-    add_test("/mount");
-    add_test("/umount");
-    add_test("/fstat");
+//    add_test("/uname");
+//    add_test("/times");
+//    add_test("/getpid");
+//    add_test("/getppid");
+//    add_test("/open");
+//    add_test("/read");
+//    add_test("/close");
+//    add_test("/openat");
+//    add_test("/getcwd");
+//    add_test("/dup");
+//    add_test("/getdents");
+//    add_test("/dup2");
+//    add_test("/wait");
+//    add_test("/exit");
+//    add_test("/execve");
+//    add_test("/gettimeofday");
+//    add_test("/mkdir_");
+//    add_test("/chdir");
+//    add_test("/waitpid");
+//    add_test("/sleep");
+//    add_test("/unlink");
+//    add_test("/mount");
+//    add_test("/umount");
+//    add_test("/fstat");
 
     // IO tests
 //    add_test("/test_output");

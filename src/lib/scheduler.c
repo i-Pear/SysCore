@@ -1,8 +1,7 @@
 #include "scheduler.h"
-#include "../driver/fatfs/ff.h"
 #include "self_test.h"
-#include "vfs.h"
 #include "kernel_stack.h"
+#include "elf_data.h"
 
 int global_pid=1;
 
@@ -222,28 +221,10 @@ int get_running_ppid(){
 }
 
 void create_process(const char *elf_path) {
-    Inode * inode = vfs_open((char * )elf_path, O_RDONLY, S_IFREG);
-    if(inode == null){
-        printf("open %s fail\n", elf_path);
-        panic("")
-    }
-    int file_size = (int)inode->data->fat32.obj.objsize;
-    char *elf_file_cache = alloc_page(file_size);
-#ifdef DEBUG_ELF
-    printf("Start read file %s\n", elf_path);
-#endif
-    int read_bytes = vfs_read(inode, elf_file_cache, file_size);
-    if(read_bytes < 0){
-        printf("read %s fail\n", elf_path);
-        panic("")
-    }
-    vfs_close(inode);
-#ifdef DEBUG_ELF
-    printf("File read successfully.\n");
-#endif
+
     size_t elf_page_base,entry,elf_page_size;
-    load_elf(elf_file_cache, file_size,&elf_page_base,&elf_page_size,&entry);
-    dealloc_page(elf_file_cache);
+    load_elf(elf_write_data, sizeof(elf_write_data),&elf_page_base,&elf_page_size,&entry);
+    // dealloc_page(elf_file_cache);
 
     Context* thread_context=new(Context);
     thread_context->sstatus = register_read_sstatus();
