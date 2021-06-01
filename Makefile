@@ -9,22 +9,30 @@ K210_BOOTLOADER_SIZE = 131072
 KERNEL_BIN = k210.bin
 KERNEL_O = $(BUILD)/kernel.o
 
-GCC = riscv64-unknown-elf-c++
+GCC = riscv64-unknown-elf-gcc
+GXX = riscv64-unknown-elf-c++
 OBJCOPY = riscv64-unknown-elf-objcopy
 
 SRC_ALL = $(wildcard src/asm/*.s src/lib/*.h src/lib/*.cpp src/stl/*.h src/stl/*.cpp src/kernel/*.h src/kernel/*.cpp src/kernel/memory/*.h src/kernel/memory/*.cpp)
-SRC_DRIVER = $(wildcard src/driver/*.h src/driver/*.c)
-SRC_FATFS = $(wildcard src/driver/fatfs/*.h src/driver/fatfs/*.c)
+SRC_DRIVER = src/driver/all_driver_in_one.c
+OBJ_DRIVER = $(BUILD)/driver.o
+#SRC_FATFS = $(wildcard src/driver/fatfs/*.h src/driver/fatfs/*.c)
 
 dst = /mnt/sd
 sd = /dev/sda
 
-# 在当前目录生成k210.bin
-all:
-	# gen build/
+mk-build:
 	@test -d $(BUILD) || mkdir -p $(BUILD)
-	$(GCC) -o $(KERNEL_O) -std=c++11 -w -g -mcmodel=medany -T src/linker.ld -O0 -ffreestanding -nostdlib -fno-exceptions -fno-rtti -Wwrite-strings \
+
+driver:
+	$(GCC) -o $(OBJ_DRIVER) -w -g -mcmodel=medany -O0 -ffreestanding -nostdlib -c $(SRC_DRIVER)
+
+# 在当前目录生成k210.bin
+all: mk-build driver
+	# gen build/
+	$(GXX) -o $(KERNEL_O) -std=c++11 -w -g -mcmodel=medany -T src/linker.ld -O0 -ffreestanding -nostdlib -fno-exceptions -fno-rtti -Wwrite-strings \
                                     $(SRC_ALL) \
+                                    $(OBJ_DRIVER) \
                                     src/main.cpp
 	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)
 	@cp $(BOOTLOADER) $(BOOTLOADER).copy

@@ -23,7 +23,7 @@
 
 extern "C" void memcpy(void *to,const void *from, size_t size);
 
-void memset(void* p,char content,size_t size);
+extern "C" void memset(void* p,char content,size_t size);
 
 int strlen(const char *s);
 

@@ -4,6 +4,7 @@
 #include "kernel/self_test.h"
 #include "kernel/memory/kernel_stack.h"
 #include "kernel/times.h"
+#include "driver/interface.h"
 
 /**
  * 此处打算通过 sret 进入u-mode
@@ -20,16 +21,9 @@
 void init_thread() {
     printf("[OS] times init.\n");
     init_times();
-//    printf("[OS] bsp init.\n");
-//    bsp_init();
-//    FATFS fs;
-//    FRESULT res_sd;
-//    res_sd = f_mount(&fs, "", 1);
-//    if (res_sd != FR_OK) {
-//        panic("fat init failed")
-//    }
-//    printf("[OS] Init VFS.\n");
-//    vfs_init();
+    printf("[OS] bsp init.\n");
+    driver_init();
+
     printf("[OS] Interrupt & Timer Interrupt Open.\n");
     interrupt_timer_init();
     printf("[OS] init scheduler.\n");
@@ -37,10 +31,10 @@ void init_thread() {
 //    init_file_describer();
     init_self_tests();
 
-//    add_test("/yield");
-//    add_test("/fork");
-//    add_test("/clone");
-    add_test("/write");
+    add_test("/yield");
+    add_test("fork");
+    add_test("clone");
+    add_test("write");
 //    add_test("/uname");
 //    add_test("/times");
 //    add_test("/getpid");

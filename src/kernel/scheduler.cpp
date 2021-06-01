@@ -1,7 +1,8 @@
 #include "scheduler.h"
 #include "self_test.h"
 #include "memory/kernel_stack.h"
-#include "elf_data.h"
+//#include "elf_data.h"
+#include "../driver/fatfs/ff.h"
 
 int global_pid=1;
 
@@ -163,9 +164,22 @@ int get_running_ppid(){
 }
 
 void create_process(const char *elf_path) {
-
+    FIL fnew;
+    printf("elf %s\n", elf_path);
+    int res = f_open(&fnew, elf_path, FA_READ);
+    printf("res = %d\n", res);
+    if(res != FR_OK){
+        panic("read error")
+    }
+    int file_size = fnew.obj.objsize;
+    char *elf_file_cache = (char *)alloc_page(file_size);
+    printf("Start read file...\n");
+    uint32_t read_bytes;
+    f_read(&fnew, elf_file_cache, file_size, &read_bytes);
+    f_close(&fnew);
+    printf("File read successfully.\n");
     size_t elf_page_base,entry,elf_page_size;
-    load_elf(reinterpret_cast<const char *>(elf_write_data), sizeof(elf_write_data), &elf_page_base, &elf_page_size, &entry);
+    load_elf(elf_file_cache, file_size, &elf_page_base, &elf_page_size, &entry);
     // dealloc_page(elf_file_cache);
 
     Context* thread_context=new(Context);
