@@ -6,6 +6,7 @@
 #include "file_describer.h"
 #include "vfs.h"
 #include "times.h"
+#include "structs.h"
 
 #define get_actual_page(x) (((x)>0x80000000)?(x):(x)+ get_running_elf_page())
 #define SYSCALL_LIST_LENGTH (1024)
@@ -94,7 +95,7 @@ char *getAbsolutePath(char *path, char *cwd) {
     memset(str_buff, 0, sizeof str_buff);
     if (cwd != NULL) {
         // if path start with /, it means absolute path
-        if(!(strlen(path) >= 1 && path[0] == '/')){
+        if (!(strlen(path) >= 1 && path[0] == '/')) {
             strcpy(str_buff, cwd);
             // if cwd don't end with /, just add /
             if (strlen(cwd) == 0 || cwd[strlen(cwd) - 1] != '/') {
@@ -103,8 +104,11 @@ char *getAbsolutePath(char *path, char *cwd) {
         }
     }
 
-    assert(path != NULL);
-    strcpy(str_buff + strlen(str_buff), path);
+    if (path == NULL) {
+        if (cwd == NULL)return NULL;
+    } else {
+        strcpy(str_buff + strlen(str_buff), path);
+    }
 
     int cur_unit = 0;
     char *buf_pointer = str_buff;
@@ -130,7 +134,7 @@ char *getAbsolutePath(char *path, char *cwd) {
         } else {
             strcpy(res[cur], units[cur_unit]);
             cur++;
-            if(cur >= PATH_UNIT_MAX_COUNT){
+            if (cur >= PATH_UNIT_MAX_COUNT) {
                 return NULL;
             }
         }
@@ -168,9 +172,11 @@ void test_getAbsolutePath() {
     assert(strcmp(getAbsolutePath("./", "/mnt"), "/mnt") == 0);
     assert(strcmp(getAbsolutePath("/mnt/test_mount", NULL), "/mnt/test_mount") == 0);
     assert(strcmp(getAbsolutePath("/mnt/test_mount", "/"), "/mnt/test_mount") == 0);
+    assert(strcmp(getAbsolutePath(NULL, "/"), "/") == 0);
 
     // negative test
     assert(getAbsolutePath("../../", "/") == NULL);
+    assert(getAbsolutePath(NULL, NULL) == NULL);
 }
 
 /// syscall
@@ -263,7 +269,7 @@ int sys_openat(Context *context) {
             panic("")
         }
         File_Describer_Create(fd, FILE_DESCRIBER_REGULAR, fileAccessType, data, filename);
-    }else{
+    } else {
         // 非文件夹
         File_Describer_Data data;
         data.inode = vfs_open(filename, (int) flag, S_IFREG);
@@ -272,7 +278,7 @@ int sys_openat(Context *context) {
         }
         File_Describer_Create(fd, FILE_DESCRIBER_REGULAR, fileAccessType, data, filename);
     }
-    k_free((size_t)filename);
+    k_free((size_t) filename);
     return (fd);
 }
 
@@ -517,6 +523,36 @@ void syscall_distribute(int syscall_id, Context *context) {
     }
 }
 
+int sys_ls(Context *context) {
+    // @param char* path:
+    // if path is null, list cwd files;
+    // if path is absolute, list path files;
+    // if path is relative, list cwd + path files
+    // @param struct FileNameList list**
+    // result linked list will be save at here
+    // int res = int ls(char* path, struct FileNameList** list);
+    // if error, return -1; otherwise, return 0
+    char *path = get_actual_page(context->a0);
+    FileNameList **list = (FileNameList **) context->a1;
+    char real_path[512];
+    strcpy(real_path, getAbsolutePath(path, get_running_cwd()));
+    Inode *inode = vfs_search(&vfs_super_node.root_inode, real_path);
+    if (inode == NULL)return -1;
+    if (inode->first_child == NULL) {
+        *list = NULL;
+        return 0;
+    }
+    *list = (FileNameList *) FileNameListCreate(inode->first_child->name);
+    Inode *p = inode->first_child->next;
+    FileNameList *rp = (*list);
+    while (p){
+        rp->next = FileNameListCreate(p->name);
+        p = p->next;
+        rp = rp->next;
+    }
+    return 0;
+}
+
 Context *syscall(Context *context) {
     syscall_distribute((int) context->a7, context);
     context->sepc += 4;
@@ -550,5 +586,6 @@ void syscall_register() {
     syscall_list[SYS_sched_yield] = sys_sched_yield;
     syscall_list[SYS_mount] = sys_mount;
     syscall_list[SYS_umount2] = sys_umount2;
+    syscall_list[SYS_ls] = sys_ls;
 }
 
