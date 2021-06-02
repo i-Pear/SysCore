@@ -302,8 +302,8 @@ void vfs_init(){
 }
 
 void test_isDirectory();
-int isDirectoryInitialized = 0;
 int vfs_isDirectory(char* absolutePath){
+    static int isDirectoryInitialized = 0;
     if(isDirectoryInitialized == 0){
         isDirectoryInitialized = 1;
         test_isDirectory();

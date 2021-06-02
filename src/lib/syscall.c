@@ -76,8 +76,6 @@ char *strsep(char **s, const char *ct) {
 
 void test_getAbsolutePath();
 
-int getAbsolutePathIsInitialized = 0;
-
 /**
  * return absolute path by path & cwd
  * @param path
@@ -85,6 +83,7 @@ int getAbsolutePathIsInitialized = 0;
  * @return if valid, return a temp address; otherwise, return NULL.
  */
 char *getAbsolutePath(char *path, char *cwd) {
+    static int getAbsolutePathIsInitialized = 0;
     if (getAbsolutePathIsInitialized == 0) {
         getAbsolutePathIsInitialized = 1;
         test_getAbsolutePath();
