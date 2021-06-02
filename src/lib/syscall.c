@@ -532,7 +532,7 @@ int sys_ls(Context *context) {
     // result linked list will be save at here
     // int res = int ls(char* path, struct FileNameList** list);
     // if error, return -1; otherwise, return 0
-    char *path = get_actual_page(context->a0);
+    char *path = context->a0==0?0:get_actual_page(context->a0);
     FileNameList **list = (FileNameList **) context->a1;
     char real_path[512];
     char* absolutePath = getAbsolutePath(path, get_running_cwd());

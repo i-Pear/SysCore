@@ -50,4 +50,5 @@ int pipe(int [2]);
 int dup(int);
 int dup2(int, int);
 char getchar_996();
+void get_997(void*,void*);
 #endif // __UNISTD_H__

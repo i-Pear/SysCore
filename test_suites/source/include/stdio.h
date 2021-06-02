@@ -27,4 +27,6 @@ int putchar(int);
 int puts(const char *s);
 void printf(const char *fmt, ...);
 
+void gets(char* line);
+
 #endif // __STDIO_H__

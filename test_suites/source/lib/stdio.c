@@ -14,6 +14,20 @@ int getchar()
     return byte;
 }
 
+void gets(char* line){
+    char ch;
+    for(int i=0;;i++){
+        ch=getchar_996();
+        putchar(ch);
+        if(ch!='\n'){
+            line[i]=ch;
+        }else{
+            line[i]='\0';
+            return;
+        }
+    }
+}
+
 int putchar(int c)
 {
     char byte = c;

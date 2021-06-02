@@ -47,6 +47,8 @@ void File_Describer_Reduce(int fd){
     assert(file_describer_array_occupied[fd] >= 0)
     // 如果引用计数为0则释放path空间
     if(file_describer_array_occupied[fd] == 0){
+        //printf("//// close fd %d\n", fd);
+        vfs_close(file_describer_array[fd].data.inode);
         k_free((size_t)file_describer_array[fd].path);
     }
 }

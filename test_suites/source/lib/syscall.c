@@ -224,3 +224,9 @@ int umount(const char *special)
 char getchar_996(){
     return syscall(996);
 }
+
+void get_997(void* a,void* b){
+    syscall(997,a,b);
+}
+
+
