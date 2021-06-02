@@ -7,20 +7,21 @@
 #include "vfs.h"
 #include "times.h"
 
-#define get_actual_page(x) ((x>0x80000000)?x:x+ get_running_elf_page())
+#define get_actual_page(x) (((x)>0x80000000)?(x):(x)+ get_running_elf_page())
 #define SYSCALL_LIST_LENGTH (1024)
 
-// lazy init syscall list
+/// lazy init syscall list
 int (*syscall_list[SYSCALL_LIST_LENGTH])(Context *context);
 
 int syscall_is_initialized = 0;
 
+
+/// functions declaration
 void syscall_register();
 void syscall_distribute(int syscall_id, Context *context);
 
 
-// 0;
-#define NOP(a) 0
+/// utils functions
 
 int sysGetRealFd(int fd) {
     if (file_describer_exists(fd)) {
@@ -29,6 +30,8 @@ int sysGetRealFd(int fd) {
     fd = fd_get_origin_fd(fd);
     return fd;
 }
+
+/// syscall
 
 int sys_getchar(Context *context) {
     return getchar_blocked();
@@ -78,7 +81,7 @@ int sys_openat(Context *context) {
     // int ret = openat(fd, filename, flags, mode);
     // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
     // TODO: 暂不支持文件所有权描述
-    size_t dir_fd = context->a0;
+    size_t dir_fd = sysGetRealFd(context->a0);
     char *filename = (char *) get_actual_page(context->a1);
     size_t flag = context->a2;
 
@@ -274,7 +277,7 @@ int sys_mkdirat(Context *context) {
     // int ret = mkdirat(dirfd, path, mode);
     // 返回值：成功执行，返回0。失败，返回-1。
     // TODO: mode不支持
-    int dir_fd = (int) context->a0;
+    int dir_fd = sysGetRealFd(context->a0);
     char *path = (char *) get_actual_page(context->a1);
     int mode = (int) context->a2;
     if (dir_fd == AT_FDCWD) {
@@ -310,7 +313,7 @@ int sys_unlinkat(Context *context) {
     // int ret = unlinkat(dirfd, path, flags);
     // 返回值：成功执行，返回0。失败，返回-1。
     // TODO: 没管flag
-    int dir_fd = (int) context->a0;
+    int dir_fd = sysGetRealFd(context->a0);
     char *path = (char *) get_actual_page(context->a1);
     if (dir_fd == AT_FDCWD) {
         char *cwd = get_running_cwd();
@@ -375,6 +378,8 @@ int sys_mount(Context* context){
 int sys_umount2(Context* context){
     return 0;
 }
+
+/// syscall int & register & distribute
 
 void syscall_init() {
     for (int i = 0; i < SYSCALL_LIST_LENGTH; i++) {

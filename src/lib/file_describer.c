@@ -7,8 +7,9 @@ File_Describer file_describer_array[FILE_DESCRIBER_ARRAY_LENGTH];
 int file_describer_array_occupied[FILE_DESCRIBER_ARRAY_LENGTH];
 
 int fd_get_origin_fd(int fd){
-    assert(fd >= 0)
-    assert(fd < FILE_DESCRIBER_ARRAY_LENGTH)
+    if(fd >= FILE_DESCRIBER_ARRAY_LENGTH || fd <= 0){
+        return fd;
+    }
     if(file_describer_array[fd].fileDescriberType == FILE_DESCRIBER_REDIRECT){
         return fd_get_origin_fd(file_describer_array[fd].data.redirect_fd);
     }
