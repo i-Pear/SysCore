@@ -13,8 +13,6 @@
 /// lazy init syscall list
 int (*syscall_list[SYSCALL_LIST_LENGTH])(Context *context);
 
-int syscall_is_initialized = 0;
-
 
 /// functions declaration
 void syscall_register();
@@ -496,6 +494,7 @@ void syscall_unhandled(Context *context) {
 }
 
 void syscall_distribute(int syscall_id, Context *context) {
+    static int syscall_is_initialized = 0;
     if (syscall_is_initialized != 1) {
         syscall_init();
         syscall_register();
