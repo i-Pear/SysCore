@@ -18,6 +18,7 @@ int syscall_is_initialized = 0;
 
 /// functions declaration
 void syscall_register();
+
 void syscall_distribute(int syscall_id, Context *context);
 
 
@@ -74,6 +75,7 @@ char *strsep(char **s, const char *ct) {
 }
 
 void test_getAbsolutePath();
+
 int getAbsolutePathIsInitialized = 0;
 
 /**
@@ -83,7 +85,7 @@ int getAbsolutePathIsInitialized = 0;
  * @return if valid, return a temp address; otherwise, return NULL.
  */
 char *getAbsolutePath(char *path, char *cwd) {
-    if(getAbsolutePathIsInitialized == 0){
+    if (getAbsolutePathIsInitialized == 0) {
         getAbsolutePathIsInitialized = 1;
         test_getAbsolutePath();
     }
@@ -93,11 +95,16 @@ char *getAbsolutePath(char *path, char *cwd) {
     static char res[16][512];
     memset(str_buff, 0, sizeof str_buff);
     if (cwd != NULL) {
-        strcpy(str_buff, cwd);
+        // if path start with /, it means absolute path
+        if(!(strlen(path) >= 1 && path[0] == '/')){
+            strcpy(str_buff, cwd);
+            // if cwd don't end with /, just add /
+            if (strlen(cwd) == 0 || cwd[strlen(cwd) - 1] != '/') {
+                strcpy(str_buff + strlen(str_buff), "/");
+            }
+        }
     }
-    if(cwd != NULL && cwd[strlen(cwd) - 1] != '/'){
-        strcpy(str_buff + strlen(str_buff), "/");
-    }
+
     assert(path != NULL);
     strcpy(str_buff + strlen(str_buff), path);
 
@@ -119,7 +126,7 @@ char *getAbsolutePath(char *path, char *cwd) {
             // do nothing
         } else if (strcmp(units[cur_unit], "..") == 0) {
             cur--;
-            if(cur < 0){
+            if (cur < 0) {
                 return NULL;
             }
         } else {
@@ -129,13 +136,13 @@ char *getAbsolutePath(char *path, char *cwd) {
         cur_unit++;
     }
 
-    for(int i = 0;i < cur; i++){
+    for (int i = 0; i < cur; i++) {
         strcpy(str_buff + strlen(str_buff), "/");
         strcpy(str_buff + strlen(str_buff), res[i]);
     }
 
     // if root, should return /
-    if(cur == 0){
+    if (cur == 0) {
         strcpy(str_buff, "/");
     }
     return str_buff;
@@ -157,6 +164,7 @@ void test_getAbsolutePath() {
     assert(strcmp(getAbsolutePath(".", "/mnt"), "/mnt") == 0);
     assert(strcmp(getAbsolutePath("./", "/mnt"), "/mnt") == 0);
     assert(strcmp(getAbsolutePath("/mnt/test_mount", NULL), "/mnt/test_mount") == 0);
+    assert(strcmp(getAbsolutePath("/mnt/test_mount", "/"), "/mnt/test_mount") == 0);
 
     // negative test
     assert(getAbsolutePath("../../", "/") == NULL);
@@ -216,27 +224,20 @@ int sys_openat(Context *context) {
     char *filename = (char *) get_actual_page(context->a1);
     size_t flag = context->a2;
 
-    if (filename[0] == '.' && filename[1] == '/') {
-        char *cwd = get_running_cwd();
-        char *new_filename = (char *) k_malloc(strlen(cwd) + 2 + strlen(filename + 2));
-        sprintf(new_filename, "%s/%s", cwd, filename + 2);
-        filename = new_filename + 1;
-    } else if (filename[0] == '.' && strlen(filename) == 1) {
-        filename = get_running_cwd();
-        // 他不是个文件夹，就让他是个文件夹
-        flag |= O_DIRECTORY;
+    char *absolutePath = NULL;
+    if (dir_fd == AT_FDCWD) {
+        // 当前工作目录
+        absolutePath = getAbsolutePath(filename, get_running_cwd());
+    } else {
+        // 相对文件夹目录
+        absolutePath = getAbsolutePath(filename, file_describer_array[dir_fd].path);
     }
-    if (dir_fd != AT_FDCWD) {
-        int origin_fd = fd_get_origin_fd((int) dir_fd);
-        if (!(file_describer_array[origin_fd].data.inode->flag & S_IFDIR)) {
-            printf("fd %d not direct a dir\n", dir_fd);
-            panic("")
-        }
-        char *dir_path = file_describer_array[origin_fd].path;
-        char *new_filename = (char *) k_malloc(strlen(dir_path) + 2 + strlen(filename));
-        sprintf(new_filename, "%s/%s", dir_path, filename);
-        filename = new_filename;
+    if (absolutePath == NULL) {
+        return -1;
     }
+    filename = (char *) k_malloc(strlen(absolutePath) + 1);
+    strcpy(filename, absolutePath);
+
     int fd = fd_search_a_empty_file_describer();
     file_describer_bind(fd, fd);
 
@@ -249,8 +250,9 @@ int sys_openat(Context *context) {
     else if (flag & O_RDWR)
         fileAccessType = FILE_ACCESS_WRITE | FILE_ACCESS_READ;
 
-    // 文件夹，提前返回
-    if ((flag & O_DIRECTORY)) {
+    if ((flag & O_DIRECTORY) || vfs_isDirectory(filename)) {
+        // 文件夹
+        flag |= O_DIRECTORY;
         File_Describer_Data data;
         data.inode = vfs_open(filename, (int) flag, S_IFDIR);
         if (data.inode == null) {
@@ -258,18 +260,16 @@ int sys_openat(Context *context) {
             panic("")
         }
         File_Describer_Create(fd, FILE_DESCRIBER_REGULAR, fileAccessType, data, filename);
-        return (fd);
+    }else{
+        // 非文件夹
+        File_Describer_Data data;
+        data.inode = vfs_open(filename, (int) flag, S_IFREG);
+        if (data.inode == null) {
+            return (-1);
+        }
+        File_Describer_Create(fd, FILE_DESCRIBER_REGULAR, fileAccessType, data, filename);
     }
-
-    File_Describer_Data data;
-
-    data.inode = vfs_open(filename, (int) flag, S_IFREG);
-
-    if (data.inode == null) {
-        return (-1);
-    }
-    File_Describer_Create(fd, FILE_DESCRIBER_REGULAR, fileAccessType, data, filename);
-
+    k_free((size_t)filename);
     return (fd);
 }
 
@@ -370,7 +370,7 @@ int sys_chdir(Context *context) {
     // 返回值：成功执行，返回0。失败，返回-1。
     char *path = (char *) get_actual_page(context->a0);
     char *current_cwd = get_running_cwd();
-    strcpy(current_cwd, path);
+    strcpy(current_cwd, getAbsolutePath(path, get_running_cwd()));
     return (0);
 }
 
@@ -411,30 +411,14 @@ int sys_mkdirat(Context *context) {
     int dir_fd = sysGetRealFd(context->a0);
     char *path = (char *) get_actual_page(context->a1);
     int mode = (int) context->a2;
+    char buff[512];
     if (dir_fd == AT_FDCWD) {
-        char *cwd = get_running_cwd();
-        char buff[strlen(path) + strlen(cwd) + 2];
-
-//                printf("cwd: %s\n", cwd);
-
-        if (strcmp(cwd, "/") == 0) {
-            sprintf(buff, "/%s", path);
-        } else {
-            sprintf(buff, "%s/%s", cwd, path);
-        }
-
-//                printf("buff: %s\n", buff);
-
-        Inode *ret = vfs_mkdir(buff, mode);
-        if (ret == null) {
-            return (-1);
-        } else {
-            return (0);
-        }
+        strcpy(buff, getAbsolutePath(path, get_running_cwd()));
     } else {
-        panic("un implement in mkdir")
-        return -1;
+        strcpy(buff, getAbsolutePath(path, file_describer_array[dir_fd].path));
     }
+    vfs_mkdir(buff, mode);
+    return 0;
 }
 
 int sys_unlinkat(Context *context) {
@@ -446,27 +430,17 @@ int sys_unlinkat(Context *context) {
     // TODO: 没管flag
     int dir_fd = sysGetRealFd(context->a0);
     char *path = (char *) get_actual_page(context->a1);
+    char buff[512];
     if (dir_fd == AT_FDCWD) {
-        char *cwd = get_running_cwd();
-        char buff[strlen(path) + strlen(cwd) + 2];
-
-//                printf("cwd: %s\n", cwd);
-
-        if (strcmp(cwd, "/") == 0) {
-            sprintf(buff, "/%s", path);
-        } else {
-            sprintf(buff, "%s/%s", cwd, path);
-        }
-        vfs_delete_inode(buff);
-        return (0);
-
+        strcpy(buff, getAbsolutePath(path, get_running_cwd()));
     } else {
-        panic("un implement in unlinkat")
-        return -1;
+        strcpy(buff, getAbsolutePath(path, file_describer_array[dir_fd].path));
     }
+    vfs_delete_inode(buff);
+    return 0;
 }
 
-int sys_times(Context* context){
+int sys_times(Context *context) {
     struct ES_tms *tms = get_actual_page(context->a0);
     tms->tms_utime = 1;
     tms->tms_stime = 1;
@@ -475,38 +449,38 @@ int sys_times(Context* context){
     return (1000);
 }
 
-int sys_uname(Context* context){
+int sys_uname(Context *context) {
     struct ES_utsname *required_uname = get_actual_page(context->a0);
     memcpy(required_uname, &ES_uname, sizeof(ES_uname));
     return (0);
 }
 
-int sys_wait4(Context* context){
+int sys_wait4(Context *context) {
     return (wait(get_actual_page(context->a1)));
 }
 
-int sys_nanosleep(Context* context){
+int sys_nanosleep(Context *context) {
     TimeVal *timeVal = get_actual_page(context->a0);
     time_seconds += timeVal->sec;
     time_macro_seconds += timeVal->usec;
     return (0);
 }
 
-int sys_clone(Context* context){
+int sys_clone(Context *context) {
     clone(context->a0, context->a1, context->a2);
     return context->a0;
 }
 
-int sys_sched_yield(Context* context){
+int sys_sched_yield(Context *context) {
     yield();
     return (0);
 }
 
-int sys_mount(Context* context){
+int sys_mount(Context *context) {
     return (0);
 }
 
-int sys_umount2(Context* context){
+int sys_umount2(Context *context) {
     return 0;
 }
 

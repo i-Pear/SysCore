@@ -64,6 +64,7 @@ int vfs_write(Inode* inode, char buf[], int count);
 void vfs_close(Inode* inode);
 Inode *vfs_mkdir(char* path, int flag);
 int vfs_delete_inode(char* path);
+int vfs_isDirectory(char* absolutePath);
 
 extern Supernode vfs_super_node;
 

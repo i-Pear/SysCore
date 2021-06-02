@@ -300,3 +300,36 @@ void vfs_init(){
         panic("can't create /dev/console");
     }
 }
+
+void test_isDirectory();
+int isDirectoryInitialized = 0;
+int vfs_isDirectory(char* absolutePath){
+    if(isDirectoryInitialized == 0){
+        isDirectoryInitialized = 1;
+        test_isDirectory();
+    }
+    // fatfs can't distinguish /
+    if(strcmp(absolutePath, "/") == 0){
+        return 1;
+    }
+
+    FRESULT fr;
+    FILINFO filinfo;
+    fr = f_stat(absolutePath, &filinfo);
+
+    if(fr != FR_OK){
+        return 0;
+    }
+
+    if(filinfo.fattrib & AM_DIR){
+        return 1;
+    }
+    return 0;
+}
+
+void test_isDirectory(){
+    assert(vfs_isDirectory("/") == 1);
+    assert(vfs_isDirectory("/mnt") == 1);
+    assert(vfs_isDirectory("mnt") == 1);
+    assert(vfs_isDirectory("uname") == 0);
+}
