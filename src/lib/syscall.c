@@ -15,6 +15,14 @@
 // 0;
 #define NOP(a) 0
 
+int sys_get_real_fd(int fd){
+    if (file_describer_exists(fd)) {
+        fd = (int) file_describer_convert(fd);
+    }
+    fd = fd_get_origin_fd(fd);
+    return fd;
+}
+
 Context *syscall(Context *context) {
     // Check SystemCall Number
     // printf("[SYSCALL] call id=%d\n",context->a7);
@@ -45,29 +53,9 @@ Context *syscall(Context *context) {
             // count：要写入的字节数。
             // ssize_t ret = write(fd, buf, count);
             // 返回值：成功执行，返回写入的字节数。错误，则返回-1。
-            int fd = (int) context->a0;
-
-//            printf("fd %d\n", fd);
-            if (file_describer_exists(fd)) {
-                fd = (int) file_describer_convert(fd);
-            }
-//            printf("fd %d\n", fd);
-            fd = fd_get_origin_fd(fd);
-//            printf("fd %d\n", fd);
-
-//            printf("[PRINT] origin buf=0x%x\n",context->a1);
+            int fd = sys_get_real_fd((int) context->a0);
             char *buf = (char *) get_actual_page(context->a1);
-//            printf("----------------------\n");
-//            for(int i=0;i<10;i++){
-//                printf("0x%x ",buf[i]);
-//            }
-//            printf("\n----------------------\n");
-//            printf("[PRINT] buf=0x%x\n",buf);
             int count = (int) context->a2;
-
-//            printf("fd %d\n", fd);
-
-
             int write_bytes = vfs_write(file_describer_array[fd].data.inode, buf, count);
             return(write_bytes);
 #undef debug_write
@@ -193,7 +181,7 @@ Context *syscall(Context *context) {
             // fd: 文件描述符，buf: 用户空间缓冲区，count：读多少
             // ssize_t ret = read(fd, buf, count)
             // ret: 返回的字节数
-            size_t fd = context->a0;
+            int fd = sys_get_real_fd(context->a0);
             char *buf = (char *) get_actual_page(context->a1);
             size_t count = context->a2;
 
@@ -201,8 +189,7 @@ Context *syscall(Context *context) {
             debug_read((size_t) buf);
             debug_read(count);
 
-            int origin_fd = fd_get_origin_fd((int) fd);
-            int read_bytes = vfs_read(file_describer_array[origin_fd].data.inode, buf, (int) count);
+            int read_bytes = vfs_read(file_describer_array[fd].data.inode, buf, (int) count);
             if (read_bytes < 0) {
                 return(-1);
             } else {
@@ -221,7 +208,7 @@ Context *syscall(Context *context) {
             // fd：要关闭的文件描述符。
             // int ret = close(fd);
             // 返回值：成功执行，返回0。失败，返回-1。
-            size_t fd = context->a0;
+            size_t fd = sys_get_real_fd(context->a0);
 
             debug_close(fd);
 
@@ -273,7 +260,7 @@ Context *syscall(Context *context) {
             // fd：被复制的文件描述符。
             // int ret = dup(fd);
             // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
-            int fd = (int) context->a0;
+            int fd = sys_get_real_fd(context->a0);
             int new_fd = fd_search_a_empty_file_describer();
             file_describer_bind(new_fd, new_fd);
             File_Describer_Plus(fd);
@@ -294,7 +281,7 @@ Context *syscall(Context *context) {
             // new：新的文件描述符。
             // int ret = dup3(old, new, 0);
             // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
-            size_t old_fd = context->a0;
+            size_t old_fd = sys_get_real_fd(context->a0);
             size_t new_fd = context->a1;
             // TODO: dup3暂不支持flag参数
             size_t flags = context->a2;
@@ -346,7 +333,7 @@ Context *syscall(Context *context) {
             // len：buf的大小。
             // int ret = getdents64(fd, buf, len);
             // 返回值：成功执行，返回读取的字节数。当到目录结尾，则返回0。失败，则返回-1。
-            size_t fd = context->a0;
+            size_t fd = sys_get_real_fd(context->a0);
             char *buf = (char *) get_actual_page(context->a1);
             size_t len = context->a2;
             if (!(file_describer_array[fd].data.inode->flag & S_IFDIR)) {
