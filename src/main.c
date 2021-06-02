@@ -85,9 +85,7 @@ int main() {
            "          __/ |                         \n"
            "         |___/                          \n");
 
-    lty(get_kernel_stack_base());
-    lty(get_kernel_stack_end());
-    lty(__kernel_stack_base);
+    lty(get_kernel_stack_base());lty(get_kernel_stack_end());lty(__kernel_stack_base);
 
     printf("[OS] Memory Init.\n");
     init_memory();

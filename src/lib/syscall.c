@@ -31,6 +31,136 @@ int sysGetRealFd(int fd) {
     return fd;
 }
 
+/**
+ * strpbrk - Find the first occurrence of a set of characters
+ * @cs: The string to be searched
+ * @ct: The characters to search for
+ */
+char *strpbrk(const char *cs, const char *ct) {
+    const char *sc1, *sc2;
+
+    for (sc1 = cs; *sc1 != '\0'; ++sc1) {
+        for (sc2 = ct; *sc2 != '\0'; ++sc2) {
+            if (*sc1 == *sc2)
+                return (char *) sc1;
+        }
+    }
+    return NULL;
+}
+
+/**
+ * strsep - Split a string into tokens
+ * @s: The string to be searched
+ * @ct: The characters to search for
+ *
+ * strsep() updates @s to point after the token, ready for the next call.
+ *
+ * It returns empty tokens, too, behaving exactly like the libc function
+ * of that name. In fact, it was stolen from glibc2 and de-fancy-fied.
+ * Same semantics, slimmer shape. ;)
+ */
+char *strsep(char **s, const char *ct) {
+    char *sbegin = *s;
+    char *end;
+
+    if (sbegin == NULL)
+        return NULL;
+
+    end = strpbrk(sbegin, ct);
+    if (end)
+        *end++ = '\0';
+    *s = end;
+    return sbegin;
+}
+
+void test_getAbsolutePath();
+int getAbsolutePathIsInitialized = 0;
+
+/**
+ * return absolute path by path & cwd
+ * @param path
+ * @param cwd
+ * @return if valid, return a temp address; otherwise, return NULL.
+ */
+char *getAbsolutePath(char *path, char *cwd) {
+    if(getAbsolutePathIsInitialized == 0){
+        getAbsolutePathIsInitialized = 1;
+        test_getAbsolutePath();
+    }
+
+    if(cwd != NULL && cwd[strlen(cwd) - 1] != '/'){
+        return NULL;
+    }
+
+    static char str_buff[512];
+    static char units[16][512];
+    static char res[16][512];
+    memset(str_buff, 0, sizeof str_buff);
+    if (cwd != NULL) {
+        strcpy(str_buff, cwd);
+    }
+    assert(path != NULL);
+    strcpy(str_buff + strlen(str_buff), path);
+
+    int cur_unit = 0;
+    char *buf_pointer = str_buff;
+    char *unit;
+    while ((unit = strsep(&buf_pointer, "/")) != NULL) {
+        if (*unit != '\0') {
+            strcpy(units[cur_unit++], unit);
+        }
+    }
+
+    int unit_count = cur_unit;
+    cur_unit = 0;
+
+    int cur = 0;
+    while (cur_unit < unit_count) {
+        if (strcmp(units[cur_unit], ".") == 0) {
+            // do nothing
+        } else if (strcmp(units[cur_unit], "..") == 0) {
+            cur--;
+            if(cur < 0){
+                return NULL;
+            }
+        } else {
+            strcpy(res[cur], units[cur_unit]);
+            cur++;
+        }
+        cur_unit++;
+    }
+
+    for(int i = 0;i < cur; i++){
+        strcpy(str_buff + strlen(str_buff), "/");
+        strcpy(str_buff + strlen(str_buff), res[i]);
+    }
+
+    // if root, should return /
+    if(cur == 0){
+        strcpy(str_buff, "/");
+    }
+    return str_buff;
+}
+
+void test_getAbsolutePath() {
+    // positive test
+    assert(strcmp(getAbsolutePath(".//mnt/test/../", "/"), "/mnt") == 0);
+    assert(strcmp(getAbsolutePath("/", NULL), "/") == 0);
+    assert(strcmp(getAbsolutePath(".", NULL), "/") == 0);
+    assert(strcmp(getAbsolutePath("../", "/mnt/"), "/") == 0);
+    assert(strcmp(getAbsolutePath(".", "/"), "/") == 0);
+    assert(strcmp(getAbsolutePath("/test", NULL), "/test") == 0);
+    assert(strcmp(getAbsolutePath("./test", "/"), "/test") == 0);
+    assert(strcmp(getAbsolutePath("././", NULL), "/") == 0);
+    assert(strcmp(getAbsolutePath(".", "/mnt/"), "/mnt") == 0);
+    assert(strcmp(getAbsolutePath("./", "/mnt/"), "/mnt") == 0);
+    assert(strcmp(getAbsolutePath("/mnt/test_mount", NULL), "/mnt/test_mount") == 0);
+
+    // negative test
+    assert(getAbsolutePath("/", "/mnt") == NULL);
+    assert(getAbsolutePath("../../", "/") == NULL);
+}
+
 /// syscall
 
 int sys_getchar(Context *context) {
