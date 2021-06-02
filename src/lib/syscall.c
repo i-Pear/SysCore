@@ -535,7 +535,9 @@ int sys_ls(Context *context) {
     char *path = get_actual_page(context->a0);
     FileNameList **list = (FileNameList **) context->a1;
     char real_path[512];
-    strcpy(real_path, getAbsolutePath(path, get_running_cwd()));
+    char* absolutePath = getAbsolutePath(path, get_running_cwd());
+    if(absolutePath == NULL)return -1;
+    strcpy(real_path, absolutePath);
     Inode *inode = vfs_search(&vfs_super_node.root_inode, real_path);
     if (inode == NULL)return -1;
     if (inode->first_child == NULL) {
