@@ -81,15 +81,16 @@ void test_getAbsolutePath();
  * @return if valid, return a temp address; otherwise, return NULL.
  */
 char *getAbsolutePath(char *path, char *cwd) {
+#define PATH_MAX_LEN 512
+#define PATH_UNIT_MAX_COUNT 16
     static int getAbsolutePathIsInitialized = 0;
     if (getAbsolutePathIsInitialized == 0) {
         getAbsolutePathIsInitialized = 1;
         test_getAbsolutePath();
     }
-
-    static char str_buff[512];
-    static char units[16][512];
-    static char res[16][512];
+    static char str_buff[PATH_MAX_LEN];
+    static char units[PATH_UNIT_MAX_COUNT][PATH_MAX_LEN];
+    static char res[PATH_UNIT_MAX_COUNT][PATH_MAX_LEN];
     memset(str_buff, 0, sizeof str_buff);
     if (cwd != NULL) {
         // if path start with /, it means absolute path
@@ -129,6 +130,9 @@ char *getAbsolutePath(char *path, char *cwd) {
         } else {
             strcpy(res[cur], units[cur_unit]);
             cur++;
+            if(cur >= PATH_UNIT_MAX_COUNT){
+                return NULL;
+            }
         }
         cur_unit++;
     }
@@ -143,6 +147,8 @@ char *getAbsolutePath(char *path, char *cwd) {
         strcpy(str_buff, "/");
     }
     return str_buff;
+#undef PATH_MAX_LEN
+#undef PATH_UNIT_MAX_COUNT
 }
 
 void test_getAbsolutePath() {
