@@ -88,16 +88,15 @@ char *getAbsolutePath(char *path, char *cwd) {
         test_getAbsolutePath();
     }
 
-    if(cwd != NULL && cwd[strlen(cwd) - 1] != '/'){
-        return NULL;
-    }
-
     static char str_buff[512];
     static char units[16][512];
     static char res[16][512];
     memset(str_buff, 0, sizeof str_buff);
     if (cwd != NULL) {
         strcpy(str_buff, cwd);
+    }
+    if(cwd != NULL && cwd[strlen(cwd) - 1] != '/'){
+        strcpy(str_buff + strlen(str_buff), "/");
     }
     assert(path != NULL);
     strcpy(str_buff + strlen(str_buff), path);
@@ -148,16 +147,18 @@ void test_getAbsolutePath() {
     assert(strcmp(getAbsolutePath("/", NULL), "/") == 0);
     assert(strcmp(getAbsolutePath(".", NULL), "/") == 0);
     assert(strcmp(getAbsolutePath("../", "/mnt/"), "/") == 0);
+    assert(strcmp(getAbsolutePath("../", "/mnt"), "/") == 0);
     assert(strcmp(getAbsolutePath(".", "/"), "/") == 0);
     assert(strcmp(getAbsolutePath("/test", NULL), "/test") == 0);
     assert(strcmp(getAbsolutePath("./test", "/"), "/test") == 0);
     assert(strcmp(getAbsolutePath("././", NULL), "/") == 0);
     assert(strcmp(getAbsolutePath(".", "/mnt/"), "/mnt") == 0);
     assert(strcmp(getAbsolutePath("./", "/mnt/"), "/mnt") == 0);
+    assert(strcmp(getAbsolutePath(".", "/mnt"), "/mnt") == 0);
+    assert(strcmp(getAbsolutePath("./", "/mnt"), "/mnt") == 0);
     assert(strcmp(getAbsolutePath("/mnt/test_mount", NULL), "/mnt/test_mount") == 0);
 
     // negative test
-    assert(getAbsolutePath("/", "/mnt") == NULL);
     assert(getAbsolutePath("../../", "/") == NULL);
 }
 
