@@ -48,7 +48,10 @@ int main(){
             }
         }
         // do operations
-        if(strcmp(argv[0], "ls")==0){
+        if(strcmp(argv[0], "")==0){
+            // nop
+            continue;
+        }else if(strcmp(argv[0], "ls")==0){
             struct file_list* cnt;
             if(argc==2){
                 cnt=get_dir_files(argv[1]);
@@ -93,6 +96,7 @@ int main(){
                 size = 0;
             }
             write(STDOUT, buf, size);
+            printf("\n");
             close(fd);
         }else if(strcmp(argv[0], "cd")==0){
             if(argc!=2){
@@ -100,8 +104,8 @@ int main(){
                 continue;
             }
             int exist=0;
-            if(strcmp(argv[1],".")==0)exist=1;
-            if(strcmp(argv[1],"..")==0)exist=1;
+            if(strcmp(argv[1],".")==0&&strcmp(env_cwd,"/")!=0)exist=1;
+            if(strcmp(argv[1],"..")==0&&strcmp(env_cwd,"/")!=0)exist=1;
             struct file_list* cnt=get_dir_files(0);
             while(cnt){
                     if(strcmp(cnt->filename,argv[1])==0){
@@ -126,21 +130,29 @@ int main(){
             "You can also run a program by typing its name.\n"
             );
         }else if(strcmp(argv[0], "write")==0){
+            if(argc<2){
+                printf("arguments error.\n");
+                continue;
+            }
             int fd = open(argv[1], O_CREATE | O_RDWR);
             char* buf=argv[1];
             for(int i=0;i<cmd_len;i++){
                 if(cmd[i]=='\0')cmd[i]=' ';
             }
-            printf("cmd_len=%d\n",cmd_len);
-            printf("write %d bytes\n",cmd_len-6);
-            write(fd,buf,cmd_len-6);
+            // printf("cmd_len=%d\n",cmd_len);
+            // printf("write %d bytes\n",cmd_len-6);
+            write(fd,buf,strlen(argv[2]));
             close(fd);
             printf("write success.\n");
+        }else if(strcmp(argv[0], "mkdir")==0){
+            if(argc!=2){
+                printf("arguments error.\n");
+                continue;
+            }
+            mkdir(argv[1], 0666);
         }else{
             // exec
             int exist=0;
-            if(strcmp(argv[1],".")==0)exist=1;
-            if(strcmp(argv[1],"..")==0)exist=1;
             struct file_list* cnt=get_dir_files(0);
             while(cnt){
                     if(strcmp(cnt->filename,argv[1])==0){
@@ -150,11 +162,10 @@ int main(){
                     cnt=cnt->next;
             }
             if(exist==0){
-                printf("dir not exist!\n");
+                printf("File not exist!\n");
                 continue;
             }
             execute(argv[1]);
         }
     }
 }
-
