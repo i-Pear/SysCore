@@ -8,4 +8,6 @@ typedef struct FileNameList {
 
 FileNameList* FileNameListCreate(char* name);
 
+void FileNameListDelete(FileNameList *list);
+
 #endif //OS_RISC_V_STRUCTS_H
