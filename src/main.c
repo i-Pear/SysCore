@@ -41,6 +41,7 @@ void init_thread() {
     init_file_describer();
     init_self_tests();
 
+    add_test("/sh");
 //    add_test("/yield");
 //    add_test("/fork");
 //    add_test("/clone");
@@ -68,7 +69,6 @@ void init_thread() {
 //    add_test("/unlink");
 //    add_test("/mount");
 //    add_test("/umount");
-    add_test("/lty");
 
     // IO tests
 //    add_test("/test_output");

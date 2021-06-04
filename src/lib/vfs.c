@@ -65,16 +65,20 @@ Inode* vfs_search(Inode *inode, char* path){
     int name_cur = 0;
     for(char* i = path; i != end; i++)name[name_cur++] = *i;
     name[name_cur] = '\0';
+    
+    //printf("name %s\n", name);
+    
     Inode *p = inode;
     while(p && (strcmp(p->name, name) != 0)){
-//        printf("vfs p.name %s\n", p->name);
+        //printf("vfs p.name %s\n", p->name);
         p = p->next;
     }
     if(p && strcmp(p->name, name) == 0){
+    //printf("vfs p.name %s\n", p->name);
         if(*end == '\0'){
             return p;
         }else{
-            return vfs_search(inode->first_child, end);
+            return vfs_search(p->first_child, end + 1);
         }
     }
     return null;
@@ -93,7 +97,7 @@ Inode *vfs_create_file(char* path, int flag){
         father[i] = '\0';
     }
 
-//    printf("father: %s\n", father);
+   // printf("father: %s\n", father);
 
     Inode *parent = vfs_search(&vfs_super_node.root_inode, father);
 
@@ -102,9 +106,9 @@ Inode *vfs_create_file(char* path, int flag){
 
     Inode *ret = null;
     if(flag & S_IFDIR){
-//        printf("path %s\n", path + 1);
+       // printf("dir path %s\n", path + 1);
         f_mkdir(path + 1);
-        ret = vfs_create_inode(path + 1, flag, null);
+        ret = vfs_create_inode(path + i + 1, flag, null);
     }else if(flag & S_IFREG){
         FIL fil;
         FRESULT result = f_open(&fil, path, FA_CREATE_NEW | FA_WRITE | FA_READ);
@@ -113,7 +117,9 @@ Inode *vfs_create_file(char* path, int flag){
             panic("")
         }
         f_close(&fil);
-        ret = vfs_create_inode(path + 1, flag, null);
+        
+        //printf("vfs create %s\n", path + i + 1);
+        ret = vfs_create_inode(path + i + 1, flag, null);
     }else if(flag & S_IFCHR){
         ret = vfs_create_inode("console", S_IFCHR, null);
     }else{
