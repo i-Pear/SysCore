@@ -74,7 +74,7 @@ Inode* vfs_search(Inode *inode, char* path){
         if(*end == '\0'){
             return p;
         }else{
-            return vfs_search(inode->first_child, end);
+            return vfs_search(p->first_child, end + 1);
         }
     }
     return null;
@@ -104,7 +104,7 @@ Inode *vfs_create_file(char* path, int flag){
     if(flag & S_IFDIR){
 //        printf("path %s\n", path + 1);
         f_mkdir(path + 1);
-        ret = vfs_create_inode(path + 1, flag, null);
+        ret = vfs_create_inode(path + i + 1, flag, null);
     }else if(flag & S_IFREG){
         FIL fil;
         FRESULT result = f_open(&fil, path, FA_CREATE_NEW | FA_WRITE | FA_READ);
@@ -113,7 +113,7 @@ Inode *vfs_create_file(char* path, int flag){
             panic("")
         }
         f_close(&fil);
-        ret = vfs_create_inode(path + 1, flag, null);
+        ret = vfs_create_inode(path + i + 1, flag, null);
     }else if(flag & S_IFCHR){
         ret = vfs_create_inode("console", S_IFCHR, null);
     }else{
