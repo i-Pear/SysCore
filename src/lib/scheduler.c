@@ -222,7 +222,7 @@ int get_running_ppid(){
 }
 
 void create_process(const char *elf_path) {
-    size_t result = vfs_open((char * )elf_path, O_RDONLY);
+    size_t result = vfs_open((char * )elf_path, O_RDWR | S_IFREG);
     if(result != 0){
         printf("open %s fail\n", elf_path);
         panic("")

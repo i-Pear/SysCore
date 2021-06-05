@@ -244,7 +244,18 @@ int sys_openat(Context *context) {
     int dir_fd = sysGetRealFd(context->a0);
     char *filename = (char *) get_actual_page(context->a1);
     int flag = context->a2;
-    return vfs_open(atFdCWD(dir_fd, filename), flag);
+    int fd = fd_search_a_empty_file_describer();
+    char* path = atFdCWD(dir_fd, filename);
+    int fr = vfs_open(path, flag);
+    if(fr == 0){
+        File_Describer_Data fakeData = {.redirect_fd = 0};
+        char* fd_path = (char*)k_malloc(strlen(path) + 1);
+        strcpy(fd_path, path);
+        File_Describer_Create(fd, FILE_DESCRIBER_REGULAR, FILE_ACCESS_WRITE | FILE_ACCESS_READ, fakeData, fd_path);
+        File_Describer_Plus(fd);
+        return fd;
+    }
+    return -1;
 }
 
 int sys_read(Context *context) {

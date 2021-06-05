@@ -8,7 +8,6 @@
 #define O_RDONLY 0x000
 #define O_WRONLY 0x001
 #define O_RDWR 0x002 // 可读可写
-//#define O_CREATE 0x200
 #define O_CREATE 0x40
 #define O_DIRECTORY 0x0200000
 
@@ -40,32 +39,32 @@
 #define S_IXOTH      00001   // others have execute permission
 
 // FSTAT option
-#define FSTAT_FILE_SIZE 0
-#define FSTAT_DATE 1
-#define FSTAT_TIME 2
-#define FSTAT_ATTR 3
+#define FSTAT_FILE_SIZE 0b1
+#define FSTAT_DATE 0b10
+#define FSTAT_TIME 0b100
+#define FSTAT_ATTR 0b1000
 
-// return 0 if success, otherwise return -1
+// return 0 if success
 extern int (*vfs_init)();
-// return 0 if success, otherwise return -1
+// return 0 if success
 extern int (*vfs_open)(const char* path, int flag);
-// return read bytes count if success, otherwise return -1
-extern int (*vfs_read)(const char* path,  char buf[], int count);
-// return write bytes count if success, otherwise return -1
-extern int (*vfs_write)(const char* path, char buf[], int count);
-// return 0 if success, otherwise return -1
+// return read bytes count if success
+extern unsigned int (*vfs_read)(const char* path,  char buf[], int count);
+// return write bytes count if success
+extern unsigned int (*vfs_write)(const char* path, char buf[], int count);
+// return 0 if success
 extern int (*vfs_close)(const char *path);
-// return 0 if success, otherwise return -1
+// return 0 if success
 extern int (*vfs_mkdir)(const char* path, int flag);
-// return 0 if success, otherwise return -1
+// return 0 if success
 extern int (*vfs_link)(const char* path, int flag);
-// return 0 if success, otherwise return -1
+// return 0 if success
 extern int (*vfs_unlink)(const char* path);
-// return 0 if success, otherwise return -1
+// return 0 if success
 extern int (*vfs_mount)(const char* dist, char* origin);
-// return 0 if success, otherwise return -1
+// return 0 if success
 extern int (*vfs_umount)(const char* dist);
-// return 0 if success, otherwise return -1
+// return 0 if success
 // use option to control get which attr
 extern int (*vfs_fstat)(const char* path, size_t* result, int option);
 

@@ -58,6 +58,9 @@ void init_file_describer() {
     for (int i = 0; i < FILE_DESCRIBER_RESERVED_FD_COUNT; ++i) {
         file_describer_array_occupied[i] = 1;
     }
+    File_Describer_Data fakeData = {.redirect_fd = 0};
+    File_Describer_Create(1, FILE_DESCRIBER_REGULAR, FILE_ACCESS_WRITE, fakeData, "/dev/console");
+    File_Describer_Plus(1);
 }
 
 int fd_search_a_empty_file_describer() {
@@ -71,6 +74,6 @@ int fd_search_a_empty_file_describer() {
 }
 
 char *File_Describer_Get_Path(int fd) {
-    assert(fd >= 3 && fd < FILE_DESCRIBER_ARRAY_LENGTH);
+    assert(fd >= 0 && fd < FILE_DESCRIBER_ARRAY_LENGTH);
     return file_describer_array[fd].path;
 }
