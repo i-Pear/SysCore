@@ -1,7 +1,7 @@
 #ifndef OS_RISC_V_VFS_H
 #define OS_RISC_V_VFS_H
 
-#include "../driver/fatfs/ff.h"
+#include "stddef.h"
 
 // 文件系统相关宏
 #define AT_FDCWD (-100) //相对路径
@@ -39,33 +39,38 @@
 #define S_IWOTH      00002   // others have write permission
 #define S_IXOTH      00001   // others have execute permission
 
-typedef union{
-    FIL fat32;
-    DIR fat32_dir;
-} InodeData;
+// FSTAT option
+#define FSTAT_FILE_SIZE 0
+#define FSTAT_DATE 1
+#define FSTAT_TIME 2
+#define FSTAT_ATTR 3
 
-typedef struct Inode{
-    InodeData* data;
-    int flag;
-    char* name;
-    struct Inode* next;
-    struct Inode* first_child;
-}Inode;
+// return 0 if success, otherwise return -1
+extern int (*vfs_init)();
+// return 0 if success, otherwise return -1
+extern int (*vfs_open)(const char* path, int flag);
+// return read bytes count if success, otherwise return -1
+extern int (*vfs_read)(const char* path,  char buf[], int count);
+// return write bytes count if success, otherwise return -1
+extern int (*vfs_write)(const char* path, char buf[], int count);
+// return 0 if success, otherwise return -1
+extern int (*vfs_close)(const char *path);
+// return 0 if success, otherwise return -1
+extern int (*vfs_mkdir)(const char* path, int flag);
+// return 0 if success, otherwise return -1
+extern int (*vfs_link)(const char* path, int flag);
+// return 0 if success, otherwise return -1
+extern int (*vfs_unlink)(const char* path);
+// return 0 if success, otherwise return -1
+extern int (*vfs_mount)(const char* dist, char* origin);
+// return 0 if success, otherwise return -1
+extern int (*vfs_umount)(const char* dist);
+// return 0 if success, otherwise return -1
+// use option to control get which attr
+extern int (*vfs_fstat)(const char* path, size_t* result, int option);
 
-typedef struct {
-    struct Inode root_inode;
-}Supernode;
+// register function pointer
+void vfs_register();
 
-void vfs_init();
-Inode* vfs_search(Inode *inode, char* path);
-Inode* vfs_open(char* path, int o_flag, int s_flag);
-int vfs_read(Inode *inode,  char buf[], int count);
-int vfs_write(Inode* inode, char buf[], int count);
-void vfs_close(Inode* inode);
-Inode *vfs_mkdir(char* path, int flag);
-int vfs_delete_inode(char* path);
-int vfs_isDirectory(char* absolutePath);
-
-extern Supernode vfs_super_node;
 
 #endif //OS_RISC_V_VFS_H

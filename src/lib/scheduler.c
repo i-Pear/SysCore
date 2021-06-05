@@ -222,22 +222,23 @@ int get_running_ppid(){
 }
 
 void create_process(const char *elf_path) {
-    Inode * inode = vfs_open((char * )elf_path, O_RDONLY, S_IFREG);
-    if(inode == null){
+    size_t result = vfs_open((char * )elf_path, O_RDONLY);
+    if(result != 0){
         printf("open %s fail\n", elf_path);
         panic("")
     }
-    int file_size = (int)inode->data->fat32.obj.objsize;
+    vfs_fstat(elf_path, &result, FSTAT_FILE_SIZE);
+    int file_size = result;
     char *elf_file_cache = alloc_page(file_size);
 #ifdef DEBUG_ELF
     printf("Start read file %s\n", elf_path);
 #endif
-    int read_bytes = vfs_read(inode, elf_file_cache, file_size);
+    int read_bytes = vfs_read(elf_path, elf_file_cache, file_size);
     if(read_bytes < 0){
         printf("read %s fail\n", elf_path);
         panic("")
     }
-    vfs_close(inode);
+    vfs_close(elf_path);
 #ifdef DEBUG_ELF
     printf("File read successfully.\n");
 #endif

@@ -26,12 +26,8 @@ void init_thread() {
     init_times();
     printf("[OS] bsp init.\n");
     bsp_init();
-    FATFS fs;
-    FRESULT res_sd;
-    res_sd = f_mount(&fs, "", 1);
-    if (res_sd != FR_OK) {
-        panic("fat init failed")
-    }
+    printf("[VFS] vfs register.\n");
+    vfs_register();
     printf("[OS] Init VFS.\n");
     vfs_init();
     printf("[OS] Interrupt & Timer Interrupt Open.\n");

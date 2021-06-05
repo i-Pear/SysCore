@@ -1,7 +1,6 @@
 #ifndef OS_RISC_V_FILE_DESCRIBER_H
 #define OS_RISC_V_FILE_DESCRIBER_H
 
-#include "../driver/fatfs/ff.h"
 #include "stdbool.h"
 #include "stl.h"
 #include "vfs.h"
@@ -17,7 +16,6 @@ enum File_Access_Type{
 };
 
 typedef union{
-    Inode *inode;
     int redirect_fd;
 } File_Describer_Data;
 
@@ -67,6 +65,8 @@ void File_Describer_Plus(int fd);
  * @param fd
  */
 void File_Describer_Reduce(int fd);
+
+char* File_Describer_Get_Path(int fd);
 
 /*
  *  私有接口

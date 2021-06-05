@@ -48,7 +48,7 @@ void File_Describer_Reduce(int fd){
     // 如果引用计数为0则释放path空间
     if(file_describer_array_occupied[fd] == 0){
         //printf("//// close fd %d\n", fd);
-        vfs_close(file_describer_array[fd].data.inode);
+        vfs_close(file_describer_array[fd].path);
         k_free((size_t)file_describer_array[fd].path);
     }
 }
@@ -58,12 +58,6 @@ void init_file_describer() {
     for (int i = 0; i < FILE_DESCRIBER_RESERVED_FD_COUNT; ++i) {
         file_describer_array_occupied[i] = 1;
     }
-    Inode * stdout_inode = vfs_open("/dev/console", O_CREATE, S_IFCHR);
-    if(stdout_inode == null){
-        panic("stdout init error")
-    }
-    File_Describer_Data data = {.inode = stdout_inode};
-    File_Describer_Create(1, FILE_DESCRIBER_REGULAR, FILE_ACCESS_WRITE, data, "/dev/console");
 }
 
 int fd_search_a_empty_file_describer() {
@@ -74,4 +68,9 @@ int fd_search_a_empty_file_describer() {
     }
     panic("no empty file describer");
     return -1;
+}
+
+char *File_Describer_Get_Path(int fd) {
+    assert(fd >= 3 && fd < FILE_DESCRIBER_ARRAY_LENGTH);
+    return file_describer_array[fd].path;
 }

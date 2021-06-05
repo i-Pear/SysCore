@@ -10,6 +10,8 @@
 
 #define get_actual_page(x) (((x)>0x80000000)?(x):(x)+ get_running_elf_page())
 #define SYSCALL_LIST_LENGTH (1024)
+// 该宏默认所有的路径长度都不会超过512
+#define PATH_BUFF_SIZE (512)
 
 /// lazy init syscall list
 int (*syscall_list[SYSCALL_LIST_LENGTH])(Context *context);
@@ -179,6 +181,16 @@ void test_getAbsolutePath() {
     assert(getAbsolutePath(NULL, NULL) == NULL);
 }
 
+char *atFdCWD(int dir_fd, char *path) {
+    static char buff[PATH_BUFF_SIZE];
+    if (dir_fd == AT_FDCWD) {
+        strcpy(buff, getAbsolutePath(path, get_running_cwd()));
+    } else {
+        strcpy(buff, getAbsolutePath(path, File_Describer_Get_Path(dir_fd)));
+    }
+    return buff;
+}
+
 /// syscall
 
 int sys_getchar(Context *context) {
@@ -194,7 +206,7 @@ int sys_write(Context *context) {
     int fd = sysGetRealFd((int) context->a0);
     char *buf = (char *) get_actual_page(context->a1);
     int count = (int) context->a2;
-    int write_bytes = vfs_write(file_describer_array[fd].data.inode, buf, count);
+    int write_bytes = vfs_write(File_Describer_Get_Path(fd), buf, count);
     return write_bytes;
 }
 
@@ -229,57 +241,10 @@ int sys_openat(Context *context) {
     // int ret = openat(fd, filename, flags, mode);
     // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
     // TODO: 暂不支持文件所有权描述
-    size_t dir_fd = sysGetRealFd(context->a0);
+    int dir_fd = sysGetRealFd(context->a0);
     char *filename = (char *) get_actual_page(context->a1);
-    size_t flag = context->a2;
-
-    char *absolutePath = NULL;
-    if (dir_fd == AT_FDCWD) {
-        // 当前工作目录
-        absolutePath = getAbsolutePath(filename, get_running_cwd());
-    } else {
-        // 相对文件夹目录
-        absolutePath = getAbsolutePath(filename, file_describer_array[dir_fd].path);
-    }
-    if (absolutePath == NULL) {
-        return -1;
-    }
-    filename = (char *) k_malloc(strlen(absolutePath) + 1);
-    strcpy(filename, absolutePath);
-
-    int fd = fd_search_a_empty_file_describer();
-    file_describer_bind(fd, fd);
-
-    enum File_Access_Type fileAccessType;
-
-    if (flag == O_RDONLY)
-        fileAccessType = FILE_ACCESS_READ;
-    else if (flag == O_WRONLY)
-        fileAccessType = FILE_ACCESS_WRITE;
-    else if (flag & O_RDWR)
-        fileAccessType = FILE_ACCESS_WRITE | FILE_ACCESS_READ;
-
-    if ((flag & O_DIRECTORY) || vfs_isDirectory(filename)) {
-        // 文件夹
-        flag |= O_DIRECTORY;
-        File_Describer_Data data;
-        data.inode = vfs_open(filename, (int) flag, S_IFDIR);
-        if (data.inode == null) {
-            printf("can't open this dir: %s\n", filename);
-            panic("")
-        }
-        File_Describer_Create(fd, FILE_DESCRIBER_REGULAR, fileAccessType, data, filename);
-    } else {
-        // 非文件夹
-        File_Describer_Data data;
-        data.inode = vfs_open(filename, (int) flag, S_IFREG);
-        if (data.inode == null) {
-            return (-1);
-        }
-        File_Describer_Create(fd, FILE_DESCRIBER_REGULAR, fileAccessType, data, filename);
-    }
-    k_free((size_t) filename);
-    return (fd);
+    int flag = context->a2;
+    return vfs_open(atFdCWD(dir_fd, filename), flag);
 }
 
 int sys_read(Context *context) {
@@ -288,26 +253,16 @@ int sys_read(Context *context) {
     // ret: 返回的字节数
     int fd = sysGetRealFd(context->a0);
     char *buf = (char *) get_actual_page(context->a1);
-    size_t count = context->a2;
-
-    int read_bytes = vfs_read(file_describer_array[fd].data.inode, buf, (int) count);
-    if (read_bytes < 0) {
-        return (-1);
-    } else {
-        return (read_bytes);
-    }
+    int count = context->a2;
+    return vfs_read(File_Describer_Get_Path(fd), buf, count);
 }
 
 int sys_close(Context *context) {
     // fd：要关闭的文件描述符。
     // int ret = close(fd);
     // 返回值：成功执行，返回0。失败，返回-1。
-    size_t fd = sysGetRealFd(context->a0);
-
+    int fd = sysGetRealFd(context->a0);
     File_Describer_Reduce((int) fd);
-
-    // TODO: 应该解绑文件描述符
-
     return (0);
 }
 
@@ -327,9 +282,7 @@ int sys_getcwd(Context *context) {
     } else {
         ret = (char *) get_actual_page(buf);
     }
-    size_t len = strlen(current_work_dir);
-    memcpy(ret, current_work_dir, len);
-    ret[len] = '\0';
+    strcpy(ret, current_work_dir);
     // TODO: 如果用户使用虚拟地址此处会返回真实地址，这不合理
     return (int) ((size_t) ret);
 }
@@ -365,9 +318,6 @@ int sys_dup3(Context *context) {
     File_Describer_Data data = {.redirect_fd = (int) old_fd};
     File_Describer_Create(actual_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_WRITE, data, null);
     File_Describer_Plus((int) old_fd);
-    // TODO: 这里返回了new_fd但是还没有建立虚拟映射关系,只建立了系统和actual_fd之间的关系
-//            printf("new fd: %d\n", new_fd);
-//            printf("actual fd: %d\n", actual_fd);
     file_describer_bind(new_fd, actual_fd);
 
     return (int) (new_fd);
@@ -392,19 +342,8 @@ int sys_getdents64(Context *context) {
     size_t fd = sysGetRealFd(context->a0);
     char *buf = (char *) get_actual_page(context->a1);
     size_t len = context->a2;
-    if (!(file_describer_array[fd].data.inode->flag & S_IFDIR)) {
-        return (-1);
-    }
-
-    Inode *inode = vfs_search(&vfs_super_node.root_inode, file_describer_array[fd].path);
-    if (inode == null || inode->first_child == null) {
-        return (-1);
-    }
-
-    struct linux_dirent64 *res = (struct linux_dirent64 *) buf;
-    strcpy(res->d_name, inode->first_child->name);
-
-    return (len);
+    // TODO: unhandled
+    return -1;
 }
 
 int sys_mkdirat(Context *context) {
@@ -420,13 +359,7 @@ int sys_mkdirat(Context *context) {
     int dir_fd = sysGetRealFd(context->a0);
     char *path = (char *) get_actual_page(context->a1);
     int mode = (int) context->a2;
-    char buff[512];
-    if (dir_fd == AT_FDCWD) {
-        strcpy(buff, getAbsolutePath(path, get_running_cwd()));
-    } else {
-        strcpy(buff, getAbsolutePath(path, file_describer_array[dir_fd].path));
-    }
-    vfs_mkdir(buff, mode);
+    vfs_mkdir(atFdCWD(dir_fd, path), mode);
     return 0;
 }
 
@@ -439,13 +372,7 @@ int sys_unlinkat(Context *context) {
     // TODO: 没管flag
     int dir_fd = sysGetRealFd(context->a0);
     char *path = (char *) get_actual_page(context->a1);
-    char buff[512];
-    if (dir_fd == AT_FDCWD) {
-        strcpy(buff, getAbsolutePath(path, get_running_cwd()));
-    } else {
-        strcpy(buff, getAbsolutePath(path, file_describer_array[dir_fd].path));
-    }
-    vfs_delete_inode(buff);
+    vfs_unlink(atFdCWD(dir_fd, path));
     return 0;
 }
 
@@ -523,41 +450,6 @@ void syscall_distribute(int syscall_id, Context *context) {
     }
 }
 
-int sys_ls(Context *context) {
-    // @param char* path:
-    // if path is null, list cwd files;
-    // if path is absolute, list path files;
-    // if path is relative, list cwd + path files
-    // @param struct FileNameList list**
-    // result linked list will be save at here
-    // int res = int ls(char* path, struct FileNameList** list);
-    // if error, return -1; otherwise, return 0
-    static FileNameList* fileNameListBuff = NULL;
-    FileNameListDelete(fileNameListBuff);
-    char *path = context->a0==0?0:get_actual_page(context->a0);
-    FileNameList **list = (FileNameList **) context->a1;
-    char real_path[512];
-    char* absolutePath = getAbsolutePath(path, get_running_cwd());
-    if(absolutePath == NULL)return -1;
-    strcpy(real_path, absolutePath);
-    Inode *inode = vfs_search(&vfs_super_node.root_inode, real_path);
-    if (inode == NULL)return -1;
-    if (inode->first_child == NULL) {
-        *list = NULL;
-        return 0;
-    }
-    fileNameListBuff = FileNameListCreate(inode->first_child->name);
-    *list = fileNameListBuff;
-    Inode *p = inode->first_child->next;
-    FileNameList *rp = (*list);
-    while (p){
-        rp->next = FileNameListCreate(p->name);
-        p = p->next;
-        rp = rp->next;
-    }
-    return 0;
-}
-
 Context *syscall(Context *context) {
     syscall_distribute((int) context->a7, context);
     context->sepc += 4;
@@ -591,6 +483,5 @@ void syscall_register() {
     syscall_list[SYS_sched_yield] = sys_sched_yield;
     syscall_list[SYS_mount] = sys_mount;
     syscall_list[SYS_umount2] = sys_umount2;
-    syscall_list[SYS_ls] = sys_ls;
 }
 
