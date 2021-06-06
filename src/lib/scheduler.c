@@ -3,6 +3,7 @@
 #include "self_test.h"
 #include "vfs.h"
 #include "kernel_stack.h"
+#include "syscall.h"
 
 int global_pid=1;
 
@@ -222,23 +223,25 @@ int get_running_ppid(){
 }
 
 void create_process(const char *elf_path) {
-    size_t result = vfs_open((char * )elf_path, O_RDWR | S_IFREG);
+    char buff[512];
+    strcpy(buff, getAbsolutePath(elf_path, get_running_cwd()));
+    size_t result = vfs_open((char * )buff, O_RDWR | S_IFREG);
     if(result != 0){
-        printf("open %s fail\n", elf_path);
+        printf("open %s fail\n", buff);
         panic("")
     }
-    vfs_fstat(elf_path, &result, FSTAT_FILE_SIZE);
+    vfs_fstat(buff, &result, FSTAT_FILE_SIZE);
     int file_size = result;
     char *elf_file_cache = alloc_page(file_size);
 #ifdef DEBUG_ELF
     printf("Start read file %s\n", elf_path);
 #endif
-    int read_bytes = vfs_read(elf_path, elf_file_cache, file_size);
+    int read_bytes = vfs_read(buff, elf_file_cache, file_size);
     if(read_bytes < 0){
-        printf("read %s fail\n", elf_path);
+        printf("read %s fail\n", buff);
         panic("")
     }
-    vfs_close(elf_path);
+    vfs_close(buff);
 #ifdef DEBUG_ELF
     printf("File read successfully.\n");
 #endif

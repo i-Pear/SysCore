@@ -252,9 +252,9 @@ int sys_openat(Context *context) {
         char* fd_path = (char*)k_malloc(strlen(path) + 1);
         strcpy(fd_path, path);
         File_Describer_Create(fd, FILE_DESCRIBER_REGULAR, FILE_ACCESS_WRITE | FILE_ACCESS_READ, fakeData, fd_path);
-        File_Describer_Plus(fd);
         return fd;
     }
+    panic("open error!\n");
     return -1;
 }
 
@@ -264,7 +264,7 @@ int sys_read(Context *context) {
     // ret: 返回的字节数
     int fd = sysGetRealFd(context->a0);
     char *buf = (char *) get_actual_page(context->a1);
-    int count = context->a2;
+    int count = (int)context->a2;
     return vfs_read(File_Describer_Get_Path(fd), buf, count);
 }
 
@@ -383,7 +383,8 @@ int sys_unlinkat(Context *context) {
     // TODO: 没管flag
     int dir_fd = sysGetRealFd(context->a0);
     char *path = (char *) get_actual_page(context->a1);
-    vfs_unlink(atFdCWD(dir_fd, path));
+    // TODO: we can't really delete it
+//    vfs_unlink(atFdCWD(dir_fd, path));
     return 0;
 }
 
@@ -483,7 +484,7 @@ void syscall_register() {
     syscall_list[SYS_dup] = sys_dup;
     syscall_list[SYS_dup3] = sys_dup3;
     syscall_list[SYS_chdir] = sys_chdir;
-    syscall_list[SYS_getdents64] = sys_getdents64;
+//    syscall_list[SYS_getdents64] = sys_getdents64;
     syscall_list[SYS_mkdirat] = sys_mkdirat;
     syscall_list[SYS_unlinkat] = sys_unlinkat;
     syscall_list[SYS_times] = sys_times;

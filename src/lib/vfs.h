@@ -49,9 +49,9 @@ extern int (*vfs_init)();
 // return 0 if success
 extern int (*vfs_open)(const char* path, int flag);
 // return read bytes count if success
-extern unsigned int (*vfs_read)(const char* path,  char buf[], int count);
+extern int (*vfs_read)(const char* path,  char buf[], int count);
 // return write bytes count if success
-extern unsigned int (*vfs_write)(const char* path, char buf[], int count);
+extern int (*vfs_write)(const char* path, char buf[], int count);
 // return 0 if success
 extern int (*vfs_close)(const char *path);
 // return 0 if success
