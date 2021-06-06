@@ -26,9 +26,8 @@ void *memmove(void *dst,void *src, uint n) {
 void bsp_init(){
     fpioa_pin_init();
 }
-
+FATFS fs;
 void fatfs_init(){
-    FATFS fs;
     FRESULT res_sd;
     res_sd = f_mount(&fs, "", 1);
     if (res_sd != FR_OK) {

@@ -12,3 +12,4 @@
 #include "fatfs/ff.c"
 #include "fatfs/diskio.c"
 #include "fatfs/ffunicode.c"
+#include "fatfs/ffsystem.c"

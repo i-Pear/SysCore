@@ -2,7 +2,10 @@
 #include "self_test.h"
 #include "memory/kernel_stack.h"
 //#include "elf_data.h"
+extern "C"{
 #include "../driver/fatfs/ff.h"
+}
+
 
 int global_pid=1;
 
@@ -167,7 +170,6 @@ void create_process(const char *elf_path) {
     FIL fnew;
     printf("elf %s\n", elf_path);
     int res = f_open(&fnew, elf_path, FA_READ);
-    printf("res = %d\n", res);
     if(res != FR_OK){
         panic("read error")
     }

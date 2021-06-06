@@ -4,7 +4,13 @@
 #include "kernel/self_test.h"
 #include "kernel/memory/kernel_stack.h"
 #include "kernel/times.h"
+#include <cstdint>
+
+extern "C"{
 #include "driver/interface.h"
+#include "driver/fatfs/ff.h"
+}
+
 
 /**
  * 此处打算通过 sret 进入u-mode
@@ -31,9 +37,9 @@ void init_thread() {
 //    init_file_describer();
     init_self_tests();
 
-    add_test("/yield");
-    add_test("fork");
-    add_test("clone");
+//    add_test("/yield");
+//    add_test("fork");
+//    add_test("clone");
     add_test("write");
 //    add_test("/uname");
 //    add_test("/times");

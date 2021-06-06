@@ -21,12 +21,6 @@ OBJ_DRIVER = $(BUILD)/driver.o
 dst = /mnt/sd
 sd = /dev/sda
 
-mk-build:
-	@test -d $(BUILD) || mkdir -p $(BUILD)
-
-driver:
-	$(GCC) -o $(OBJ_DRIVER) -w -g -mcmodel=medany -O0 -ffreestanding -nostdlib -c $(SRC_DRIVER)
-
 # 在当前目录生成k210.bin
 all: mk-build driver
 	# gen build/
@@ -38,6 +32,12 @@ all: mk-build driver
 	@cp $(BOOTLOADER) $(BOOTLOADER).copy
 	@dd if=$(KERNEL_BIN) of=$(BOOTLOADER).copy bs=$(K210_BOOTLOADER_SIZE) seek=1
 	@mv $(BOOTLOADER).copy $(KERNEL_BIN)
+
+mk-build:
+	@test -d $(BUILD) || mkdir -p $(BUILD)
+
+driver:
+	$(GCC) -o $(OBJ_DRIVER) -w -g -mcmodel=medany -O0 -ffreestanding -nostdlib -c $(SRC_DRIVER)
 
 # 编译运行
 run: all up see
