@@ -11,6 +11,10 @@ extern "C"{
 #include "driver/fatfs/ff.h"
 }
 
+extern "C" void __cxa_pure_virtual()
+{
+    // Do nothing or print an error message.
+}
 
 /**
  * 此处打算通过 sret 进入u-mode
