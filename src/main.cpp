@@ -5,6 +5,7 @@
 #include "kernel/memory/kernel_stack.h"
 #include "kernel/times.h"
 #include <cstdint>
+#include "lib/stl/string.h"
 
 extern "C"{
 #include "driver/interface.h"
@@ -29,6 +30,14 @@ extern "C" void __cxa_pure_virtual()
  * 所以这里需要恢复现场+将模拟硬件自动完成的动作。
  */
 void init_thread() {
+    String a="123";
+    String b="456";
+    String c=a+b;
+    printf("%s\n",c.c_str());
+
+    shutdown();
+
+
     printf("[OS] times init.\n");
     init_times();
     printf("[OS] bsp init.\n");
