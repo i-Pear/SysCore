@@ -10,6 +10,8 @@ include_directories(src/kernel)
 aux_source_directory(src/asm SRC_ASM)
 aux_source_directory(src/driver SRC_DRIVER)
 aux_source_directory(src/kernel SRC_LIB)
+aux_source_directory(src/kernel/memory SRC_MEMORY)
+aux_source_directory(src/kernel/fs SRC_FS)
 aux_source_directory(src/driver/fatfs SRC_FATFS)
 
 add_executable(
@@ -18,4 +20,6 @@ add_executable(
         ${SRC_DRIVER}
         ${SRC_LIB}
         ${SRC_FATFS}
+        ${SRC_FS}
+        ${SRC_MEMORY}
         src/main.cpp)

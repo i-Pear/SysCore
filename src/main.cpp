@@ -4,7 +4,6 @@
 #include "kernel/self_test.h"
 #include "kernel/memory/kernel_stack.h"
 #include "kernel/times.h"
-#include <cstdint>
 
 extern "C"{
 #include "driver/interface.h"
