@@ -4,6 +4,7 @@
 #include "kernel/self_test.h"
 #include "kernel/memory/kernel_stack.h"
 #include "kernel/times.h"
+#include "lib/stl/string.h"
 
 extern "C"{
 #include "driver/interface.h"
