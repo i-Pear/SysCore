@@ -12,6 +12,7 @@ aux_source_directory(src/driver SRC_DRIVER)
 aux_source_directory(src/kernel SRC_LIB)
 aux_source_directory(src/kernel/memory SRC_MEMORY)
 aux_source_directory(src/kernel/fs SRC_FS)
+aux_source_directory(src/kernel/posix SRC_POSIX)
 aux_source_directory(src/driver/fatfs SRC_FATFS)
 
 add_executable(
@@ -22,4 +23,5 @@ add_executable(
         ${SRC_FATFS}
         ${SRC_FS}
         ${SRC_MEMORY}
+        ${SRC_POSIX}
         src/main.cpp)

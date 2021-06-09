@@ -2,8 +2,8 @@
 #include "register.h"
 #include "../lib/stl/stl.h"
 #include "scheduler.h"
-#include "external_structs.h"
-#include "file_describer.h"
+#include "posix/posix_structs.h"
+#include "fs/file_describer.h"
 #include "times.h"
 
 #define get_actual_page(x) (((x)>0x80000000)?(x):(x)+ get_running_elf_page())
@@ -351,7 +351,7 @@ int sys_getdents64(Context *context) {
     size_t fd = sysGetRealFd(context->a0);
     char *buf = (char *) get_actual_page(context->a1);
     size_t len = context->a2;
-    // TODO: unhandled
+
     return -1;
 }
 
@@ -482,7 +482,7 @@ void syscall_register() {
     syscall_list[SYS_dup] = sys_dup;
     syscall_list[SYS_dup3] = sys_dup3;
     syscall_list[SYS_chdir] = sys_chdir;
-//    syscall_list[SYS_getdents64] = sys_getdents64;
+    syscall_list[SYS_getdents64] = sys_getdents64;
     syscall_list[SYS_mkdirat] = sys_mkdirat;
     syscall_list[SYS_unlinkat] = sys_unlinkat;
     syscall_list[SYS_times] = sys_times;

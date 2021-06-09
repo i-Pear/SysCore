@@ -1,5 +1,5 @@
-#ifndef OS_RISC_V_EXTERNAL_STRUCTS_H
-#define OS_RISC_V_EXTERNAL_STRUCTS_H
+#ifndef OS_RISC_V_POSIX_STRUCTS_H
+#define OS_RISC_V_POSIX_STRUCTS_H
 
 typedef char int8;
 typedef unsigned char uint8;
@@ -78,4 +78,4 @@ struct linux_dirent64 {
     char            d_name[];
 };
 
-#endif //OS_RISC_V_EXTERNAL_STRUCTS_H
+#endif //OS_RISC_V_POSIX_STRUCTS_H

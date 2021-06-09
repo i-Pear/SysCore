@@ -1,7 +1,7 @@
 #ifndef OS_RISC_V_TIMES_H
 #define OS_RISC_V_TIMES_H
 
-#include "external_structs.h"
+#include "posix/posix_structs.h"
 #include "stddef.h"
 
 void get_timespec(TimeVal* timeVal);

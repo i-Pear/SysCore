@@ -7,7 +7,7 @@
 #include "lib/stl/string.h"
 #include "kernel/fs/IFS.h"
 #include "kernel/Test.h"
-#include "kernel/file_describer.h"
+#include "kernel/fs/file_describer.h"
 
 extern "C"{
 #include "driver/interface.h"

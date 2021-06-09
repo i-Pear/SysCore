@@ -2,8 +2,8 @@
 #define OS_RISC_V_FILE_DESCRIBER_H
 
 #include "stdbool.h"
-#include "../lib/stl/stl.h"
-#include "fs/IFS.h"
+#include "../../lib/stl/stl.h"
+#include "IFS.h"
 
 enum File_Describer_Type {
     FILE_DESCRIBER_REGULAR,

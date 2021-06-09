@@ -30,6 +30,8 @@ public:
     virtual int umount(const char *dist) = 0;
 
     virtual int fstat(const char *path, size_t *result, int option) = 0;
+
+//    virtual int read_dir(const char* path, char buf[], int len) override;
 };
 
 class FS : public IFS {

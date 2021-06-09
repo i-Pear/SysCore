@@ -1,4 +1,4 @@
-#include "external_structs.h"
+#include "posix_structs.h"
 
 struct ES_utsname ES_uname={
         "sysCore",
