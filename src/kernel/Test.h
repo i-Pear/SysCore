@@ -30,19 +30,19 @@ public:
     void test(){
         start_one_test();
 
-//        String s1 = "Hello World";
-//        String s2 = s1;
-//        assert(s1 == s2);
-//        String s3 = "Hello ";
-//        s3.append(String("World"));
-//        assert(s1 == s3);
-//        String s5 = (String("Hello") + String(" ")+ String("World"));
-//        printf("s5 %s\n", s5.c_str());
-//        assert(s5 == s1);
-//        String s4 = "Hello";
-//        s4 += " ";
-//        s4 += "World";
-//        assert(s4 == "Hello World");
+        String s1 = "Hello World";
+        String s2 = s1;
+        assert(s1 == s2);
+        String s3 = "Hello ";
+        s3.append(String("World"));
+        assert(s1 == s3);
+        String s5 = (String("Hello") + String(" ")+ String("World"));
+        printf("s5 %s\n", s5.c_str());
+        assert(s5 == s1);
+        String s4 = "Hello";
+        s4 += " ";
+        s4 += "World";
+        assert(s4 == "Hello World");
 
         end_one_test();
     }

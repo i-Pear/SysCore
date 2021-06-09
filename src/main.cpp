@@ -17,10 +17,10 @@ extern "C" void __cxa_pure_virtual()
     // Do nothing or print an error message.
 }
 
-//void test(){
-//    TestString t = TestString();
-//    t.test();
-//}
+void test(){
+    TestString t = TestString();
+    t.test();
+}
 
 /**
  * 此处打算通过 sret 进入u-mode
@@ -35,8 +35,8 @@ extern "C" void __cxa_pure_virtual()
  * 所以这里需要恢复现场+将模拟硬件自动完成的动作。
  */
 void init_thread() {
-//    printf("[OS] test library\n");
-//    test();
+    printf("[OS] test library\n");
+    test();
     printf("[OS] times init.\n");
     init_times();
     printf("[OS] bsp init.\n");
