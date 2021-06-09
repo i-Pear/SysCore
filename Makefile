@@ -13,7 +13,7 @@ GCC = riscv64-unknown-elf-gcc
 GXX = riscv64-unknown-elf-c++
 OBJCOPY = riscv64-unknown-elf-objcopy
 
-SRC_ALL = $(wildcard src/asm/*.s src/lib/*.h src/lib/*.cpp src/stl/*.h src/stl/*.cpp src/kernel/*.h src/kernel/*.cpp src/kernel/memory/*.h src/kernel/memory/*.cpp src/kernel/fs/*.h src/kernel/fs/*.cpp)
+SRC_ALL = $(wildcard src/asm/*.s src/lib/*.h src/lib/*.cpp src/lib/stl/*.h src/lib/stl/*.cpp src/kernel/*.h src/kernel/*.cpp src/kernel/memory/*.h src/kernel/memory/*.cpp src/kernel/fs/*.h src/kernel/fs/*.cpp)
 SRC_DRIVER = src/driver/all_driver_in_one.c
 OBJ_DRIVER = $(BUILD)/driver.o
 #SRC_FATFS = $(wildcard src/driver/fatfs/*.h src/driver/fatfs/*.c)
