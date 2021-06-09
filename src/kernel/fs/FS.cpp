@@ -22,6 +22,8 @@ class FSUtil{
 };
 
 int FS::init() {
+    static FATFS fatfs;
+    f_mount(&fatfs, "", 1);
     return 0;
 }
 

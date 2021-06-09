@@ -5,8 +5,9 @@
 #include "../../driver/fatfs/ff.h"
 #include "../../lib/stl/map.h"
 #include "FSMacro.h"
+#include "../../lib/stl/string.h"
 
-class IFS{
+class IFS {
 public:
     virtual int init() = 0;
 
@@ -24,16 +25,29 @@ public:
 
     virtual int unlink(const char *path) = 0;
 
-    virtual int mount(const char *dist,const char *origin) = 0;
+    virtual int mount(const char *dist, const char *origin) = 0;
 
     virtual int umount(const char *dist) = 0;
 
     virtual int fstat(const char *path, size_t *result, int option) = 0;
 };
 
-class FS: public IFS{
+class FS : public IFS {
 private:
+    union FS_Data {
+        FIL fil;
+        DIR dir;
+    };
 
+    class FS_Element {
+    public:
+        FS_Element(FS_Data fsData, bool isFile) : is_file(isFile), data(fsData) {}
+
+        FS_Data data;
+        bool is_file;
+    };
+
+    Map<String, FS_Element> path_to_fs_el;
 public:
     int init() override;
 
@@ -57,7 +71,6 @@ public:
 
     int fstat(const char *path, size_t *result, int option) override;
 };
-
 
 
 #endif //OS_RISC_V_IFS_H
