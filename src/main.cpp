@@ -53,9 +53,9 @@ void init_thread() {
     init_file_describer();
     init_self_tests();
 
-//    add_test("/yield");
-//    add_test("/fork");
-//    add_test("/clone");
+    add_test("/yield");
+    add_test("/fork");
+    add_test("/clone");
     add_test("/write");
     add_test("/uname");
     add_test("/times");
@@ -69,14 +69,14 @@ void init_thread() {
     add_test("/dup");
     add_test("/getdents");
     add_test("/dup2");
-//    add_test("/wait");
-//    add_test("/exit");
+    add_test("/wait");
+    add_test("/exit");
 //    add_test("/execve");
     add_test("/gettimeofday");
     add_test("/mkdir_");
     add_test("/chdir");
-//    add_test("/waitpid");
-//    add_test("/sleep");
+    add_test("/waitpid");
+    add_test("/sleep");
     add_test("/unlink");
     add_test("/mount");
     add_test("/umount");

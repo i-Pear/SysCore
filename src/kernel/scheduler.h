@@ -12,7 +12,9 @@
 
 extern int global_pid;
 
-struct PCB{
+class PCB{
+public:
+
     int pid;
     int ppid;
     size_t stack;
@@ -33,6 +35,10 @@ struct PCB{
     List<pair<int,int>> signal_list;
     int* wstatus;
     size_t wait_pid;
+
+    PCB();
+
+    PCB(const PCB& other);
 
 };
 
