@@ -31,7 +31,7 @@ public:
 
     virtual int fstat(const char *path, size_t *result, int option) = 0;
 
-//    virtual int read_dir(const char* path, char buf[], int len) override;
+    virtual int read_dir(const char* path, char buf[], int len) = 0;
 };
 
 class FS : public IFS {
@@ -73,6 +73,8 @@ public:
     int umount(const char *dist) override;
 
     int fstat(const char *path, size_t *result, int option) override;
+
+    int read_dir(const char *path, char *buf, int len) override;
 };
 
 extern IFS* fs;

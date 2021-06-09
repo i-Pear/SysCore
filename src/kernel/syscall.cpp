@@ -351,8 +351,7 @@ int sys_getdents64(Context *context) {
     size_t fd = sysGetRealFd(context->a0);
     char *buf = (char *) get_actual_page(context->a1);
     size_t len = context->a2;
-
-    return -1;
+    return fs->read_dir(file_describer_array[fd].path, buf, len);
 }
 
 int sys_mkdirat(Context *context) {

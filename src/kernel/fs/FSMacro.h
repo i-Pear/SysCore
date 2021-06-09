@@ -39,4 +39,18 @@
 #define S_IWOTH      00002   // others have write permission
 #define S_IXOTH      00001   // others have execute permission
 
+/// dirent mode
+
+
+# define DT_UNKNOWN 0         //未知类型
+# define DT_FIFO 1           //管道
+# define DT_CHR  2             //字符设备
+# define DT_DIR    4             //目录
+# define DT_BLK    6            //块设备
+# define DT_REG    8            //常规文件
+# define DT_LNK    10           //符号链接
+# define DT_SOCK    12          //套接字
+# define DT_WHT    14             //链接
+
+
 #endif //OS_RISC_V_FSMACRO_H
