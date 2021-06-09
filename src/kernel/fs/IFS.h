@@ -41,10 +41,11 @@ private:
 
     class FS_Element {
     public:
+        explicit FS_Element()= default;
         FS_Element(FS_Data fsData, bool isFile) : is_file(isFile), data(fsData) {}
 
-        FS_Data data;
-        bool is_file;
+        FS_Data data{};
+        bool is_file{};
     };
 
     Map<String, FS_Element> path_to_fs_el;
@@ -72,5 +73,6 @@ public:
     int fstat(const char *path, size_t *result, int option) override;
 };
 
+extern IFS* fs;
 
 #endif //OS_RISC_V_IFS_H

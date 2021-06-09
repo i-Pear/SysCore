@@ -47,7 +47,7 @@ _start:
 # Enable interrupt, But it looks no use, Even cause interrupt
     # csrsi mstatus, 0x8
 
-# ebreak test
+# ebreak test_lib
     # ebreak
 
     call main

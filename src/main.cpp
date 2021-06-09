@@ -5,7 +5,9 @@
 #include "kernel/memory/kernel_stack.h"
 #include "kernel/times.h"
 #include "lib/stl/string.h"
+#include "kernel/fs/IFS.h"
 #include "kernel/Test.h"
+#include "kernel/file_describer.h"
 
 extern "C"{
 #include "driver/interface.h"
@@ -17,7 +19,7 @@ extern "C" void __cxa_pure_virtual()
     // Do nothing or print an error message.
 }
 
-void test(){
+void test_lib(){
     TestString t = TestString();
     t.test();
 }
@@ -35,49 +37,50 @@ void test(){
  * 所以这里需要恢复现场+将模拟硬件自动完成的动作。
  */
 void init_thread() {
-
-    printf("[OS] test library\n");
-    test();
+    printf("[OS] test_lib library\n");
+    test_lib();
     printf("[OS] times init.\n");
     init_times();
     printf("[OS] bsp init.\n");
     driver_init();
-
+    printf("[FS] fs init.\n");
+    fs = new FS();
+    fs->init();
     printf("[OS] Interrupt & Timer Interrupt Open.\n");
     interrupt_timer_init();
     printf("[OS] init scheduler.\n");
     init_scheduler();
-//    init_file_describer();
+    init_file_describer();
     init_self_tests();
 
 //    add_test("/yield");
-//    add_test("fork");
-//    add_test("clone");
-    add_test("write");
-//    add_test("/uname");
-//    add_test("/times");
-//    add_test("/getpid");
-//    add_test("/getppid");
-//    add_test("/open");
-//    add_test("/read");
-//    add_test("/close");
-//    add_test("/openat");
-//    add_test("/getcwd");
-//    add_test("/dup");
-//    add_test("/getdents");
-//    add_test("/dup2");
+//    add_test("/fork");
+//    add_test("/clone");
+    add_test("/write");
+    add_test("/uname");
+    add_test("/times");
+    add_test("/getpid");
+    add_test("/getppid");
+    add_test("/open");
+    add_test("/read");
+    add_test("/close");
+    add_test("/openat");
+    add_test("/getcwd");
+    add_test("/dup");
+    add_test("/getdents");
+    add_test("/dup2");
 //    add_test("/wait");
 //    add_test("/exit");
 //    add_test("/execve");
-//    add_test("/gettimeofday");
-//    add_test("/mkdir_");
-//    add_test("/chdir");
+    add_test("/gettimeofday");
+    add_test("/mkdir_");
+    add_test("/chdir");
 //    add_test("/waitpid");
 //    add_test("/sleep");
-//    add_test("/unlink");
-//    add_test("/mount");
-//    add_test("/umount");
-//    add_test("/fstat");
+    add_test("/unlink");
+    add_test("/mount");
+    add_test("/umount");
+    add_test("/fstat");
 
     // IO tests
 //    add_test("/test_output");

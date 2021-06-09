@@ -84,7 +84,7 @@ typedef __gnuc_va_list va_list;
 #else  /* not __svr4__ || _SCO_DS */
 
 /* The macro _VA_LIST_ is the same thing used by this file in Ultrix.
-   But on BSD NET2 we must not test or define or undef it.
+   But on BSD NET2 we must not test_lib or define or undef it.
    (Note that the comments in NET 2's ansi.h
    are incorrect for _VA_LIST_--see stdio.h!)  */
 #if !defined(_VA_LIST_) || defined(__BSD_NET2__) || defined(____386BSD____) || \

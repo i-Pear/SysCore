@@ -506,4 +506,6 @@ static inline _u64 internal_syscall(long n, _u64 _a0, _u64 _a1, _u64 _a2, _u64
 
 Context* syscall(Context* context);
 
+char *getAbsolutePath(char *path, char *cwd);
+
 #endif

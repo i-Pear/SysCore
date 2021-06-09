@@ -62,7 +62,6 @@ struct Map{
             }
             cnt=cnt->next;
         }
-        printf("in map_get: key %d not exist!\n", key);
         printf("[panic] %s:%d  %s\n",__FILE__,__LINE__,"");shutdown();
     }
 };
