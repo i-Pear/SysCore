@@ -252,7 +252,6 @@ int sys_openat(Context *context) {
         File_Describer_Create(fd, FILE_DESCRIBER_REGULAR, FILE_ACCESS_RW, fakeData, fd_path);
         return fd;
     }
-    panic("open error!\n");
     return -1;
 }
 
@@ -381,7 +380,7 @@ int sys_unlinkat(Context *context) {
     int dir_fd = sysGetRealFd(context->a0);
     char *path = (char *) get_actual_page(context->a1);
     // TODO: we can't really delete it
-//    vfs_unlink(atFdCWD(dir_fd, path));
+    fs->unlink(atFdCWD(dir_fd, path));
     return 0;
 }
 
