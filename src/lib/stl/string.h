@@ -37,4 +37,6 @@ public:
     bool operator<(const String& b)const;
 };
 
+String to_string(long long n);
+
 #endif //OS_RISC_V_STRING_H

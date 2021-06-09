@@ -85,3 +85,27 @@ bool String::operator==(const String& b) const{
 bool String::operator<(const String& b)const{
     return strcmp(data,b.data)<0;
 }
+
+String to_string(long long n){
+    if(n==0){
+        return String("0");
+    }else if(n>0){
+        char buf[30];
+        int length=0;
+        while (n){
+            buf[30-1-(length++)]=n%10+'0';
+            n/=10;
+        }
+        return String(&buf[30-length]);
+    }else{
+        n=-n;
+        char buf[30];
+        int length=0;
+        while (n){
+            buf[30-1-(length++)]=n%10+'0';
+            n/=10;
+        }
+        buf[30-1-(length++)]='-';
+        return String(&buf[30-length]);
+    }
+}

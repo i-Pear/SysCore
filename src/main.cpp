@@ -35,6 +35,7 @@ void test(){
  * 所以这里需要恢复现场+将模拟硬件自动完成的动作。
  */
 void init_thread() {
+
     printf("[OS] test library\n");
     test();
     printf("[OS] times init.\n");
