@@ -22,7 +22,7 @@ public:
         s4 += "World";
         assert(s4 == "Hello World");
 
-        printf("<=# End Test %s No.%d\n", test_name);
+        printf("<=# End Test %\n", test_name);
     }
 };
 

@@ -6,6 +6,7 @@
 #include "../../lib/stl/map.h"
 #include "FSMacro.h"
 #include "../../lib/stl/string.h"
+#include "../posix/posix_structs.h"
 
 class IFS {
 public:
@@ -29,7 +30,7 @@ public:
 
     virtual int umount(const char *dist) = 0;
 
-    virtual int fstat(const char *path, size_t *result, int option) = 0;
+    virtual int fstat(const char *path, kstat* stat) = 0;
 
     virtual int read_dir(const char* path, char buf[], int len) = 0;
 };
@@ -72,7 +73,7 @@ public:
 
     int umount(const char *dist) override;
 
-    int fstat(const char *path, size_t *result, int option) override;
+    int fstat(const char *path, kstat* stat) override;
 
     int read_dir(const char *path, char *buf, int len) override;
 };

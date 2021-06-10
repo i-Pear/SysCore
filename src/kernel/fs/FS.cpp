@@ -15,6 +15,11 @@ public:
         return result;
     }
 
+    static int fatfs_mode_to_posix_mode(int mode) {
+        if (mode & AM_DIR)return S_IFDIR;
+        return S_IFREG;
+    }
+
     static int add_flag(const char *path, int flag) {
         if (flag == 0) {
             flag |= O_RDWR;
@@ -52,7 +57,21 @@ int FS::open(const char *path, int flag) {
     return -1;
 }
 
-int FS::fstat(const char *path, size_t *result, int option) {
+int FS::fstat(const char *path, kstat *stat) {
+    FILINFO fileInfo;
+    int fr = f_stat(path, &fileInfo);
+    if (fr != FR_OK)return -1;
+    stat->st_size = fileInfo.fsize;
+    stat->st_mtime_sec = fileInfo.ftime;
+    stat->st_mtime_nsec = fileInfo.ftime;
+    stat->st_ctime_sec = fileInfo.ftime;
+    stat->st_ctime_nsec = fileInfo.ftime;
+    stat->st_atime_sec = fileInfo.ftime;
+    stat->st_atime_nsec = fileInfo.ftime;
+    stat->st_dev = 0;
+    stat->st_ino = 0;
+    stat->st_mode = FSUtil::fatfs_mode_to_posix_mode(fileInfo.fattrib);
+    stat->st_nlink = 0;
     return 0;
 }
 
@@ -123,8 +142,8 @@ FRESULT scan_files(
             if (res != FR_OK || fno.fname[0] == 0) break;  /* Break on error or end of dir */
             size_t len = 2 + offsetof(struct linux_dirent64, d_name) + strlen(fno.fname);
             size_t off = (len + 7) / 8 * 8;
-            if(offset + off >= length)break;
-            auto* dirent64 = (linux_dirent64*) (buf + offset);
+            if (offset + off >= length)break;
+            auto *dirent64 = (linux_dirent64 *) (buf + offset);
             dirent64->d_ino = ino++;
             dirent64->d_reclen = length;
             dirent64->d_off = off;

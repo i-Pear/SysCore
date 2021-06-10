@@ -428,6 +428,16 @@ int sys_umount2(Context *context) {
     return 0;
 }
 
+int sys_fstat(Context* context){
+    // fd: 文件句柄；
+    // kst: 接收保存文件状态的指针；
+    // int ret = fstat(fd, &kst);
+    // 返回值：成功返回0，失败返回-1；
+    int fd = sysGetRealFd(context->a0);
+    auto* stat = (kstat*) get_actual_page(context->a1);
+    return fs->fstat(file_describer_array[fd].path, stat);
+}
+
 /// syscall int & register & distribute
 
 void syscall_init() {
@@ -491,4 +501,5 @@ void syscall_register() {
     syscall_list[SYS_sched_yield] = sys_sched_yield;
     syscall_list[SYS_mount] = sys_mount;
     syscall_list[SYS_umount2] = sys_umount2;
+    syscall_list[SYS_fstat] = sys_fstat;
 }
