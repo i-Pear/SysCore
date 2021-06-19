@@ -22,13 +22,7 @@ public:
 
     virtual int mkdir(const char *path, int flag) = 0;
 
-    virtual int link(const char *path, int flag) = 0;
-
     virtual int unlink(const char *path) = 0;
-
-    virtual int mount(const char *dist, const char *origin) = 0;
-
-    virtual int umount(const char *dist) = 0;
 
     virtual int fstat(const char *path, kstat* stat) = 0;
 
@@ -65,13 +59,7 @@ public:
 
     int mkdir(const char *path, int flag) override;
 
-    int link(const char *path, int flag) override;
-
     int unlink(const char *path) override;
-
-    int mount(const char *dist, const char *origin) override;
-
-    int umount(const char *dist) override;
 
     int fstat(const char *path, kstat* stat) override;
 

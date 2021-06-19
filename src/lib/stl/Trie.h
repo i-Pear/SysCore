@@ -127,20 +127,12 @@ public:
         printf("Trie.h 0\n");
 
         List<String> f1 = file1, f2 = file2, f3 = file3;
-        printf("0.5\n");
-
         assert(*strTrie.firstMatch(f1) == 1);
-
-        printf("1\n");
-
         assert(*strTrie.firstMatch(f2) == 2);
-        printf("2\n");
-
         assert(*strTrie.firstMatch(f3) == 1);
-        printf("3\n");
+
         f3 = file3;
         assert(*strTrie.fullMatch(f3) == 3);
-        printf("4\n");
     }
 };
 

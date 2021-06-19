@@ -12,23 +12,50 @@
 #include "lib/stl/Trie.h"
 #include "lib/stl/PathUtil.h"
 
-extern "C"{
+extern "C" {
 #include "driver/interface.h"
 #include "driver/fatfs/ff.h"
 }
 
-extern "C" void __cxa_pure_virtual()
-{
+extern "C" void __cxa_pure_virtual() {
     // Do nothing or print an error message.
 }
 
-void test_lib(){
+void test_lib() {
     TestString t = TestString();
     t.test();
 
     TestTrie testTrie;
     TestPathUtil testPathUtil;
 }
+
+/// Don't delete it!
+//void test_vfs(){
+//    printf("[OS] test vfs\n");
+//    driver_init();
+//    IFS* ifs = new FS;
+//    int r;
+//    ifs->init();
+//    VFS vfs(ifs);
+//    r = vfs.open("/text.txt", O_RDWR);
+//    assert(r == 0);
+//    char buf[512];
+//    r = vfs.read("/text.txt", buf, 20);
+//    printf("Read: %s\n", buf);
+//    r = vfs.close("/text.txt");
+//    assert(r == 0);
+//
+//    vfs.mount("/mnt", "");
+//    memset(buf, 0, sizeof buf);
+//
+//    vfs.open("/mnt/text.txt", O_RDWR);
+//    vfs.read("/mnt/text.txt", buf, 20);
+//    printf("Read: %s\n", buf);
+//    r = vfs.close("/mnt/text.txt");
+//    assert(r == 0);
+//    printf("test ok\n");
+//    shutdown();
+//}
 
 /**
  * 此处打算通过 sret 进入u-mode
@@ -45,6 +72,7 @@ void test_lib(){
 void init_thread() {
     printf("[OS] test library\n");
     test_lib();
+//    test_vfs();
     printf("[OS] times init.\n");
     init_times();
     printf("[OS] bsp init.\n");
@@ -104,9 +132,7 @@ int main() {
            "          __/ |                         \n"
            "         |___/                          \n");
 
-    lty(get_kernel_stack_base());
-    lty(get_kernel_stack_end());
-    lty(__kernel_stack_base);
+    lty(get_kernel_stack_base());lty(get_kernel_stack_end());lty(__kernel_stack_base);
 
     printf("[OS] Memory Init.\n");
     init_memory();

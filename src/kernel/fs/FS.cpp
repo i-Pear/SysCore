@@ -75,20 +75,8 @@ int FS::fstat(const char *path, kstat *stat) {
     return 0;
 }
 
-int FS::umount(const char *dist) {
-    return 0;
-}
-
-int FS::mount(const char *dist, const char *origin) {
-    return 0;
-}
-
 int FS::unlink(const char *path) {
     return f_unlink(path);
-}
-
-int FS::link(const char *path, int flag) {
-    return 0;
 }
 
 int FS::mkdir(const char *path, int flag) {
