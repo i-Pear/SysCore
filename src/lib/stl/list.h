@@ -108,6 +108,20 @@ struct List{
     }
 
     List(const List<T>& list){
+        start=end=nullptr;
+        ListNode<T>* cnt=list.start;
+        while (cnt){
+            push_back(cnt->data);
+            cnt=cnt->next;
+        }
+    }
+
+    List<T>& operator=(const List<T>& list){
+        // TODO:free
+        // pass
+
+        // copy
+        start=end=nullptr;
         ListNode<T>* cnt=list.start;
         while (cnt){
             push_back(cnt->data);
