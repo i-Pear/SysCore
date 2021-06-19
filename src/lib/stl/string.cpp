@@ -110,3 +110,36 @@ String to_string(long long n){
         return String(&buf[30-length]);
     }
 }
+
+String to_string(unsigned long long n){
+    if(n==0){
+        return String("0");
+    }else{
+        char buf[30];
+        int length=0;
+        while (n){
+            buf[30-1-(length++)]=n%10+'0';
+            n/=10;
+        }
+        return String(&buf[30-length]);
+    }
+}
+
+ostream& operator <<(ostream& os,const String& s){
+    for(int i=0;i<s._length;i++){
+        putchar(s.data[i]);
+    }
+    return os;
+}
+
+ostream& operator <<(ostream& os,long long n){
+    os<< to_string(n);
+    return os;
+}
+
+ostream& operator <<(ostream& os,unsigned long long n){
+    os<< to_string(n);
+    return os;
+}
+
+ostream cout;
