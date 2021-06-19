@@ -9,6 +9,7 @@
 #include "kernel/Test.h"
 #include "kernel/fs/file_describer.h"
 #include "lib/stl/Trie.h"
+#include "lib/stl/PathUtil.h"
 
 extern "C"{
 #include "driver/interface.h"
@@ -25,6 +26,7 @@ void test_lib(){
     t.test();
 
     TestTrie testTrie;
+    TestPathUtil testPathUtil;
 }
 
 /**
