@@ -28,6 +28,16 @@ struct List{
         return cnt->data;
     }
 
+    int length()const{
+        auto cnt=start;
+        int count=0;
+        while (cnt!= nullptr){
+            cnt=cnt->next;
+            count++;
+        }
+        return count;
+    }
+
     bool is_empty()const{
         return start==nullptr;
     }
