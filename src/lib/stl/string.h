@@ -6,8 +6,8 @@
 class String{
 public:
     const static int __INIT_CAPACITY=10;
-    int _capacity;
-    int _length;
+    int _capacity; // current vector capacity
+    int _length; // length without '0' in the end
     char* data;
 
     String(const char* str);
