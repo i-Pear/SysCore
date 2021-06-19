@@ -7,7 +7,7 @@ class TestString{
 public:
     void test(){
         const char* test_name = "String";
-        printf("#=> Start Test %s\n", test_name);
+//        printf("#=> Start Test %s\n", test_name);
 
         String s1 = "Hello World";
         String s2 = s1;
@@ -24,7 +24,7 @@ public:
 
         assert(s5.length() == 11);
 
-        printf("<=# End Test %s\n", test_name);
+//        printf("<=# End Test %s\n", test_name);
     }
 };
 

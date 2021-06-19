@@ -4,6 +4,11 @@
 #include "list.h"
 #include "string.h"
 
+/**
+ * Trie
+ * @tparam U search unit
+ * @tparam T data stored in end node
+ */
 template<typename U, typename T>
 class Trie {
 private:
@@ -92,7 +97,7 @@ public:
 class TestTrie {
 public:
     TestTrie() {
-        printf("#=> Start Test Trie\n");
+//        printf("#=> Start Test Trie\n");
         Trie<String, int> strTrie;
         List<String> file1, file2, file3;
         file1.push_back("/");

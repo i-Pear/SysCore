@@ -5,7 +5,7 @@
 #include "string.h"
 
 class PathUtil {
-public:
+private:
     /**
  * strpbrk - Find the first occurrence of a set of characters
  * @cs: The string to be searched
@@ -47,7 +47,7 @@ public:
         *s = end;
         return sbegin;
     }
-
+public:
     static List<String> split(const String& path){
         char *unit;
         List<String> res;
@@ -58,10 +58,6 @@ public:
             }
         }
         return res;
-    }
-
-    static String join(const List<String>& pathList){
-        return "";
     }
 };
 
