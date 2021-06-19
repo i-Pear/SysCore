@@ -18,6 +18,16 @@ struct List{
     ListNode<T>* start;
     ListNode<T>* end;
 
+    T& operator [] (int n){
+        auto cnt=start;
+        while (n--){
+            assert(cnt!= nullptr);
+            cnt=cnt->next;
+        }
+        assert(cnt!= nullptr);
+        return cnt->data;
+    }
+
     bool is_empty()const{
         return start==nullptr;
     }
