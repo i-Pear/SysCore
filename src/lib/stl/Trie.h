@@ -124,8 +124,6 @@ public:
         strTrie.insert(file2, 2);
         strTrie.insert(file3, 3);
 
-        printf("Trie.h 0\n");
-
         List<String> f1 = file1, f2 = file2, f3 = file3;
         assert(*strTrie.firstMatch(f1) == 1);
         assert(*strTrie.firstMatch(f2) == 2);

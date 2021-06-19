@@ -1,8 +1,9 @@
 #include "IFS.h"
 #include "../stdio.h"
 #include "../posix/posix_structs.h"
+#include "VFS.h"
 
-IFS *fs;
+VFS* fs;
 
 class FSUtil {
 public:

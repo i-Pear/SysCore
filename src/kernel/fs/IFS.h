@@ -66,6 +66,4 @@ public:
     int read_dir(const char *path, char *buf, int len) override;
 };
 
-extern IFS* fs;
-
 #endif //OS_RISC_V_IFS_H

@@ -17,7 +17,9 @@ public:
         return fs->X;\
     }\
     auto new_path = PathUtil::joinAbsolutePath(paths).c_str();          \
-    return (*p)->Y;
+    int res = (*p)->Y;                                        \
+    delete new_path;                                                          \
+    return res;
 
     VFS(IFS* ifs) {
         init(ifs);
@@ -57,6 +59,10 @@ public:
         VFS_ADAPTER(mkdir(path, flag), mkdir(new_path, flag));
     };
 
+    int unlink(const char *path){
+        VFS_ADAPTER(unlink(path), unlink(new_path));
+    }
+
     int mount(const char *dist, const char *origin){
         VFS* vfs = new VFS(fs);
         tree.insert(PathUtil::split(dist), vfs);
@@ -68,10 +74,13 @@ public:
         return 0;
     };
 
+
     int umount(const char *dist){
         //TODO implement
         return 0;
     };
 };
+
+extern VFS* fs;
 
 #endif //OS_RISC_V_VFS_H

@@ -3,7 +3,7 @@
 
 #include "stdbool.h"
 #include "../../lib/stl/stl.h"
-#include "IFS.h"
+#include "VFS.h"
 
 enum File_Describer_Type {
     FILE_DESCRIBER_REGULAR,
