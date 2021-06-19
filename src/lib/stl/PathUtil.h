@@ -1,0 +1,4 @@
+#ifndef OS_RISC_V_PATHUTIL_H
+#define OS_RISC_V_PATHUTIL_H
+
+#endif //OS_RISC_V_PATHUTIL_H

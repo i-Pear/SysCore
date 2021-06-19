@@ -35,6 +35,10 @@ public:
     bool operator==(const String& b) const;
 
     bool operator<(const String& b)const;
+
+    char& operator[](const int x) const{
+        return data[x];
+    }
 };
 
 String to_string(long long n);

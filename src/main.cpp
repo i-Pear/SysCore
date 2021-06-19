@@ -8,6 +8,7 @@
 #include "kernel/fs/IFS.h"
 #include "kernel/Test.h"
 #include "kernel/fs/file_describer.h"
+#include "lib/stl/Trie.h"
 
 extern "C"{
 #include "driver/interface.h"
@@ -22,6 +23,8 @@ extern "C" void __cxa_pure_virtual()
 void test_lib(){
     TestString t = TestString();
     t.test();
+
+    TestTrie testTrie;
 }
 
 /**

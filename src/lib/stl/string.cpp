@@ -28,10 +28,10 @@ String::String(int length):_capacity(length+1),_length(length){
 }
 
 String::String(const String& b){
-    _capacity=b._length;
+    _capacity=b._length+1;
     _length=b._length;
-    data=new char[_length];
-    memcpy(data,b.data,_length);
+    data=new char[_capacity];
+    memcpy(data,b.data,_capacity);
 }
 
 char* String::c_str()const{
@@ -39,11 +39,11 @@ char* String::c_str()const{
 }
 
 int String::length()const{
-    return _length-1;
+    return _length;
 }
 
 int String::size()const{
-    return _length-1;
+    return length();
 }
 
 String String::operator+(const String& b)const{

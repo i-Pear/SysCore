@@ -22,6 +22,8 @@ public:
         s4 += "World";
         assert(s4 == "Hello World");
 
+        assert(s5.length() == 11);
+
         printf("<=# End Test %s\n", test_name);
     }
 };
