@@ -16,8 +16,6 @@ public:
 
     String();
 
-    ~String();
-
     String(int length);
 
     String(const String& b);

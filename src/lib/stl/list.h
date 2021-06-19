@@ -118,9 +118,7 @@ struct List{
 
     List<T>& operator=(const List<T>& list){
         // TODO:free
-        while (start!= nullptr){
-            pop_front();
-        }
+        // pass
 
         // copy
         start=end=nullptr;

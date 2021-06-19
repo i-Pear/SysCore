@@ -142,8 +142,4 @@ ostream& operator <<(ostream& os,unsigned long long n){
     return os;
 }
 
-String::~String() {
-    delete data;
-}
-
 ostream cout;
