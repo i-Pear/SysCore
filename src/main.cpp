@@ -6,6 +6,7 @@
 #include "kernel/times.h"
 #include "lib/stl/string.h"
 #include "kernel/fs/IFS.h"
+#include "kernel/fs/VFS.h"
 #include "kernel/Test.h"
 #include "kernel/fs/file_describer.h"
 #include "lib/stl/Trie.h"

@@ -47,11 +47,12 @@ private:
         *s = end;
         return sbegin;
     }
+
 public:
-    static List<String> split(const String& path){
+    static List<String> split(const String &path) {
         char *unit;
         List<String> res;
-        char* c_str = path.c_str();
+        char *c_str = path.c_str();
         while ((unit = strsep(&c_str, "/")) != NULL) {
             if (*unit != '\0') {
                 res.push_back(unit);
@@ -59,17 +60,29 @@ public:
         }
         return res;
     }
+
+    static String joinAbsolutePath(const List<String> &pathList) {
+        String res;
+        auto p = pathList.start;
+        while (p) {
+            res += "/";
+            res += p->data;
+            p = p->next;
+        }
+        return res;
+    }
 };
 
-class TestPathUtil{
+class TestPathUtil {
 public:
-    TestPathUtil(){
+    TestPathUtil() {
         auto list = PathUtil::split("/dev/sdb");
         assert(list.start->data == "dev" && list.start->next->data == "sdb");
 
         list = PathUtil::split("dev/sdb");
         assert(list.start->data == "dev" && list.start->next->data == "sdb");
 
+        assert(PathUtil::joinAbsolutePath(list) == "/dev/sdb");
     }
 };
 

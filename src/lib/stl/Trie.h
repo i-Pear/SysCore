@@ -54,20 +54,28 @@ public:
 
     /**
      * return the first node.data which is marked End
+     * ! it will pop prefix in word
      * @param word
      * @return if find, return node.data otherwise nullptr
      */
-    T *firstMatch(const List<U> &word) {
+    T *firstMatch(List<U> &word) {
         auto *node = this;
         auto *word_head = word.start;
+        int count = 0;
         while (word_head) {
+            count++;
             auto &c = word_head->data;
             auto *target = findChild(node->children, c);
             if (target == nullptr) {
                 return nullptr;
             }
             node = target;
-            if (node->isEnd)return node->data;
+            if (node->isEnd){
+                while (count--){
+                    word.pop_front();
+                }
+                return node->data;
+            }
             word_head = word_head->next;
         }
         return nullptr;
@@ -116,12 +124,23 @@ public:
         strTrie.insert(file2, 2);
         strTrie.insert(file3, 3);
 
-        assert(*strTrie.firstMatch(file1) == 1);
-        assert(*strTrie.firstMatch(file2) == 2);
-        assert(*strTrie.firstMatch(file3) == 1);
+        printf("Trie.h 0\n");
 
-        assert(*strTrie.fullMatch(file3) == 3);
+        List<String> f1 = file1, f2 = file2, f3 = file3;
+        printf("0.5\n");
 
+        assert(*strTrie.firstMatch(f1) == 1);
+
+        printf("1\n");
+
+        assert(*strTrie.firstMatch(f2) == 2);
+        printf("2\n");
+
+        assert(*strTrie.firstMatch(f3) == 1);
+        printf("3\n");
+        f3 = file3;
+        assert(*strTrie.fullMatch(f3) == 3);
+        printf("4\n");
     }
 };
 
