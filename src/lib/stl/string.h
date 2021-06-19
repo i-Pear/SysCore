@@ -12,13 +12,19 @@ public:
 
     String(const char* str);
 
+    String& operator=(const String& str);
+
     String& operator=(const char* str);
 
     String();
 
+    ~String();
+
     String(int length);
 
     String(const String& b);
+
+    String(String&& b);
 
     char* c_str()const;
 

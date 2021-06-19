@@ -7,6 +7,17 @@ String::String(const char* str){
     memcpy(data,str,_length+1);
 }
 
+String& String::operator=(const String& str){
+    delete[] data;
+
+    _length= str._length;
+    _capacity=_length+1;
+    data=new char[_capacity];
+    memcpy(data,str.data,_length+1);
+
+    return *this;
+}
+
 String& String::operator=(const char* str){
     delete[] data;
 
@@ -33,6 +44,17 @@ String::String(const String& b){
     _length=b._length;
     data=new char[_capacity];
     memcpy(data,b.data,_capacity);
+}
+
+String::String(String&& b){
+    _capacity=b._capacity;
+    _length=b._length;
+    data=b.data;
+    // init b to empty
+    b._capacity=__INIT_CAPACITY;
+    b._length=0;
+    b.data=new char [b._capacity];
+    memset(b.data,0,__INIT_CAPACITY);
 }
 
 char* String::c_str()const{
@@ -140,6 +162,10 @@ ostream& operator <<(ostream& os,long long n){
 ostream& operator <<(ostream& os,unsigned long long n){
     os<< to_string(n);
     return os;
+}
+
+String::~String() {
+    delete data;
 }
 
 ostream cout;
