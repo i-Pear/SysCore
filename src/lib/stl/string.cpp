@@ -20,6 +20,7 @@ String& String::operator=(const char* str){
 
 String::String(): _capacity(__INIT_CAPACITY), _length(0){
     data=new char[_capacity];
+    memset(data,0,_capacity);
 }
 
 String::String(int length):_capacity(length+1),_length(length){
