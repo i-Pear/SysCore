@@ -167,11 +167,13 @@ void *operator new[](size_t size) {
 }
 
 void operator delete(void *p) {
-    k_free((size_t) p);
+    if(p != nullptr)
+        k_free((size_t) p);
 }
 
 void operator delete[](void *p) {
-    k_free((size_t) p);
+    if(p != nullptr)
+        k_free((size_t) p);
 }
 
 #undef cnt

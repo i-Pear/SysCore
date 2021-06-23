@@ -31,6 +31,7 @@ void test_lib() {
 
     TestTrie testTrie;
     TestPathUtil testPathUtil;
+    TestFile testFile;
 }
 
 /// Don't delete it!
@@ -82,6 +83,7 @@ void init_thread() {
     printf("[OS] bsp init.\n");
     driver_init();
     printf("[FS] fs init.\n");
+    File::init();
     fs = new VFS(new FS);
     fs->fs->init();
     printf("[OS] Interrupt & Timer Interrupt Open.\n");
