@@ -13,3 +13,9 @@
 #include "fatfs/diskio.c"
 #include "fatfs/ffunicode.c"
 #include "fatfs/ffsystem.c"
+
+
+// img
+#ifdef QEMU
+#include "img.h"
+#endif

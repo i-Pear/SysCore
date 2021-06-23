@@ -11,6 +11,10 @@
 #include "diskio.h"		/* Declarations of disk functions */
 #include "../sdcard.h"
 
+#ifdef QEMU
+extern unsigned char fs_img[];
+#endif
+
 /* Definitions of physical drive number for each drive */
 //#define DEV_RAM		0	/* Example: Map Ramdisk to physical drive 0 */
 //#define DEV_MMC		1	/* Example: Map MMC/SD card to physical drive 1 */
@@ -54,11 +58,15 @@ DSTATUS disk_initialize (
 	DSTATUS status = STA_NOINIT;
     switch (pdrv) {
         case SD_CARD:{
+#ifndef QEMU
             if(sdcard_init() != 0){
                 status = RES_OK;
             }else{
                 status = STA_NOINIT;
             }
+#else
+            status = RES_OK;
+#endif
             break;
         }
         default:
@@ -84,10 +92,19 @@ DRESULT disk_read (
 	DRESULT status = RES_PARERR;
     switch (pdrv) {
         case SD_CARD:{
+#ifndef QEMU
             for (UINT i = 0; i < count; ++i) {
                 sdcard_read_sector(buff + SD_SECTOR_SIZE * i, (int)(sector + i));
             }
             status = RES_OK;
+#else
+            for (UINT i = 0;i < count; i++){
+                for (UINT j = 0;j < 512; j++){
+                    buff[512 * i + j] = fs_img[(sector + i) * 512 + j];
+                }
+            }
+            status = RES_OK;
+#endif
             break;
         }
         default:
@@ -116,10 +133,19 @@ DRESULT disk_write (
     if(!count)return status;
     switch (pdrv) {
         case SD_CARD:{
+#ifndef QEMU
             for (UINT i = 0;i < count; i++){
                 sdcard_write_sector((uint8 *)buff + SD_SECTOR_SIZE * i, (int)(sector + i));
             }
             status = RES_OK;
+#else
+            for (UINT i = 0;i < count; i++){
+                for (UINT j = 0;j < 512; j++){
+                    fs_img[(sector + i) * 512 + j] = buff[512 * i + j];
+                }
+            }
+            status = RES_OK;
+#endif
             break;
         }
         default:
@@ -147,13 +173,27 @@ DRESULT disk_ioctl (
         case SD_CARD:{
             switch (cmd) {
                 case GET_SECTOR_SIZE:
+#ifndef QEMU
                     *(WORD*)buff = SD_SECTOR_SIZE;
+#else
+                    *(WORD*)buff = 512;
+#endif
+
                     break;
                 case GET_BLOCK_SIZE:
+#ifndef QEMU
                     *(DWORD*)buff = SD_BLOCK_SIZE;
+#else
+                    *(DWORD*)buff = 16384;
+#endif
                     break;
                 case GET_SECTOR_COUNT:
+#ifndef QEMU
                     *(DWORD*)buff = SD_SECTOR_COUNT;
+#else
+                    *(DWORD*)buff = 125171712;
+#endif
+
                     break;
                 case CTRL_SYNC:
                     break;

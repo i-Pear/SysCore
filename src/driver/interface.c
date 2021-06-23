@@ -34,8 +34,12 @@ void fatfs_init(){
         printf("fat init failed\n");
     }
 }
-
+#ifdef QEMU
+extern unsigned char fs_img[];
+#endif
 void driver_init(){
+#ifndef QEMU
     bsp_init();
+#endif
     fatfs_init();
 }
