@@ -155,6 +155,11 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
             page_fault(context, stval);
             __restore();
         }
+        // store page fault
+        case 15:{
+            page_fault(context, stval);
+            __restore();
+        }
         default: {
             printf("scause: %d\n", scause);
             printf("sepc: 0x%x\n", context->sepc);

@@ -312,7 +312,7 @@ int sys_dup(Context *context) {
     file_describer_bind(new_fd, new_fd);
     File_Describer_Plus(fd);
     File_Describer_Data data = {.redirect_fd = fd};
-    File_Describer_Create(new_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_READ, data, NULL);
+    File_Describer_Create(new_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_READ, data, "\0");
     return (new_fd);
 }
 
@@ -332,7 +332,7 @@ int sys_dup3(Context *context) {
     int actual_fd = fd_search_a_empty_file_describer();
 
     File_Describer_Data data = {.redirect_fd = (int) old_fd};
-    File_Describer_Create(actual_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_WRITE, data, NULL);
+    File_Describer_Create(actual_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_WRITE, data, "\0");
     File_Describer_Plus((int) old_fd);
     file_describer_bind(new_fd, actual_fd);
 
