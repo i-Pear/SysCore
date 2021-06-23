@@ -21,6 +21,10 @@ extern "C" void __cxa_pure_virtual() {
     // Do nothing or print an error message.
 }
 
+extern "C" void print_ss(){
+    printf("sstatus: 0x%x\n", register_read_sstatus());
+}
+
 void test_lib() {
     TestString t = TestString();
     t.test();

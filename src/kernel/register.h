@@ -9,6 +9,10 @@
 #define REGISTER_SSTATUS_SPP (1 << 8)
 // whether supervisor interrupts were enabled prior to trapping into supervisor mode
 #define REGISTER_SSTATUS_SPIE (1 << 5)
+// Permit Supervisor User Memory access
+#define REGISTER_SSTATUS_SUM (1 << 18)
+// Global Interrupt Enable
+#define REGISTER_SSTATUS_SIE (1 << 1)
 
 size_t register_read_sip();
 size_t register_read_sstatus();

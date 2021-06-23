@@ -150,6 +150,11 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
             syscall(context);
             __restore();
         }
+        // ins page fault & load page fault
+        case 12 ... 13:{
+            page_fault(context, stval);
+            __restore();
+        }
         default: {
             printf("scause: %d\n", scause);
             printf("sepc: 0x%x\n", context->sepc);

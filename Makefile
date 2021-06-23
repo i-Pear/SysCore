@@ -13,7 +13,7 @@ GCC = riscv64-unknown-elf-gcc
 GXX = riscv64-unknown-elf-c++
 OBJCOPY = riscv64-unknown-elf-objcopy
 
-SRC_ALL = $(wildcard src/asm/*.s src/lib/*.h src/lib/*.cpp src/lib/stl/*.h src/lib/stl/*.cpp src/kernel/*.h src/kernel/*.cpp src/kernel/memory/*.h src/kernel/memory/*.cpp src/kernel/fs/*.h src/kernel/fs/*.cpp src/kernel/posix/*.h src/kernel/posix/*.cpp)
+SRC_ALL = $(wildcard src/lib/*.h src/lib/*.cpp src/lib/stl/*.h src/lib/stl/*.cpp src/kernel/*.h src/kernel/*.cpp src/kernel/memory/*.h src/kernel/memory/*.cpp src/kernel/fs/*.h src/kernel/fs/*.cpp src/kernel/posix/*.h src/kernel/posix/*.cpp)
 SRC_DRIVER = src/driver/all_driver_in_one.c
 OBJ_DRIVER = $(BUILD)/driver.o
 #SRC_FATFS = $(wildcard src/driver/fatfs/*.h src/driver/fatfs/*.c)
@@ -27,6 +27,8 @@ all: mk-build driver
 	$(GXX) -o $(KERNEL_O) -std=c++11 -w -g -mcmodel=medany -T src/linker.ld -O0 -ffreestanding -nostdlib -fno-exceptions -fno-rtti -Wwrite-strings -fno-use-cxa-atexit\
                                     $(SRC_ALL) \
                                     $(OBJ_DRIVER) \
+                                    src/asm/boot.s \
+                                    src/asm/interrupt.s \
                                     src/main.cpp
 	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)
 	@cp $(BOOTLOADER) $(BOOTLOADER).copy
@@ -65,15 +67,21 @@ img:
 flash:
 	@sudo dd if=fs.img of=$(sd);
 
+qemu-driver:
+	$(GCC) -o build/driver-qemu.o -w -g -mcmodel=medany -O0 -ffreestanding -nostdlib -c $(SRC_DRIVER) -DQEMU
 
 qemu:
-	#$(GCC) -o $(OBJ_DRIVER) -w -g -mcmodel=medany -O0 -ffreestanding -nostdlib -c $(SRC_DRIVER) -DQEMU
 	$(GXX) -o $(KERNEL_O) -std=c++11 -w -g -mcmodel=medany -T src/linker-qemu.ld -O0 -ffreestanding -nostdlib -fno-exceptions -fno-rtti -Wwrite-strings -fno-use-cxa-atexit\
                                         $(SRC_ALL) \
-                                        $(OBJ_DRIVER) \
+                                        src/asm/boot.s \
+                                        src/asm/interrupt-qemu.s \
+                                        build/driver-qemu.o \
                                         src/main.cpp \
                                         -DQEMU
 	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)
 
 	qemu-system-riscv64 -machine virt -nographic -bios platform/qemu/fw_payload.bin -device loader,file=k210.bin,addr=0x80200000 \
-	 -S -s
+	 -S -s -m 2000M -smp 2
+
+debug:
+	riscv64-unknown-elf-gdb build/kernel.o -ex "target remote :1234"
