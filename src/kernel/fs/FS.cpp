@@ -93,6 +93,7 @@ int FS::close(const char *path) {
 }
 
 int FS::write(const char *path, char *buf, int count) {
+    // why qemu boom after delete this code?
     if (strcmp(path, "/dev/console") == 0) {
         for (int i = 0; i < count; i++) {
             putchar(buf[i]);
