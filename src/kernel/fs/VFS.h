@@ -145,7 +145,7 @@ public:
         init(ifs);
     }
 
-    void scan(const String& str, File *dir) {
+    void scan(const String &str, File *dir) {
 //        printf("%s\n", str.c_str());
         static DirInfo dirInfo;
         int res;
@@ -154,7 +154,7 @@ public:
             return;
         }
         dir->appendChild(new File(dirInfo.fname, fs));
-        while (res != 0){
+        while (res != 0) {
             res = fs->read_dir(str.c_str(), (char *) &dirInfo, 0);
             if (res == -1) {
                 return;
@@ -162,10 +162,10 @@ public:
             dir->appendChild(new File(dirInfo.fname, fs));
         }
         auto *p = dir->first_child;
-        while (p){
-            if(str == "/"){
+        while (p) {
+            if (str == "/") {
                 scan(str + p->name, p);
-            }else{
+            } else {
                 scan(str + "/" + p->name, p);
             }
             p = p->next;
@@ -180,22 +180,42 @@ public:
         return 0;
     }
 
-    static File* search(File* file, const char* path){
-        if(path == nullptr){
+    static File *search(File *file, const char *path) {
+        if (path == nullptr) {
             return nullptr;
         }
-        if(strcmp(path, "/") == 0){
+        if (strcmp(path, "/") == 0) {
             return file;
         }
         return file->first_child->search(path);
     }
 
     int open(const char *path, int flag) {
+        if (flag & O_CREATE) {
+            auto list = PathUtil::split(path);
+            if (list.is_empty()) {
+                panic("cannot create root dir!")
+            }
+            if(list.length() == 1){
+                return root->fs->open(path, flag);
+            }
+            auto new_list = List<String>();
+            auto *p = list.start;
+            auto len = list.length();
+            for(auto i = 0;i < len - 1; i++){
+                new_list.push_back(p->data);
+                p = p->next;
+            }
+            auto father_str = PathUtil::joinAbsolutePath(new_list);
+            auto* father_file = root->first_child->search(father_str);
+            if(father_file == nullptr)return -1;
+            return father_file->fs->open(path, flag);
+        }
         VFS_ADAPTER(open(path, flag))
     }
 
     int read(const char *path, char buf[], int count) {
-        if(path == nullptr)return -1;
+        if (path == nullptr)return -1;
         VFS_ADAPTER(read(path, buf, count))
     }
 
