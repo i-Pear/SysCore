@@ -91,7 +91,22 @@ struct List{
         }else{
             ListNode<T>* firstNode=start;
             start=firstNode->next;
+            start->previous= nullptr;
             delete firstNode;
+        }
+    }
+
+    void pop_back(){
+        if(start==end){
+            // has only one
+            ListNode<T>* firstNode=start;
+            start=end=nullptr;
+            delete firstNode;
+        }else{
+            ListNode<T>* lastNode=end;
+            end=lastNode->previous;
+            end->next= nullptr;
+            delete lastNode;
         }
     }
 
