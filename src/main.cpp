@@ -12,6 +12,8 @@
 #include "lib/stl/Trie.h"
 #include "lib/stl/PathUtil.h"
 
+void vfs_init();
+
 extern "C" {
 #include "driver/interface.h"
 #include "driver/fatfs/ff.h"
@@ -83,10 +85,7 @@ void init_thread() {
     printf("[OS] bsp init.\n");
     driver_init();
     printf("[FS] fs init.\n");
-    File::init();
-    auto *ifs = new FS;
-    ifs->init();
-    fs = new VFS(ifs);
+    vfs_init();
     printf("[OS] Interrupt & Timer Interrupt Open.\n");
     interrupt_timer_init();
     printf("[OS] init scheduler.\n");
@@ -127,6 +126,21 @@ void init_thread() {
 //    add_test("/test_output");
 
     schedule();
+}
+
+void vfs_init() {
+    File::init();
+    auto *ifs = new FS;
+    ifs->init();
+    fs = new VFS(ifs);
+
+    auto* stdout = new StdoutFs;
+    fs->root->appendChild(new File("dev", ifs));
+    fs->mkdir("/dev", O_DIRECTORY | O_RDWR);
+
+    auto* dev = fs->root->first_child->search("/dev");
+    assert(dev != nullptr);
+    dev->appendChild(new File("console", stdout));
 }
 
 int main() {
