@@ -84,8 +84,9 @@ void init_thread() {
     driver_init();
     printf("[FS] fs init.\n");
     File::init();
-    fs = new VFS(new FS);
-    fs->fs->init();
+    auto *ifs = new FS;
+    ifs->init();
+    fs = new VFS(ifs);
     printf("[OS] Interrupt & Timer Interrupt Open.\n");
     interrupt_timer_init();
     printf("[OS] init scheduler.\n");

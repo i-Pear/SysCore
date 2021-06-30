@@ -8,6 +8,14 @@
 #include "../../lib/stl/string.h"
 #include "../posix/posix_structs.h"
 
+struct DirInfo{
+    FSIZE_t	fsize;			/* File size */
+    WORD	fdate;			/* Modified date */
+    WORD	ftime;			/* Modified time */
+    int	fattrib;		/* File attribute */
+    TCHAR	fname[FF_LFN_BUF + 1];	/* Primary file name */
+};
+
 class IFS {
 public:
     virtual int init() = 0;
@@ -26,8 +34,17 @@ public:
 
     virtual int fstat(const char *path, kstat* stat) = 0;
 
-    virtual int read_dir(const char* path, char buf[], int len) = 0;
+    /**
+     * read directory entry
+     * @param path: directory path
+     * @param buff: a DirInfo Object buffer
+     * @param new_request: is this is a new request
+     * @return -1 when error, 0 when end, 1 when ok
+     */
+    virtual int read_dir(const char* path, char buff[sizeof(DirInfo)], int new_request) = 0;
 };
+
+
 
 class FS : public IFS {
 private:
@@ -46,6 +63,9 @@ private:
     };
 
     Map<String, FS_Element> path_to_fs_el;
+
+    DIR last_dir;
+    int has_last_dir;
 public:
     int init() override;
 
@@ -63,7 +83,7 @@ public:
 
     int fstat(const char *path, kstat* stat) override;
 
-    int read_dir(const char *path, char *buf, int len) override;
+    int read_dir(const char *path, char *buff, int new_request) override;
 };
 
 #endif //OS_RISC_V_IFS_H

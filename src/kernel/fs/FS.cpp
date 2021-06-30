@@ -3,7 +3,7 @@
 #include "../posix/posix_structs.h"
 #include "VFS.h"
 
-VFS* fs;
+VFS *fs;
 
 class FSUtil {
 public:
@@ -35,6 +35,7 @@ public:
 };
 
 int FS::init() {
+    has_last_dir = 0;
     static FATFS fatfs;
     f_mount(&fatfs, "", 1);
     return 0;
@@ -113,44 +114,36 @@ int FS::read(const char *path, char *buf, int count) {
     return result;
 }
 
-FRESULT scan_files(
-        char *path,        /* Start node to be scanned (***also used as work area***) */
-        char buf[],
-        int length
-) {
+int FS::read_dir(const char *path, char *buff, int new_request) {
     FRESULT res;
-    DIR dir;
     FILINFO fno;
-    size_t ino = 0;
-    size_t offset = 0;
 
-    res = f_opendir(&dir, path);                       /* Open the directory */
-    if (res == FR_OK) {
-        for (;;) {
-            res = f_readdir(&dir, &fno);                   /* Read a directory item */
-            if (res != FR_OK || fno.fname[0] == 0) break;  /* Break on error or end of dir */
-            size_t len = 2 + offsetof(struct linux_dirent64, d_name) + strlen(fno.fname);
-            size_t off = (len + 7) / 8 * 8;
-            if (offset + off >= length)break;
-            auto *dirent64 = (linux_dirent64 *) (buf + offset);
-            dirent64->d_ino = ino++;
-            dirent64->d_reclen = length;
-            dirent64->d_off = off;
-            strcpy(dirent64->d_name, fno.fname);
-            if (fno.fattrib & AM_DIR) {
-                dirent64->d_type = DT_DIR;
-            } else {
-                dirent64->d_type = DT_REG;
-            }
-            offset += off;
+    if(!has_last_dir || new_request != 0){
+        if(has_last_dir != 0){
+            f_closedir(&last_dir);
         }
-        f_closedir(&dir);
+        res = f_opendir(&last_dir, path);
+        has_last_dir = 1;
+        if(res != FR_OK){
+            f_closedir(&last_dir);
+            return -1;
+        }
     }
-    return res;
-}
-
-
-int FS::read_dir(const char *path, char *buf, int len) {
-    String p = path;
-    return scan_files(p.c_str(), buf, 512);
+    res = f_readdir(&last_dir, &fno);
+    if (res != FR_OK || fno.fname[0] == 0) {
+        f_closedir(&last_dir);
+        has_last_dir = 0;
+        return 0;
+    }
+    auto* dirInfo = (DirInfo*) buff;
+    if(fno.fattrib & AM_DIR){
+        dirInfo->fattrib = S_IFDIR;
+    }else{
+        dirInfo->fattrib = S_IFREG;
+    }
+    dirInfo->fdate = fno.fdate;
+    dirInfo->ftime = fno.ftime;
+    dirInfo->fsize = fno.fsize;
+    strcpy(dirInfo->fname, fno.fname);
+    return 1;
 }
