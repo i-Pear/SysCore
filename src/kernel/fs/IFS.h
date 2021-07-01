@@ -36,7 +36,7 @@ public:
 
     virtual int fstat(const char *path, kstat *stat) = 0;
 
-    virtual int lseek(const char* path, int offset) = 0;
+    virtual int lseek(const char *path, size_t offset, int whence) = 0;
 
     /**
      * read directory entry
@@ -89,7 +89,7 @@ public:
 
     int read_dir(const char *path, char *buff, int new_request) override;
 
-    int lseek(const char *path, int offset) override;
+    int lseek(const char *path, size_t offset, int whence) override;
 };
 
 
@@ -141,7 +141,7 @@ public:
         return 0;
     }
 
-    int lseek(const char *path, int offset) override {
+    int lseek(const char *path, size_t offset, int whence) override {
         NOT_IMPLEMENT
         return 0;
     }

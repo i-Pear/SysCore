@@ -232,8 +232,8 @@ public:
         VFS_ADAPTER(fstat(path, stat))
     };
 
-    int lseek(const char *path, int offset){
-        VFS_ADAPTER(lseek(path, offset))
+    int lseek(const char *path, size_t offset, int whence) {
+        VFS_ADAPTER(lseek(path, offset, whence))
     }
 
     int read_dir(const char *path, char buf[], int len) {

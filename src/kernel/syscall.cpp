@@ -450,6 +450,16 @@ int sys_fstat(Context* context){
     return fs->fstat(file_describer_array[fd].path, stat);
 }
 
+int sys_lseek(Context* context){
+    // int fd
+    // size_t offset
+    // int whence
+    // size_t res = lseek(fd, offset, whence)
+    // Upon successful completion, lseek() returns the resulting offset location as measured in bytes from the beginning of the file.  On error, the value (off_t) -1 is returned and errno is set to indicate the error
+    int fd = sysGetRealFd(context->a0);
+    return fs->lseek(file_describer_array[fd].path, context->a1, context->a2);
+}
+
 /// syscall int & register & distribute
 
 void syscall_init() {
@@ -514,4 +524,5 @@ void syscall_register() {
     syscall_list[SYS_mount] = sys_mount;
     syscall_list[SYS_umount2] = sys_umount2;
     syscall_list[SYS_fstat] = sys_fstat;
+    syscall_list[SYS_lseek] = sys_lseek;
 }

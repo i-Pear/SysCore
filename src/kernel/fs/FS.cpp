@@ -150,11 +150,16 @@ int FS::read_dir(const char *path, char *buff, int new_request) {
     return 1;
 }
 
-int FS::lseek(const char *path, int offset) {
+int FS::lseek(const char *path, size_t offset, int whence) {
     auto &el = path_to_fs_el.get(path);
+    if(whence == 1){
+        offset += f_tell(&el.data.fil);
+    }else if(whence == 2){
+        offset += f_size(&el.data.fil);
+    }
     auto res = f_lseek(&el.data.fil, offset);
     if(res != FR_OK){
         return -1;
     }
-    return 0;
+    return f_tell(&el.data.fil);
 }

@@ -52,5 +52,11 @@
 # define DT_SOCK    12          //套接字
 # define DT_WHT    14             //链接
 
+/// lseek whence
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END 2
+
+
 
 #endif //OS_RISC_V_FSMACRO_H
