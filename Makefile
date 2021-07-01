@@ -71,7 +71,6 @@ qemu-driver: mk-build
 	$(GCC) -o build/driver-qemu.o -w -g -mcmodel=medany -O0 -ffreestanding -nostdlib -c $(SRC_DRIVER) -DQEMU
 
 qemu:
-	cd ~/ktool/kendryte-toolchain/bin
 	$(GXX) -o $(KERNEL_O) -std=c++11 -w -g -mcmodel=medany -T src/linker-qemu.ld -O0 -ffreestanding -nostdlib -fno-exceptions -fno-rtti -Wwrite-strings -fno-use-cxa-atexit\
                                         $(SRC_ALL) \
                                         src/asm/boot.s \
