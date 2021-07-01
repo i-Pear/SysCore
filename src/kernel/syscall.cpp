@@ -460,6 +460,38 @@ int sys_lseek(Context* context){
     return fs->lseek(file_describer_array[fd].path, context->a1, context->a2);
 }
 
+int sys_readv(Context* context){
+    // TODO: test
+    int fd = sysGetRealFd(context->a0);
+    auto *iov = (struct iovec*) get_actual_page(context->a1);
+    int iovcnt = context->a2;
+    int read_bytes = 0;
+    int res;
+    for(auto i = 0;i < iovcnt; i++){
+        auto& bio = iov[i];
+        res = fs->read(File_Describer_Get_Path(fd), (char *)get_actual_page((size_t)bio.iov_base), bio.iov_len);
+        if(res != FR_OK)return -1;
+        read_bytes += res;
+    }
+    return read_bytes;
+}
+
+int sys_writev(Context* context){
+    // TODO: test
+    int fd = sysGetRealFd(context->a0);
+    auto *iov = (struct iovec*) get_actual_page(context->a1);
+    int iovcnt = context->a2;
+    int write_bytes = 0;
+    int res;
+    for(auto i = 0;i < iovcnt; i++){
+        auto& bio = iov[i];
+        res = fs->write(File_Describer_Get_Path(fd), (char *)get_actual_page((size_t)bio.iov_base), bio.iov_len);
+        if(res != FR_OK)return -1;
+        write_bytes += res;
+    }
+    return write_bytes;
+}
+
 /// syscall int & register & distribute
 
 void syscall_init() {
@@ -525,4 +557,6 @@ void syscall_register() {
     syscall_list[SYS_umount2] = sys_umount2;
     syscall_list[SYS_fstat] = sys_fstat;
     syscall_list[SYS_lseek] = sys_lseek;
+    syscall_list[SYS_readv] = sys_readv;
+    syscall_list[SYS_writev] = sys_writev;
 }

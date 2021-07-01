@@ -1,6 +1,9 @@
 #ifndef OS_RISC_V_STDDEF_H
 #define OS_RISC_V_STDDEF_H
 
+/// own
+typedef long long ssize_t;
+
 /* Copyright (C) 1989-2017 Free Software Foundation, Inc.
 
 This file is part of GCC.

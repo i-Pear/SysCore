@@ -1,6 +1,8 @@
 #ifndef OS_RISC_V_POSIX_STRUCTS_H
 #define OS_RISC_V_POSIX_STRUCTS_H
 
+#include "../stddef.h"
+
 typedef char int8;
 typedef unsigned char uint8;
 typedef short int16;
@@ -76,6 +78,11 @@ struct linux_dirent64 {
     unsigned short  d_reclen;
     unsigned char   d_type;
     char            d_name[];
+};
+
+struct iovec {
+    void  *iov_base;    /* Starting address */
+    size_t iov_len;     /* Number of bytes to transfer */
 };
 
 #endif //OS_RISC_V_POSIX_STRUCTS_H
