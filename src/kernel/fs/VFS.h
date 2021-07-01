@@ -233,7 +233,7 @@ public:
     };
 
     int lseek(const char *path, int offset){
-        VFS_ADAPTER(lseek(path, offset));
+        VFS_ADAPTER(lseek(path, offset))
     }
 
     int read_dir(const char *path, char buf[], int len) {

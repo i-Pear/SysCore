@@ -11,7 +11,6 @@
 #include "kernel/fs/file_describer.h"
 #include "lib/stl/Trie.h"
 #include "lib/stl/PathUtil.h"
-#include "kernel/syscall.h"
 
 void vfs_init();
 
@@ -102,11 +101,11 @@ void vfs_init() {
     ifs->init();
     fs = new VFS(ifs);
 
-    auto* stdout = new StdoutFs;
+    auto *stdout = new StdoutFs;
     fs->root->appendChild(new File("dev", ifs));
     fs->mkdir("/dev", O_DIRECTORY | O_RDWR);
 
-    auto* dev = fs->root->first_child->search("/dev");
+    auto *dev = fs->root->first_child->search("/dev");
     assert(dev != nullptr);
     dev->appendChild(new File("console", stdout));
 }

@@ -142,6 +142,7 @@ public:
     }
 
     int lseek(const char *path, int offset) override {
+        NOT_IMPLEMENT
         return 0;
     }
 };
