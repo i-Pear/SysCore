@@ -82,6 +82,7 @@ int FS::unlink(const char *path) {
 }
 
 int FS::mkdir(const char *path, int flag) {
+    //TODO: mkdir syscall error
     return f_mkdir(path);
 }
 
@@ -119,13 +120,13 @@ int FS::read_dir(const char *path, char *buff, int new_request) {
     FRESULT res;
     FILINFO fno;
 
-    if(!has_last_dir || new_request != 0){
-        if(has_last_dir != 0){
+    if (!has_last_dir || new_request != 0) {
+        if (has_last_dir != 0) {
             f_closedir(&last_dir);
         }
         res = f_opendir(&last_dir, path);
         has_last_dir = 1;
-        if(res != FR_OK){
+        if (res != FR_OK) {
             f_closedir(&last_dir);
             return -1;
         }
@@ -136,10 +137,10 @@ int FS::read_dir(const char *path, char *buff, int new_request) {
         has_last_dir = 0;
         return 0;
     }
-    auto* dirInfo = (DirInfo*) buff;
-    if(fno.fattrib & AM_DIR){
+    auto *dirInfo = (DirInfo *) buff;
+    if (fno.fattrib & AM_DIR) {
         dirInfo->fattrib = S_IFDIR;
-    }else{
+    } else {
         dirInfo->fattrib = S_IFREG;
     }
     dirInfo->fdate = fno.fdate;
@@ -147,4 +148,13 @@ int FS::read_dir(const char *path, char *buff, int new_request) {
     dirInfo->fsize = fno.fsize;
     strcpy(dirInfo->fname, fno.fname);
     return 1;
+}
+
+int FS::lseek(const char *path, int offset) {
+    auto &el = path_to_fs_el.get(path);
+    auto res = f_lseek(&el.data.fil, offset);
+    if(res != FR_OK){
+        return -1;
+    }
+    return 0;
 }

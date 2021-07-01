@@ -36,6 +36,8 @@ public:
 
     virtual int fstat(const char *path, kstat *stat) = 0;
 
+    virtual int lseek(const char* path, int offset) = 0;
+
     /**
      * read directory entry
      * @param path: directory path
@@ -86,6 +88,8 @@ public:
     int fstat(const char *path, kstat *stat) override;
 
     int read_dir(const char *path, char *buff, int new_request) override;
+
+    int lseek(const char *path, int offset) override;
 };
 
 
@@ -134,6 +138,10 @@ public:
 
     int read_dir(const char *path, char *buff, int new_request) override {
         NOT_IMPLEMENT
+        return 0;
+    }
+
+    int lseek(const char *path, int offset) override {
         return 0;
     }
 };
