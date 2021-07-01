@@ -8,11 +8,14 @@
 
 class Process_memory_controller{
     String elf_path;
-    size_t* page_base;
+    size_t* page_table;
+
+    size_t stack_size;
+    size_t elf_page_size;
+    size_t stack;
 
     // virtual addr -> real addr
     Map<size_t,Mmap_unit> map;
-
 
 };
 

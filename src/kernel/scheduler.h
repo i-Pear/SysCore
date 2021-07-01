@@ -7,6 +7,7 @@
 #include "register.h"
 #include "../lib/stl/list.h"
 #include "../lib/stl/map.h"
+#include "memory/process_memory.h"
 
 #define MAX_PATH_LENGTH 32
 
@@ -17,19 +18,13 @@ public:
 
     int pid;
     int ppid;
-    size_t stack;
-    size_t elf_page_base;
-    size_t page_table;
-
-    size_t stack_size;
-    size_t elf_page_size;
 
     Context * thread_context;
     char cwd[MAX_PATH_LENGTH];
 
     Map<size_t,size_t> occupied_file_describer;
-    List<size_t> occupied_kernel_heap;
-    List<size_t> occupied_pages;
+
+    Process_memory_controller processMemoryController;
 
     // wait related
     List<pair<int,int>> signal_list;
