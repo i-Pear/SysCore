@@ -20,23 +20,41 @@ struct DirInfo {
 
 class IFS {
 public:
-    virtual int init() = 0;
+    virtual int init() {
+        NOT_IMPLEMENT
+    };
 
-    virtual int open(const char *path, int flag) = 0;
+    virtual int open(const char *path, int flag) {
+        NOT_IMPLEMENT
+    };
 
-    virtual int read(const char *path, char buf[], int count) = 0;
+    virtual int read(const char *path, char buf[], int count) {
+        NOT_IMPLEMENT
+    };
 
-    virtual int write(const char *path, char buf[], int count) = 0;
+    virtual int write(const char *path, char buf[], int count) {
+        NOT_IMPLEMENT
+    };
 
-    virtual int close(const char *path) = 0;
+    virtual int close(const char *path) {
+        NOT_IMPLEMENT
+    };
 
-    virtual int mkdir(const char *path, int flag) = 0;
+    virtual int mkdir(const char *path, int flag) {
+        NOT_IMPLEMENT
+    };
 
-    virtual int unlink(const char *path) = 0;
+    virtual int unlink(const char *path) {
+        NOT_IMPLEMENT
+    };
 
-    virtual int fstat(const char *path, kstat *stat) = 0;
+    virtual int fstat(const char *path, kstat *stat) {
+        NOT_IMPLEMENT
+    };
 
-    virtual int lseek(const char *path, size_t offset, int whence) = 0;
+    virtual int lseek(const char *path, size_t offset, int whence) {
+        NOT_IMPLEMENT
+    };
 
     /**
      * read directory entry
@@ -45,7 +63,9 @@ public:
      * @param new_request: is this is a new request
      * @return -1 when error, 0 when end, 1 when ok
      */
-    virtual int read_dir(const char *path, char buff[sizeof(DirInfo)], int new_request) = 0;
+    virtual int read_dir(const char *path, char buff[sizeof(DirInfo)], int new_request) {
+        NOT_IMPLEMENT
+    };
 };
 
 
@@ -99,51 +119,11 @@ public:
         return 0;
     }
 
-    int open(const char *path, int flag) override {
-        NOT_IMPLEMENT
-        return 0;
-    }
-
-    int read(const char *path, char *buf, int count) override {
-        NOT_IMPLEMENT
-        return 0;
-    }
-
     int write(const char *path, char *buf, int count) override {
          for(auto i = 0;i < count; i++){
              putchar(buf[i]);
          }
         return count;
-    }
-
-    int close(const char *path) override {
-        NOT_IMPLEMENT
-        return 0;
-    }
-
-    int mkdir(const char *path, int flag) override {
-        NOT_IMPLEMENT
-        return 0;
-    }
-
-    int unlink(const char *path) override {
-        NOT_IMPLEMENT
-        return 0;
-    }
-
-    int fstat(const char *path, kstat *stat) override {
-        NOT_IMPLEMENT
-        return 0;
-    }
-
-    int read_dir(const char *path, char *buff, int new_request) override {
-        NOT_IMPLEMENT
-        return 0;
-    }
-
-    int lseek(const char *path, size_t offset, int whence) override {
-        NOT_IMPLEMENT
-        return 0;
     }
 };
 
