@@ -151,7 +151,6 @@ size_t alloc_page(size_t size){
 }
 
 void dealloc_page(size_t p){
-
     int start=(p-__kernel_end)/__page_size;
     int length=__memory_alloc_length[start];
     // printf("dealloc_page page: start=%d length=%d\n",start,length);
