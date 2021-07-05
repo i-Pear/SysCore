@@ -142,6 +142,59 @@ public:
     }
 };
 
+class PipeFs: public IFS{
+private:
+    Map<String, List<unsigned char> *> read_pair, write_pair;
+public:
+    int init() override {
+        return IFS::init();
+    }
 
+    int read(const char *path, char *buf, int count) override {
+        auto *read_buff = read_pair.get(String(path));
+        if(read_buff == nullptr)return -1;
+        int cur = 0;
+        for (auto i = 0; i < count; i++) {
+            if (!read_buff->is_empty()) {
+                buf[cur++] = read_buff->start->data;
+                read_buff->pop_front();
+            } else {
+                // TODO: 此处直接实现为非阻塞，如果没有足够的数据会直接返回
+                return cur;
+            }
+        }
+        return cur;
+    }
+
+    int write(const char *path, char *buf, int count) override {
+        auto *write_buff = write_pair.get(String(path));
+        if(write_buff == nullptr)return -1;
+        for (auto i = 0; i < count; i++) {
+            write_buff->push_back(buf[i]);
+        }
+        return count;
+    }
+
+    int close(const char *path) override {
+        if (read_pair.exists(String(path))) {
+            auto *buff_list = read_pair.get(String(path));
+            delete buff_list;
+            read_pair.erase(String(path));
+        }
+        if (write_pair.exists(String(path))) {
+            auto *buff_list = write_pair.get((String(path)));
+            delete buff_list;
+            write_pair.erase(String(path));
+        }
+        return 0;
+    }
+
+    int pipe(const char *read_path, const char *write_path, int flags, int unused_param) override {
+        auto *buff = new List<unsigned char>();
+        read_pair.put(String(read_path), buff);
+        write_pair.put(String(write_path), buff);
+        return 0;
+    }
+};
 
 #endif //OS_RISC_V_IFS_H
