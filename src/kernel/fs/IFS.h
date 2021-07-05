@@ -8,7 +8,7 @@
 #include "../../lib/stl/string.h"
 #include "../posix/posix_structs.h"
 
-#define NOT_IMPLEMENT printf("%s not implement!\n", __FUNCTION__); panic("");
+#define NOT_IMPLEMENT printf("%s not implement!\n", __FUNCTION__); panic("")
 
 struct DirInfo {
     FSIZE_t fsize;            /* File size */
@@ -22,38 +22,47 @@ class IFS {
 public:
     virtual int init() {
         NOT_IMPLEMENT
+        return 0;
     };
 
     virtual int open(const char *path, int flag) {
         NOT_IMPLEMENT
+        return 0;
     };
 
     virtual int read(const char *path, char buf[], int count) {
         NOT_IMPLEMENT
+        return 0;
     };
 
     virtual int write(const char *path, char buf[], int count) {
         NOT_IMPLEMENT
+        return 0;
     };
 
     virtual int close(const char *path) {
         NOT_IMPLEMENT
+        return 0;
     };
 
     virtual int mkdir(const char *path, int flag) {
         NOT_IMPLEMENT
+        return 0;
     };
 
     virtual int unlink(const char *path) {
         NOT_IMPLEMENT
+        return 0;
     };
 
     virtual int fstat(const char *path, kstat *stat) {
         NOT_IMPLEMENT
+        return 0;
     };
 
     virtual int lseek(const char *path, size_t offset, int whence) {
         NOT_IMPLEMENT
+        return 0;
     };
 
     /**
@@ -65,7 +74,13 @@ public:
      */
     virtual int read_dir(const char *path, char buff[sizeof(DirInfo)], int new_request) {
         NOT_IMPLEMENT
+        return 0;
     };
+
+    virtual int pipe(const char *read_path, const char *write_path, int flags, int unused_param) {
+        NOT_IMPLEMENT
+        return 0;
+    }
 };
 
 
@@ -120,11 +135,13 @@ public:
     }
 
     int write(const char *path, char *buf, int count) override {
-         for(auto i = 0;i < count; i++){
-             putchar(buf[i]);
-         }
+        for (auto i = 0; i < count; i++) {
+            putchar(buf[i]);
+        }
         return count;
     }
 };
+
+
 
 #endif //OS_RISC_V_IFS_H
