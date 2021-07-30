@@ -15,13 +15,14 @@ Context *tick(Context* context);
 Context *page_fault(Context* context, size_t stval);
 
 Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
+//    printf("interrupt\n");
     int is_interrupt = (int)(scause >> 63);
     scause &= 31;
     switch (scause) {
         case 1:{
             if(is_interrupt == 0){
                 // load ins fault
-                mtl("load ins fault");
+                mtl(">>>>>> load ins fault <<<<<<");
                 page_fault(context, stval);
                 __restore();
             }else{
@@ -32,7 +33,7 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
         }
         case 2:{
             if(is_interrupt == 0){
-                mtl("illegal ins");
+                mtl(">>>>>> illegal ins <<<<<<");
                 lty(context->sepc);
                 lty(context->stval);
                 lty(context->satp);
@@ -124,7 +125,7 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
                 __restore();
             }else{
                 // load access fault
-                mtl("Load Access Fault");
+                mtl(">>>>>> Load Access Fault <<<<<<");
 //                printf("Perhaps Page is Error\n");
 //                printf("sepc: 0x%x\n", context->sepc);
 //                printf("[Shutdown!]\n");
@@ -136,7 +137,7 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
         case 7:{
             if(is_interrupt == 0){
                 // store access fault
-                mtl("store access fault");
+                mtl(">>>>>> store access fault <<<<<<");
                 page_fault(context, stval);
                 __restore();
             }else{

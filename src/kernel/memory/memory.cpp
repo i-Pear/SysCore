@@ -144,7 +144,7 @@ size_t alloc_page(size_t size){
         shutdown();
         return -1;
     }
-    // printf("Alloced page of start=%d length=%d\n",start,count);
+    // printf("Alloced page of start=0x%x end=0x%x\n",__kernel_end+start*__page_size,__kernel_end+start*__page_size+count*__page_size);
     __memory_update(1,start,start+count-1,1);
     __memory_alloc_length[start]=count;
     return __kernel_end+start*__page_size;

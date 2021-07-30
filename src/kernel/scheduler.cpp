@@ -177,7 +177,7 @@ void create_process(const char *elf_path) {
     uint32_t read_bytes;
     f_read(&fnew, elf_file_cache, file_size, &read_bytes);
     f_close(&fnew);
-    printf("File read successfully.\n");
+//    printf("File read successfully.\n");
     size_t elf_page_base,entry,elf_page_size;
     load_elf(elf_file_cache, file_size, &elf_page_base, &elf_page_size, &entry);
     // dealloc_page(elf_file_cache);
@@ -190,7 +190,7 @@ void create_process(const char *elf_path) {
      */
      size_t stack_page=(size_t) alloc_page(4096);
      memset(reinterpret_cast<void *>(stack_page), 0, 4096);
-     thread_context->sp = stack_page + __page_size-2*8;
+     thread_context->sp = stack_page + __page_size-100*8;
 //    size_t stack=(size_t) alloc_page(4096);
 //    thread_context.sp=4096+0x40000000;
     /**

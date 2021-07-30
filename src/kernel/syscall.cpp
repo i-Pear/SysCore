@@ -12,7 +12,7 @@
 #define PATH_BUFF_SIZE (512)
 
 /// lazy init syscall list
-int (*syscall_list[SYSCALL_LIST_LENGTH])(Context *context);
+size_t (*syscall_list[SYSCALL_LIST_LENGTH])(Context *context);
 
 
 /// functions declaration
@@ -199,11 +199,11 @@ char *atFdCWD(int dir_fd, char *path) {
 
 /// syscall
 
-int sys_getchar(Context *context) {
+size_t sys_getchar(Context *context) {
     return getchar_blocked();
 }
 
-int sys_write(Context *context) {
+size_t sys_write(Context *context) {
     // fd：要写入文件的文件描述符。
     // buf：一个缓存区，用于存放要写入的内容。
     // count：要写入的字节数。
@@ -216,30 +216,30 @@ int sys_write(Context *context) {
     return write_bytes;
 }
 
-int sys_execve(Context *context) {
+size_t sys_execve(Context *context) {
     execute((const char *)get_actual_page(context->a0));
     return context->a0;
 }
 
-int sys_gettimeofday(Context *context) {
+size_t sys_gettimeofday(Context *context) {
     get_timespec((TimeVal*)get_actual_page(context->a0));
     return 0;
 }
 
-int sys_exit(Context *context) {
+size_t sys_exit(Context *context) {
     exit_process(context->a0);
     return context->a0;
 }
 
-int sys_getppid(Context *context) {
+size_t sys_getppid(Context *context) {
     return get_running_ppid();
 }
 
-int sys_getpid(Context *context) {
+size_t sys_getpid(Context *context) {
     return get_running_pid();
 }
 
-int sys_openat(Context *context) {
+size_t sys_openat(Context *context) {
     // fd：文件所在目录的文件描述符
     // filename：要打开或创建的文件名。如为绝对路径，则忽略fd。如为相对路径，且fd是AT_FDCWD，则filename是相对于当前工作目录来说的。如为相对路径，且fd是一个文件描述符，则filename是相对于fd所指向的目录来说的。
     // flags：必须包含如下访问模式的其中一种：O_RDONLY，O_WRONLY，O_RDWR。还可以包含文件创建标志和文件状态标志。
@@ -263,7 +263,7 @@ int sys_openat(Context *context) {
     return -1;
 }
 
-int sys_read(Context *context) {
+size_t sys_read(Context *context) {
     // fd: 文件描述符，buf: 用户空间缓冲区，count：读多少
     // ssize_t ret = read(fd, buf, count)
     // ret: 返回的字节数
@@ -273,7 +273,7 @@ int sys_read(Context *context) {
     return fs->read(File_Describer_Get_Path(fd), buf, count);
 }
 
-int sys_close(Context *context) {
+size_t sys_close(Context *context) {
     // fd：要关闭的文件描述符。
     // int ret = close(fd);
     // 返回值：成功执行，返回0。失败，返回-1。
@@ -282,7 +282,7 @@ int sys_close(Context *context) {
     return (0);
 }
 
-int sys_getcwd(Context *context) {
+size_t sys_getcwd(Context *context) {
     // char *buf：一块缓存区，用于保存当前工作目录的字符串。当buf设为NULL，由系统来分配缓存区。
     // size：buf缓存区的大小。
     // long ret = getcwd(buf, size);
@@ -303,7 +303,7 @@ int sys_getcwd(Context *context) {
     return (int) ((size_t) ret);
 }
 
-int sys_dup(Context *context) {
+size_t sys_dup(Context *context) {
     // fd：被复制的文件描述符。
     // int ret = dup(fd);
     // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
@@ -316,7 +316,7 @@ int sys_dup(Context *context) {
     return (new_fd);
 }
 
-int sys_dup3(Context *context) {
+size_t sys_dup3(Context *context) {
     // old：被复制的文件描述符。
     // new：新的文件描述符。
     // int ret = dup3(old, new, 0);
@@ -339,7 +339,7 @@ int sys_dup3(Context *context) {
     return (int) (new_fd);
 }
 
-int sys_chdir(Context *context) {
+size_t sys_chdir(Context *context) {
     // path：需要切换到的目录。
     // int ret = chdir(path);
     // 返回值：成功执行，返回0。失败，返回-1。
@@ -353,7 +353,7 @@ int sys_chdir(Context *context) {
     return (0);
 }
 
-int sys_getdents64(Context *context) {
+size_t sys_getdents64(Context *context) {
     // fd：所要读取目录的文件描述符。
     // buf：一个缓存区，用于保存所读取目录的信息。
     // len：buf的大小。
@@ -365,7 +365,7 @@ int sys_getdents64(Context *context) {
     return fs->read_dir(file_describer_array[fd].path, buf, len);
 }
 
-int sys_mkdirat(Context *context) {
+size_t sys_mkdirat(Context *context) {
     // dirfd：要创建的目录所在的目录的文件描述符。
     // path：要创建的目录的名称。
     //      如果path是相对路径，则它是相对于dirfd目录而言的。
@@ -382,7 +382,7 @@ int sys_mkdirat(Context *context) {
     return 0;
 }
 
-int sys_unlinkat(Context *context) {
+size_t sys_unlinkat(Context *context) {
     // dirfd：要删除的链接所在的目录。
     // path：要删除的链接的名字。如果path是相对路径，则它是相对于dirfd目录而言的。如果path是相对路径，且dirfd的值为AT_FDCWD，则它是相对于当前路径而言的。如果path是绝对路径，则dirfd被忽略。
     // flags：可设置为0或AT_REMOVEDIR。
@@ -396,7 +396,7 @@ int sys_unlinkat(Context *context) {
     return 0;
 }
 
-int sys_times(Context *context) {
+size_t sys_times(Context *context) {
     struct ES_tms *tms = (struct ES_tms *)get_actual_page(context->a0);
     tms->tms_utime = 1;
     tms->tms_stime = 1;
@@ -405,42 +405,42 @@ int sys_times(Context *context) {
     return (1000);
 }
 
-int sys_uname(Context *context) {
+size_t sys_uname(Context *context) {
     struct ES_utsname *required_uname = (struct ES_utsname *)get_actual_page(context->a0);
     memcpy(required_uname, &ES_uname, sizeof(ES_uname));
     return (0);
 }
 
-int sys_wait4(Context *context) {
+size_t sys_wait4(Context *context) {
     return (wait((int *)get_actual_page(context->a1)));
 }
 
-int sys_nanosleep(Context *context) {
+size_t sys_nanosleep(Context *context) {
     TimeVal *timeVal = (TimeVal *)get_actual_page(context->a0);
     time_seconds += timeVal->sec;
     time_macro_seconds += timeVal->usec;
     return (0);
 }
 
-int sys_clone(Context *context) {
+size_t sys_clone(Context *context) {
     clone(context->a0, context->a1, context->a2);
     return context->a0;
 }
 
-int sys_sched_yield(Context *context) {
+size_t sys_sched_yield(Context *context) {
     yield();
     return (0);
 }
 
-int sys_mount(Context *context) {
+size_t sys_mount(Context *context) {
     return (0);
 }
 
-int sys_umount2(Context *context) {
+size_t sys_umount2(Context *context) {
     return 0;
 }
 
-int sys_fstat(Context* context){
+size_t sys_fstat(Context* context){
     // fd: 文件句柄；
     // kst: 接收保存文件状态的指针；
     // int ret = fstat(fd, &kst);
@@ -450,7 +450,7 @@ int sys_fstat(Context* context){
     return fs->fstat(file_describer_array[fd].path, stat);
 }
 
-int sys_lseek(Context* context){
+size_t sys_lseek(Context* context){
     // int fd
     // size_t offset
     // int whence
@@ -460,7 +460,7 @@ int sys_lseek(Context* context){
     return fs->lseek(file_describer_array[fd].path, context->a1, context->a2);
 }
 
-int sys_readv(Context* context){
+size_t sys_readv(Context* context){
     // TODO: test
     int fd = sysGetRealFd(context->a0);
     auto *iov = (struct iovec*) get_actual_page(context->a1);
@@ -476,7 +476,7 @@ int sys_readv(Context* context){
     return read_bytes;
 }
 
-int sys_writev(Context* context){
+size_t sys_writev(Context* context){
     // TODO: test
     int fd = sysGetRealFd(context->a0);
     auto *iov = (struct iovec*) get_actual_page(context->a1);
@@ -491,6 +491,21 @@ int sys_writev(Context* context){
     }
     return write_bytes;
 }
+
+size_t sys_brk(Context* context){
+    size_t require=context->a0;
+    printf("brk: require= 0x%x\n",require);
+    if(require!=0){
+        return require;
+    }else{
+        return 0x80500000;
+    }
+}
+
+size_t sys_faccessat(Context* context){
+    return 0;
+}
+
 
 /// syscall int & register & distribute
 
@@ -559,4 +574,6 @@ void syscall_register() {
     syscall_list[SYS_lseek] = sys_lseek;
     syscall_list[SYS_readv] = sys_readv;
     syscall_list[SYS_writev] = sys_writev;
+    syscall_list[SYS_brk]=sys_brk;
+    syscall_list[SYS_faccessat]=sys_faccessat;
 }
