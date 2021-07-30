@@ -56,14 +56,6 @@ size_t file_describer_convert(size_t file_id){
     return running->occupied_file_describer.get(file_id);
 }
 
-void bind_kernel_heap(size_t addr){
-    running->occupied_kernel_heap.push_back(addr);
-}
-
-void bind_pages(size_t addr){
-    running->occupied_pages.push_back(addr);
-}
-
 List<PCB*> runnable,blocked;
 PCB* running;
 
@@ -127,8 +119,14 @@ void clone(int flags,size_t stack,int ptid){
         runnable.push_back(child_pcb);
     }else{
         // fork, generate a new stack
-        size_t stack= alloc_page(running->stack_size);
-        memcpy(reinterpret_cast<void *>(stack), reinterpret_cast<const void *>(running->stack), running->stack_size);
+//        size_t stack= alloc_page(running->stack_size);
+//        memcpy((stack), (running->stack), running->stack_size);
+        List<size_t> new_stack_maps;
+        for(auto i=running->stack_maps.start;i!= nullptr;i=i->next){
+            size_t new_stack_page= (size_t)alloc_page(4096);
+            memcpy(reinterpret_cast<void *>(new_stack_page), reinterpret_cast<const void *>(i->data), 4096);
+            new_stack_maps.push_back(new_stack_page);
+        }
 
         size_t elf_page_base= alloc_page(running->elf_page_size);
         memcpy(reinterpret_cast<void *>(elf_page_base), reinterpret_cast<const void *>(running->elf_page_base), running->elf_page_size);
@@ -140,7 +138,7 @@ void clone(int flags,size_t stack,int ptid){
         child_context->sepc+=4;
 
         child_pcb->thread_context->a0=0;
-        child_pcb->stack=stack;
+        child_pcb->processMemory.=stack;
         child_pcb->thread_context->sp=running->thread_context->sp-running->stack+stack;
         child_pcb->elf_page_base=elf_page_base;
         child_pcb->page_table=page_table;
@@ -153,7 +151,7 @@ void clone(int flags,size_t stack,int ptid){
 
 size_t get_running_elf_page(){
     if(running==nullptr)return 0;
-    return running->elf_page_base;
+    return running->processMemory.elf_base;
 }
 
 int get_running_pid(){
@@ -178,6 +176,7 @@ void create_process(const char *elf_path) {
     f_read(&fnew, elf_file_cache, file_size, &read_bytes);
     f_close(&fnew);
     printf("File read successfully.\n");
+
     size_t elf_page_base,entry,elf_page_size;
     load_elf(elf_file_cache, file_size, &elf_page_base, &elf_page_size, &entry);
     // dealloc_page(elf_file_cache);
@@ -221,16 +220,13 @@ void create_process(const char *elf_path) {
     PCB* new_pcb= new PCB;
     new_pcb->pid=get_new_pid();
     new_pcb->ppid=1;
-    new_pcb->stack=stack_page;
+    new_pcb->stack_maps.push_back(stack_page);
     new_pcb->thread_context=thread_context;
-    new_pcb->elf_page_base=elf_page_base;
-    new_pcb->page_table=page_table_base;
+    new_pcb->processMemory.elf_base=elf_page_base;
+    new_pcb->processMemory.page_table=(size_t*)page_table_base;
     // TODO: 初始化工作目录为/，这不合理
     memset(new_pcb->cwd, 0, sizeof(new_pcb->cwd));
     new_pcb->cwd[0] = '/';
-
-    new_pcb->elf_page_size=elf_page_size;
-    new_pcb->stack_size=4096;
 
     runnable.push_back(new_pcb);
 }
@@ -366,12 +362,8 @@ int wait(int* wstatus){
 PCB::PCB(const PCB &other):occupied_file_describer(other.occupied_file_describer) {
     pid=other.pid;
     ppid=other.ppid;
-    stack=other.stack;
-    elf_page_base=other.elf_page_base;
-    page_table=other.page_table;
 
-    stack_size=other.stack_size;
-    elf_page_size=other.elf_page_size;
+    processMemory=other.processMemory;
 
     thread_context=nullptr;
     strcpy(cwd,other.cwd);

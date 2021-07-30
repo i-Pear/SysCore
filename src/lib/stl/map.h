@@ -22,6 +22,10 @@ struct Map{
         }
     }
 
+    Map<Key,Value>& operator=(const Map<Key,Value>& other){
+        data=other.data;
+    }
+
     void put(Key key,Value value){
         auto cnt=data.start;
         while (cnt!=nullptr){

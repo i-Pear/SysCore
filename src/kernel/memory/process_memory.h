@@ -1,29 +1,25 @@
 #ifndef OS_RISC_V_PROCESS_MEMORY_H
 #define OS_RISC_V_PROCESS_MEMORY_H
 
-#include "../lib/stl/string.h"
-#include "../lib/stl/map.h"
+#include "../../lib/stl/string.h"
+#include "../../lib/stl/map.h"
 #include "memory.h"
-#include "page_pool.h"
+#include "../../lib/stl/list.h"
 #include "../elf_loader.h"
 
-class Process_memory_controller{
+#define stack_base 0x20000000
 
-    String elf_path;
+struct Process_Memory{
 
     // page table base
     size_t* page_table;
 
-    // stack
-    size_t stack_base;
-    size_t stack_size;
+    // elf file
+    size_t elf_base;
 
-    // elf segment data
-    ELF_Info elf_segments;
-
-    // virtual addr -> real addr
-    // include: heap(can edit) / elf(.data can edit) / file(using mmap)
-    Map<size_t,Mmap_unit> map;
+    // heap
+#define heap_base 0x40000000
+    List<size_t> heap_maps; // index -> physical address
 
 };
 

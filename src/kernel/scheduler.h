@@ -22,9 +22,11 @@ public:
     Context * thread_context;
     char cwd[MAX_PATH_LENGTH];
 
+    List<size_t> stack_maps;
+
     Map<size_t,size_t> occupied_file_describer;
 
-    Process_memory_controller processMemoryController;
+    Process_Memory processMemory;
 
     // wait related
     List<pair<int,int>> signal_list;
@@ -47,10 +49,6 @@ void file_describer_erase(size_t file_id);
 bool file_describer_exists(size_t file_id);
 
 size_t file_describer_convert(size_t file_id);
-
-void bind_kernel_heap(size_t addr);
-
-void bind_pages(size_t addr);
 
 int get_new_pid();
 

@@ -132,7 +132,7 @@ struct List{
     }
 
     List<T>& operator=(const List<T>& list){
-        // TODO:free
+        // free
         while (start!= nullptr){
             pop_front();
         }
