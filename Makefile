@@ -57,7 +57,7 @@ see:
 img:
 	@if [ ! -f "fs.img" ]; then \
 		echo "making fs image..."; \
-		dd if=/dev/zero of=fs.img bs=512k count=512; \
+		dd if=/dev/zero of=fs.img bs=1M count=20; \
 		mkfs.vfat -F 32 fs.img; fi
 	@sudo mount fs.img $(dst)
 	@sudo test -d $(dst) || mkdir -p $(dst)

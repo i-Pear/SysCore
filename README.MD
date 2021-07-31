@@ -110,6 +110,19 @@ make qemu
 make debug
 ```
 
+## 制作img.h的方法
+
+```shell
+dd if=/dev/zero of=fs.img bs=1M count=20
+mkfs.vfat -F 32 fs.img
+sudo mount fs.img /mnt/sd
+sudo cp -r test_suites/* /mnt/sd
+sync
+sudo umount /mnt/sd
+xxd -i fs.img img.h
+https://ws28.cn/f/61axjleac4g 复制链接到浏览器打开
+```
+
 
 ## 以下是一些有用的网站
 
