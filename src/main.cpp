@@ -11,7 +11,7 @@
 #include "kernel/fs/file_describer.h"
 #include "lib/stl/Trie.h"
 #include "lib/stl/PathUtil.h"
-#include "lib/util/RefCountPtr.h"
+#include "lib/stl/RefCountPtr.h"
 
 void vfs_init();
 
