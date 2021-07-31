@@ -484,6 +484,7 @@ size_t sys_writev(Context* context){
     int write_bytes = 0;
     int res;
     for(auto i = 0;i < iovcnt; i++){
+        printf("[writev debug] %s\n",(char *)get_actual_page((size_t)iov[i].iov_base));
         auto& bio = iov[i];
         res = fs->write(File_Describer_Get_Path(fd), (char *)get_actual_page((size_t)bio.iov_base), bio.iov_len);
         if(res != FR_OK)return -1;
@@ -502,7 +503,42 @@ size_t sys_brk(Context* context){
     }
 }
 
+size_t sys_getuid(Context* context){
+    return 0;
+}
+
+size_t sys_geteuid(Context* context){
+    return 0;
+}
+
+size_t sys_getgid(Context* context){
+    return 0;
+}
+
+size_t sys_getegid(Context* context){
+    return 0;
+}
+
 size_t sys_faccessat(Context* context){
+    return 0;
+}
+
+size_t sys_gettid(Context* context){
+    return 10000;
+}
+
+size_t sys_mmap(Context* context){
+    // void *addr, size_t length, int prot, int flags, int fd, off_t offset
+    void* addr= (void*)(context->a0);
+    size_t length=context->a1;
+    int prot=context->a2;
+    int flags=context->a3;
+    int fd=context->a4;
+    off_t offset=context->a5;
+
+    printf("void *addr=0x%x , size_t length=0x%x , int prot=0x%x , int flags=0x%x , int fd=0x%x , off_t offset=0x%x \n",
+           addr,length,prot,flags,fd,offset);
+
     return 0;
 }
 
@@ -517,9 +553,11 @@ void syscall_init() {
 
 void syscall_unhandled(Context *context) {
     printf("[SYSCALL] Unhandled Syscall: %d\n", context->a7);
+    context->a0=0;
 }
 
 void syscall_distribute(int syscall_id, Context *context) {
+    printf("[syscall] %d\n",syscall_id);
     static int syscall_is_initialized = 0;
     if (syscall_is_initialized != 1) {
         syscall_init();
@@ -576,4 +614,13 @@ void syscall_register() {
     syscall_list[SYS_writev] = sys_writev;
     syscall_list[SYS_brk]=sys_brk;
     syscall_list[SYS_faccessat]=sys_faccessat;
+
+    syscall_list[SYS_getuid]=sys_getuid;
+    syscall_list[SYS_geteuid]=sys_geteuid;
+    syscall_list[SYS_getgid]=sys_getgid;
+    syscall_list[SYS_getegid]=sys_getegid;
+    syscall_list[SYS_gettid]=sys_gettid;
+    //syscall_list[SYS_tgkill]= sys_tgkill;
+
+    syscall_list[SYS_mmap]=sys_mmap;
 }

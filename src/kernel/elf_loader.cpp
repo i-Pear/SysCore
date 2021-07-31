@@ -1,6 +1,6 @@
 #include "elf_loader.h"
 
-void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_page_size,size_t* entry) {
+void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_page_size,size_t* entry,Elf64_Off* e_phoff,int* phnum) {
     // check magic number
     if (_elf_data[0] != 0x7f || _elf_data[1] != 0x45 || _elf_data[2] != 0x4c || _elf_data[3] != 0x46) {
         printf("[ELF LOADER] Invalid ELF File! \n");
@@ -43,6 +43,8 @@ void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_p
     printf("[ELF LOADER] ELF entry: %x\n", Ehdr->e_entry);
 #endif
     char *exec;
+    *e_phoff=Ehdr->e_phoff;
+    *phnum=Ehdr->e_phnum;
 
     Elf64_Phdr *phdr = (Elf64_Phdr *) (elf_start + Ehdr->e_phoff);
     int load_segment_count=0;
@@ -54,6 +56,7 @@ void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_p
         need_alloc_page= max(need_alloc_page,phdr[i].p_vaddr+phdr[i].p_filesz);
     }
     exec = (char *) alloc_page(need_alloc_page);
+    memset(exec,0,need_alloc_page);
     *elf_page_size=need_alloc_page;
     // printf("elf segment count = %d \n",load_segment_count);
 

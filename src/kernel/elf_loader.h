@@ -7,6 +7,6 @@
 
 //#define DEBUG_ELF
 
-void load_elf(const char* elf_data,int size,size_t* elf_page_base,size_t* elf_page_size,size_t* entry);
+void load_elf(const char* elf_data,int size,size_t* elf_page_base,size_t* elf_page_size,size_t* entry,Elf64_Off* e_phoff,int* phnum);
 
 #endif //OS_RISC_V_ELF_LOADER_H
