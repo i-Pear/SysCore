@@ -13,6 +13,7 @@
 #include "lib/stl/PathUtil.h"
 #include "lib/stl/RefCountPtr.h"
 #include "lib/stl/UniquePtr.h"
+#include "lib/stl/PageTableUtil.h"
 
 void vfs_init();
 
