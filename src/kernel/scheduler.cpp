@@ -57,7 +57,7 @@ size_t file_describer_convert(size_t file_id){
 }
 
 void bind_kernel_heap(size_t addr){
-    running->occupied_kernel_heap.push_back(addr);
+    running->occupied_kernel_heap->push_back(addr);
 }
 
 void bind_pages(size_t addr){
@@ -363,7 +363,7 @@ int wait(int* wstatus){
     schedule();
 }
 
-PCB::PCB(const PCB &other):occupied_file_describer(other.occupied_file_describer) {
+PCB::PCB(const PCB &other):occupied_file_describer(other.occupied_file_describer){
     pid=other.pid;
     ppid=other.ppid;
     stack=other.stack;
@@ -372,12 +372,13 @@ PCB::PCB(const PCB &other):occupied_file_describer(other.occupied_file_describer
 
     stack_size=other.stack_size;
     elf_page_size=other.elf_page_size;
+    occupied_kernel_heap = other.occupied_kernel_heap;
 
     thread_context=nullptr;
     strcpy(cwd,other.cwd);
 
 }
 
-PCB::PCB() {
+PCB::PCB(): occupied_kernel_heap(new List<size_t>){
 
 }

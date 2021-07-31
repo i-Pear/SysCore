@@ -4,9 +4,11 @@
 template<typename Ptr>
 class RefCountPtr {
 public:
-    explicit RefCountPtr(Ptr* ptr) {
-        atomic_count_ = new AtomicCount(ptr, 1);
-    }
+
+    // never use an uninitialized RefCountPtr !
+    explicit RefCountPtr():atomic_count_(nullptr){}
+
+    explicit RefCountPtr(Ptr* ptr):atomic_count_(new AtomicCount(ptr, 1)) {}
 
     virtual ~RefCountPtr() {
         decrease();
