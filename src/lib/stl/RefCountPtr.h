@@ -6,7 +6,8 @@ class RefCountPtr {
 public:
 
     // never use an uninitialized RefCountPtr !
-    explicit RefCountPtr():atomic_count_(nullptr){}
+    explicit RefCountPtr():atomic_count_(nullptr){
+    }
 
     explicit RefCountPtr(Ptr* ptr):atomic_count_(new AtomicCount(ptr, 1)) {}
 
