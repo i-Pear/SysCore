@@ -1,6 +1,6 @@
 #include "elf_loader.h"
 
-void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_page_size,size_t* entry) {
+void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_page_size,size_t* entry,Elf64_Off* e_phoff,int* phnum) {
     // check magic number
     if (_elf_data[0] != 0x7f || _elf_data[1] != 0x45 || _elf_data[2] != 0x4c || _elf_data[3] != 0x46) {
         printf("[ELF LOADER] Invalid ELF File! \n");
@@ -8,7 +8,7 @@ void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_p
         return;
     }
     const char *elf_start = _elf_data;
-
+// #define DEBUG_ELF
     // read elf header
 #ifdef DEBUG_ELF
     printf("[ELF LOADER] elf size = %d\n", size);
@@ -43,27 +43,31 @@ void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_p
     printf("[ELF LOADER] ELF entry: %x\n", Ehdr->e_entry);
 #endif
     char *exec;
+    *e_phoff=Ehdr->e_phoff;
+    *phnum=Ehdr->e_phnum;
 
     Elf64_Phdr *phdr = (Elf64_Phdr *) (elf_start + Ehdr->e_phoff);
     int load_segment_count=0;
+    size_t need_alloc_page=0;
     for (int i = 0; i < Ehdr->e_phnum; i++) {
         if (phdr[i].p_type != PT_LOAD)continue;
         if (phdr[i].p_filesz == 0)continue;
         load_segment_count++;
-        if(load_segment_count>1){
-            panic("[ELF LOADER] ELF FILE HAS MORE THEN ONE LOAD SEGMENT.");
-        }
-//        printf("[ELF LOADER] Copying Segment of size %d\n", phdr[i].p_filesz);
+        need_alloc_page= max(need_alloc_page,phdr[i].p_vaddr+phdr[i].p_filesz);
+    }
+    exec = (char *) alloc_page(need_alloc_page);
+    memset(exec,0,need_alloc_page);
+    *elf_page_size=need_alloc_page;
+    // printf("elf segment count = %d \n",load_segment_count);
 
-        exec = (char *) alloc_page(phdr[i].p_vaddr+phdr[i].p_filesz);
-        *elf_page_size=phdr[i].p_vaddr+phdr[i].p_filesz;
+    for (int i = 0; i < Ehdr->e_phnum; i++) {
+        if (phdr[i].p_type != PT_LOAD)continue;
+        if (phdr[i].p_filesz == 0)continue;
 
-        const char *start = elf_start + phdr[i].p_offset;
-        char *target_addr = phdr[i].p_vaddr + exec;
-//        printf("[ELF LOADER] p_vaddr: 0x%x  exec: 0x%x\n", phdr[i].p_vaddr, exec);
-//        printf("[ELF LOADER] Start memcpy! from 0x%x to 0x%x \n", start, target_addr);
+        const char *segment_start_addr = elf_start + phdr[i].p_offset;
+        char *segment_target_addr = phdr[i].p_vaddr + exec;
 
-        memcpy(target_addr, start, phdr[i].p_filesz);
+        memcpy(segment_target_addr, segment_start_addr, phdr[i].p_filesz);
     }
 
     *elf_page_base=(size_t)exec;

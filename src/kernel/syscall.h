@@ -46,6 +46,7 @@
 #define SYS_sched_get_priority_min 126
 #define SYS_kill 129
 #define SYS_tkill 130
+#define SYS_tgkill 131
 #define SYS_rt_sigaction 134
 #define SYS_rt_sigprocmask 135
 #define SYS_rt_sigreturn 139
