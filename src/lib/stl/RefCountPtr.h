@@ -4,7 +4,7 @@
 template<typename Ptr>
 class RefCountPtr {
 public:
-    explicit RefCountPtr(Ptr *ptr) {
+    explicit RefCountPtr(Ptr* ptr) {
         atomic_count_ = new AtomicCount(ptr, 1);
     }
 
@@ -12,23 +12,28 @@ public:
         decrease();
     }
 
-    RefCountPtr(const RefCountPtr<Ptr> &other_ptr) : atomic_count_(other_ptr.atomic_count_) {
+    RefCountPtr(const RefCountPtr<Ptr>& other_ptr) : atomic_count_(other_ptr.atomic_count_) {
         increase();
     }
 
-    RefCountPtr &operator=(RefCountPtr<Ptr> other_ptr) {
+    RefCountPtr& operator=(const RefCountPtr<Ptr>& other_ptr) {
+        if (this == &other_ptr)return *this;
         decrease();
         atomic_count_ = other_ptr.atomic_count_;
         increase();
         return *this;
     }
 
-    Ptr *operator->() {
+    Ptr* operator->() {
         return atomic_count_->ptr();
     }
 
     Ptr operator*() {
         return *atomic_count_->ptr();
+    }
+
+    explicit operator bool() const {
+        return atomic_count_->ptr() != nullptr;
     }
 
 private:
@@ -49,7 +54,7 @@ private:
 
     class AtomicCount {
     public:
-        AtomicCount(Ptr *ptr, int count) : ptr_(ptr), count_(count) {};
+        AtomicCount(Ptr* ptr, int count) : ptr_(ptr), count_(count) {};
 
         virtual ~AtomicCount() {
             delete ptr_;
@@ -64,7 +69,7 @@ private:
             --count_;
         }
 
-        Ptr *ptr() {
+        Ptr* ptr() {
             return ptr_;
         }
 
@@ -74,10 +79,10 @@ private:
 
     private:
         int count_;
-        Ptr *ptr_;
+        Ptr* ptr_;
     };
 
-    AtomicCount *atomic_count_;
+    AtomicCount* atomic_count_;
 };
 
 #endif //OS_RISC_V_REFCOUNTPTR_H

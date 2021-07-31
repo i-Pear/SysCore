@@ -12,6 +12,7 @@
 #include "lib/stl/Trie.h"
 #include "lib/stl/PathUtil.h"
 #include "lib/stl/RefCountPtr.h"
+#include "lib/stl/UniquePtr.h"
 
 void vfs_init();
 
