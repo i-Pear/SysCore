@@ -39,7 +39,7 @@ mk-build:
 	@test -d $(BUILD) || mkdir -p $(BUILD)
 
 driver:
-	$(GCC) -o $(OBJ_DRIVER) -w -g -mcmodel=medany -O0 -ffreestanding -nostdlib -c $(SRC_DRIVER)
+	$(GCC) -o $(OBJ_DRIVER) -w -g -mcmodel=medany -ffreestanding -nostdlib -c $(SRC_DRIVER)
 
 # 编译运行
 run: all up see
