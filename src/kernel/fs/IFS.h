@@ -8,7 +8,7 @@
 #include "../../lib/stl/string.h"
 #include "../posix/posix_structs.h"
 
-#define NOT_IMPLEMENT printf("%s not implement!\n", __FUNCTION__); panic("");
+#define NOT_IMPLEMENT printf("%s not implement!\n", __FUNCTION__); panic("")
 
 struct DirInfo {
     FSIZE_t fsize;            /* File size */
@@ -20,23 +20,50 @@ struct DirInfo {
 
 class IFS {
 public:
-    virtual int init() = 0;
+    virtual int init() {
+        NOT_IMPLEMENT
+        return 0;
+    };
 
-    virtual int open(const char *path, int flag) = 0;
+    virtual int open(const char *path, int flag) {
+        NOT_IMPLEMENT
+        return 0;
+    };
 
-    virtual int read(const char *path, char buf[], int count) = 0;
+    virtual int read(const char *path, char buf[], int count) {
+        NOT_IMPLEMENT
+        return 0;
+    };
 
-    virtual int write(const char *path, char buf[], int count) = 0;
+    virtual int write(const char *path, char buf[], int count) {
+        NOT_IMPLEMENT
+        return 0;
+    };
 
-    virtual int close(const char *path) = 0;
+    virtual int close(const char *path) {
+        NOT_IMPLEMENT
+        return 0;
+    };
 
-    virtual int mkdir(const char *path, int flag) = 0;
+    virtual int mkdir(const char *path, int flag) {
+        NOT_IMPLEMENT
+        return 0;
+    };
 
-    virtual int unlink(const char *path) = 0;
+    virtual int unlink(const char *path) {
+        NOT_IMPLEMENT
+        return 0;
+    };
 
-    virtual int fstat(const char *path, kstat *stat) = 0;
+    virtual int fstat(const char *path, kstat *stat) {
+        NOT_IMPLEMENT
+        return 0;
+    };
 
-    virtual int lseek(const char *path, size_t offset, int whence) = 0;
+    virtual int lseek(const char *path, size_t offset, int whence) {
+        NOT_IMPLEMENT
+        return 0;
+    };
 
     /**
      * read directory entry
@@ -45,7 +72,15 @@ public:
      * @param new_request: is this is a new request
      * @return -1 when error, 0 when end, 1 when ok
      */
-    virtual int read_dir(const char *path, char buff[sizeof(DirInfo)], int new_request) = 0;
+    virtual int read_dir(const char *path, char buff[sizeof(DirInfo)], int new_request) {
+        NOT_IMPLEMENT
+        return 0;
+    };
+
+    virtual int pipe(const char *read_path, const char *write_path, int flags, int unused_param) {
+        NOT_IMPLEMENT
+        return 0;
+    }
 };
 
 
@@ -99,50 +134,65 @@ public:
         return 0;
     }
 
-    int open(const char *path, int flag) override {
-        NOT_IMPLEMENT
-        return 0;
+    int write(const char *path, char *buf, int count) override {
+        for (auto i = 0; i < count; i++) {
+            putchar(buf[i]);
+        }
+        return count;
+    }
+};
+
+class PipeFs: public IFS{
+private:
+    Map<String, List<unsigned char> *> read_pair, write_pair;
+public:
+    int init() override {
+        return IFS::init();
     }
 
     int read(const char *path, char *buf, int count) override {
-        NOT_IMPLEMENT
-        return 0;
+        auto *read_buff = read_pair.get(String(path));
+        if(read_buff == nullptr)return -1;
+        int cur = 0;
+        for (auto i = 0; i < count; i++) {
+            if (!read_buff->is_empty()) {
+                buf[cur++] = read_buff->start->data;
+                read_buff->pop_front();
+            } else {
+                // TODO: 此处直接实现为非阻塞，如果没有足够的数据会直接返回
+                return cur;
+            }
+        }
+        return cur;
     }
 
     int write(const char *path, char *buf, int count) override {
-         for(auto i = 0;i < count; i++){
-             putchar(buf[i]);
-         }
+        auto *write_buff = write_pair.get(String(path));
+        if(write_buff == nullptr)return -1;
+        for (auto i = 0; i < count; i++) {
+            write_buff->push_back(buf[i]);
+        }
         return count;
     }
 
     int close(const char *path) override {
-        NOT_IMPLEMENT
+        if (read_pair.exists(String(path))) {
+            auto *buff_list = read_pair.get(String(path));
+            delete buff_list;
+            read_pair.erase(String(path));
+        }
+        if (write_pair.exists(String(path))) {
+            auto *buff_list = write_pair.get((String(path)));
+            delete buff_list;
+            write_pair.erase(String(path));
+        }
         return 0;
     }
 
-    int mkdir(const char *path, int flag) override {
-        NOT_IMPLEMENT
-        return 0;
-    }
-
-    int unlink(const char *path) override {
-        NOT_IMPLEMENT
-        return 0;
-    }
-
-    int fstat(const char *path, kstat *stat) override {
-        NOT_IMPLEMENT
-        return 0;
-    }
-
-    int read_dir(const char *path, char *buff, int new_request) override {
-        NOT_IMPLEMENT
-        return 0;
-    }
-
-    int lseek(const char *path, size_t offset, int whence) override {
-        NOT_IMPLEMENT
+    int pipe(const char *read_path, const char *write_path, int flags, int unused_param) override {
+        auto *buff = new List<unsigned char>();
+        read_pair.put(String(read_path), buff);
+        write_pair.put(String(write_path), buff);
         return 0;
     }
 };

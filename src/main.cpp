@@ -108,6 +108,18 @@ void vfs_init() {
     auto *dev = fs->root->first_child->search("/dev");
     assert(dev != nullptr);
     dev->appendChild(new File("console", stdout));
+
+    fs->root->appendChild(new File("sys", ifs));
+    fs->mkdir("/sys", O_DIRECTORY | O_RDWR);
+
+    auto* sys = fs->root->first_child->search("/sys");
+    assert(sys != nullptr);
+
+    sys->appendChild(new File("pipe", new PipeFs));
+    fs->mkdir("/pipe", O_DIRECTORY | O_RDWR);
+
+    auto* sys_pipe = fs->root->first_child->search("/sys/pipe");
+    assert(sys_pipe != nullptr);
 }
 
 int main() {

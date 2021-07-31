@@ -10,7 +10,6 @@
 #define R(x) (x*2+1)
 
 #define __page_size (4096)
-#define PG_SIZE __page_size
 #ifndef QEMU
 #define __kernel_start (0x80020000)
 #else

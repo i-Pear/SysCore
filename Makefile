@@ -1,7 +1,7 @@
 BUILD = build
 SRC = src
 
-K210-SERIALPORT = /dev/ttyS5
+K210-SERIALPORT = /dev/ttyS3
 K210-BURNER = platform/k210/kflash.py
 BOOTLOADER = platform/k210/rustsbi-k210.bin
 K210_BOOTLOADER_SIZE = 131072
@@ -67,7 +67,7 @@ img:
 flash:
 	@sudo dd if=fs.img of=$(sd);
 
-qemu-driver: mk-build
+qemu-driver:
 	$(GCC) -o build/driver-qemu.o -w -g -mcmodel=medany -O0 -ffreestanding -nostdlib -c $(SRC_DRIVER) -DQEMU
 
 qemu:
