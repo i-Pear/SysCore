@@ -1,6 +1,7 @@
 #include "scheduler.h"
 #include "self_test.h"
 #include "memory/kernel_stack.h"
+#include "memory/memory.h"
 //#include "elf_data.h"
 extern "C" {
 #include "../driver/fatfs/ff.h"

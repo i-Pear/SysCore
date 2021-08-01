@@ -1,7 +1,7 @@
 #ifndef __STL_H__
 #define __STL_H__
 
-#include "../../kernel/memory/kernel_heap.h"
+//#include "../../kernel/memory/kernel_heap.h"
 #include "../../kernel/stdio.h"
 #include "../../kernel/sbi.h"
 
