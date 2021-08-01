@@ -322,7 +322,7 @@ void create_process(const char *elf_path,char* argv[]) {
 //    check_stack_preparation(sp);
 
     thread_context->sp = reinterpret_cast<size_t>(sp);
-    thread_context->a0=1;
+//    thread_context->a0=1;
     thread_context->a1=argv_start;
 
     /**
