@@ -1,4 +1,6 @@
 #include "elf_loader.h"
+#include "../lib/stl/stl.h"
+#include "memory/memory.h"
 
 void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_page_size,size_t* entry,Elf64_Off* e_phoff,int* phnum) {
     // check magic number

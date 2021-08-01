@@ -1,4 +1,5 @@
 #include "memory.h"
+#include "Heap.h"
 
 size_t __kernel_end;
 int page_count;
