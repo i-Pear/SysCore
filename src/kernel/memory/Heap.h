@@ -10,7 +10,7 @@
 
 class HeapAllocator {
 public:
-    HeapAllocator(size_t start, size_t end) : start_(start), end_(end) {
+    HeapAllocator() {
         Init();
     }
 
@@ -47,6 +47,7 @@ public:
                 }
                 if(flag == 0){
                     i += bits - 1;
+                    Check(i);
                 }else{
                     for(size_t j = 0;j < bits; j++){
                         Set(i + j, 1);

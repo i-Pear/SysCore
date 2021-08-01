@@ -1,7 +1,7 @@
 #include "Heap.h"
 #include "memory.h"
 
-HeapAllocator heap_allocator(0, 0);
+HeapAllocator heap_allocator;
 
 void init_heap(){
     size_t start = alloc_page(KERNEL_HEAP_PAGE_NUM * 4096);
