@@ -7,6 +7,7 @@
 #include "register.h"
 #include "../lib/stl/list.h"
 #include "../lib/stl/map.h"
+#include "../lib/stl/RefCountPtr.h"
 
 #define MAX_PATH_LENGTH 32
 
@@ -29,7 +30,7 @@ public:
     char cwd[MAX_PATH_LENGTH];
 
     Map<size_t,size_t> occupied_file_describer;
-    List<size_t> occupied_kernel_heap;
+    RefCountPtr<List<size_t>> occupied_kernel_heap;
     List<size_t> occupied_pages;
 
     // wait related

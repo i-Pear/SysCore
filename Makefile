@@ -24,7 +24,7 @@ sd = /dev/sda
 # 在当前目录生成k210.bin
 all: mk-build driver
 	# gen build/
-	$(GXX) -o $(KERNEL_O) -std=c++11 -w -g -mcmodel=medany -T src/linker.ld -O0 -ffreestanding -nostdlib -fno-exceptions -fno-rtti -Wwrite-strings -fno-use-cxa-atexit\
+	$(GXX) -o $(KERNEL_O) -std=c++11 -w -g -mcmodel=medany -T src/linker.ld -ffreestanding -nostdlib -fno-exceptions -fno-rtti -Wwrite-strings -fno-use-cxa-atexit\
                                     $(SRC_ALL) \
                                     $(OBJ_DRIVER) \
                                     src/asm/boot.s \
@@ -39,7 +39,7 @@ mk-build:
 	@test -d $(BUILD) || mkdir -p $(BUILD)
 
 driver:
-	$(GCC) -o $(OBJ_DRIVER) -w -g -mcmodel=medany -O0 -ffreestanding -nostdlib -c $(SRC_DRIVER)
+	$(GCC) -o $(OBJ_DRIVER) -w -g -mcmodel=medany -ffreestanding -nostdlib -c $(SRC_DRIVER)
 
 # 编译运行
 run: all up see
@@ -68,10 +68,23 @@ flash:
 	@sudo dd if=fs.img of=$(sd);
 
 qemu-driver:
-	$(GCC) -o build/driver-qemu.o -w -g -mcmodel=medany -O0 -ffreestanding -nostdlib -c $(SRC_DRIVER) -DQEMU
+	$(GCC) -o build/driver-qemu.o -w -g -mcmodel=medany -ffreestanding -nostdlib -c $(SRC_DRIVER) -DQEMU
 
 qemu:
-	$(GXX) -o $(KERNEL_O) -std=c++11 -w -g -mcmodel=medany -T src/linker-qemu.ld -O0 -ffreestanding -nostdlib -fno-exceptions -fno-rtti -Wwrite-strings -fno-use-cxa-atexit\
+	$(GXX) -o $(KERNEL_O) -std=c++11 -w -g -mcmodel=medany -T src/linker-qemu.ld -ffreestanding -nostdlib -fno-exceptions -fno-rtti -Wwrite-strings -fno-use-cxa-atexit\
+                                        $(SRC_ALL) \
+                                        src/asm/boot.s \
+                                        src/asm/interrupt-qemu.s \
+                                        build/driver-qemu.o \
+                                        src/main.cpp \
+                                        -DQEMU
+	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)
+
+	qemu-system-riscv64 -machine virt -nographic -bios platform/qemu/fw_payload.bin -device loader,file=k210.bin,addr=0x80200000 \
+	-m 2000M -smp 2
+
+dqemu:
+	$(GXX) -o $(KERNEL_O) -std=c++11 -w -g -mcmodel=medany -T src/linker-qemu.ld -ffreestanding -nostdlib -fno-exceptions -fno-rtti -Wwrite-strings -fno-use-cxa-atexit\
                                         $(SRC_ALL) \
                                         src/asm/boot.s \
                                         src/asm/interrupt-qemu.s \

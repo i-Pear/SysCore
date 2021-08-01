@@ -120,7 +120,6 @@ sudo cp -r test_suites/* /mnt/sd
 sync
 sudo umount /mnt/sd
 xxd -i fs.img img.h
-https://ws28.cn/f/61axjleac4g 复制链接到浏览器打开
 ```
 
 

@@ -6,7 +6,8 @@
 #include "fs/file_describer.h"
 #include "times.h"
 
-#define get_actual_page(x) (((x)>0x80000000)?(x):(x)+ get_running_elf_page())
+//#define get_actual_page(x) (((x)>0x80000000)?(x):(x)+ get_running_elf_page())
+#define get_actual_page(x) (x)
 #define SYSCALL_LIST_LENGTH (1024)
 // 该宏默认所有的路径长度都不会超过512
 #define PATH_BUFF_SIZE (512)

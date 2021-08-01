@@ -56,8 +56,8 @@ size_t file_describer_convert(size_t file_id) {
     return running->occupied_file_describer.get(file_id);
 }
 
-void bind_kernel_heap(size_t addr) {
-    running->occupied_kernel_heap.push_back(addr);
+void bind_kernel_heap(size_t addr){
+    running->occupied_kernel_heap->push_back(addr);
 }
 
 void bind_pages(size_t addr) {
@@ -431,8 +431,10 @@ void schedule() {
                     // remove it from blocked list
                     blocked.erase(cnt);
                     // get signal to return value
-                    running->thread_context->a0 = running->signal_list.start->data.first;
-                    *running->wstatus = running->signal_list.start->data.second << 8;
+                    running->thread_context->a0=running->signal_list.start->data.first;
+                    if(running->wstatus){
+                        *running->wstatus=running->signal_list.start->data.second<<8;
+                    }
                     running->signal_list.pop_front();
 
                     schedule();
@@ -456,8 +458,10 @@ int wait(int *wstatus) {
 //    printf("process %d start to wait\n",running->pid);
     if (!running->signal_list.is_empty()) {
         // return immediately
-        int ret = running->signal_list.start->data.first;
-        *wstatus = running->signal_list.start->data.second << 8;
+        int ret=running->signal_list.start->data.first;
+//        if(wstatus){
+//            *wstatus=running->signal_list.start->data.second<<8;
+//        }
         running->signal_list.pop_front();
         return ret;
     }
@@ -475,21 +479,22 @@ int wait(int *wstatus) {
     schedule();
 }
 
-PCB::PCB(const PCB &other) : occupied_file_describer(other.occupied_file_describer) {
-    pid = other.pid;
-    ppid = other.ppid;
-    stack = other.stack;
-    elf_page_base = other.elf_page_base;
-    page_table = other.page_table;
+PCB::PCB(const PCB &other):occupied_file_describer(other.occupied_file_describer){
+    pid=other.pid;
+    ppid=other.ppid;
+    stack=other.stack;
+    elf_page_base=other.elf_page_base;
+    page_table=other.page_table;
 
-    stack_size = other.stack_size;
-    elf_page_size = other.elf_page_size;
+    stack_size=other.stack_size;
+    elf_page_size=other.elf_page_size;
+    occupied_kernel_heap = other.occupied_kernel_heap;
 
     thread_context = nullptr;
     strcpy(cwd, other.cwd);
 
 }
 
-PCB::PCB() {
+PCB::PCB(): occupied_kernel_heap(new List<size_t>){
 
 }
