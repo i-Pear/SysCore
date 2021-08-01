@@ -347,9 +347,9 @@ int wait(int* wstatus){
     if(!running->signal_list.is_empty()){
         // return immediately
         int ret=running->signal_list.start->data.first;
-        if(wstatus){
-            *wstatus=running->signal_list.start->data.second<<8;
-        }
+//        if(wstatus){
+//            *wstatus=running->signal_list.start->data.second<<8;
+//        }
         running->signal_list.pop_front();
         return ret;
     }
