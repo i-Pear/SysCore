@@ -319,7 +319,9 @@ void schedule(){
                     blocked.erase(cnt);
                     // get signal to return value
                     running->thread_context->a0=running->signal_list.start->data.first;
-                    *running->wstatus=running->signal_list.start->data.second<<8;
+                    if(running->wstatus){
+                        *running->wstatus=running->signal_list.start->data.second<<8;
+                    }
                     running->signal_list.pop_front();
 
                     schedule();
