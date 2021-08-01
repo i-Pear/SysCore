@@ -16,6 +16,7 @@
 #include "lib/stl/PageTableUtil.h"
 
 void vfs_init();
+void fix_kernel_page_table();
 
 extern "C" {
 #include "driver/interface.h"
@@ -52,6 +53,8 @@ void init_thread() {
     test_lib();
     printf("[OS] times init.\n");
     init_times();
+    printf("[OS] fix page table before driver\n");
+    fix_kernel_page_table();
     printf("[OS] bsp init.\n");
     driver_init();
     printf("[FS] fs init.\n");
@@ -96,6 +99,14 @@ void init_thread() {
 //    add_test("/test_output");
 
     schedule();
+}
+
+void fix_kernel_page_table(){
+    size_t table_base = register_read_satp() << 12;
+    size_t virtual_address = 0x38001000;
+    size_t physical_address = virtual_address;
+
+    PageTableUtil::CreateMapping(table_base, virtual_address, physical_address, PAGE_TABLE_LEVEL::SMALL, PRIVILEGE_LEVEL::SUPERVISOR);
 }
 
 void vfs_init() {

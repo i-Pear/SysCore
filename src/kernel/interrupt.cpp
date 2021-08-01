@@ -178,7 +178,7 @@ Context *page_fault(Context* context, size_t stval){
     size_t table_base = satp << 12;
     size_t phy_addr = get_running_elf_page() + ((vir_addr >> 12) << 12);
 
-//    PageTableUtil::CreateMapping(table_base, vir_addr, phy_addr, PAGE_TABLE_LEVEL::SMALL, PRIVILEGE_LEVEL::USER);
+    PageTableUtil::CreateMapping(table_base, vir_addr, phy_addr, PAGE_TABLE_LEVEL::SMALL, PRIVILEGE_LEVEL::USER);
 
     size_t ppn1 = (vir_addr & (0b111111111LL << 30)) >> 30;
     size_t ppn2 = (vir_addr & (0b111111111LL << 21)) >> 21;

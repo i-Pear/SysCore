@@ -139,7 +139,8 @@ boot_stack_top:
 
 boot_page_table:
     # 第 0 项: 0x0000_0000 -> 0x0000_0000, 0xcf 表示 VRWXAD 均为 1, 只允许S态访问
-    .quad (0x00000 << 10) | 0xcf
+    .zero 8
+    # .quad (0x00000 << 10) | 0xcf
     # 第 1 项: 0x4000_0000 -> 0x4000_0000, 0xcf 表示 VRWXAD 均为 1, 只允许S态访问
     .quad (0x40000 << 10) | 0xcf
     # 第 2 项：0x8000_0000 -> 0x8000_0000，0xcf 表示 VRWXAD 均为 1, 只允许S态访问
