@@ -542,6 +542,15 @@ size_t sys_mmap(Context* context){
     return 0;
 }
 
+size_t sys_readlinkat(Context* context){
+    int fd = (int) context->a0;
+    return 0;
+}
+
+size_t sys_ioctl(Context* context){
+    return 0;
+}
+
 
 /// syscall int & register & distribute
 
@@ -623,4 +632,6 @@ void syscall_register() {
     //syscall_list[SYS_tgkill]= sys_tgkill;
 
     syscall_list[SYS_mmap]=sys_mmap;
+    syscall_list[SYS_readlinkat] = sys_readlinkat;
+    syscall_list[SYS_ioctl] = sys_ioctl;
 }
