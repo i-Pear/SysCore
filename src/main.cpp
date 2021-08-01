@@ -106,7 +106,11 @@ void fix_kernel_page_table(){
     size_t virtual_address = 0x38001000;
     size_t physical_address = virtual_address;
 
-    PageTableUtil::CreateMapping(table_base, virtual_address, physical_address, PAGE_TABLE_LEVEL::SMALL, PRIVILEGE_LEVEL::SUPERVISOR);
+    PageTableUtil::CreateMapping(table_base,
+                                 virtual_address,
+                                 physical_address,
+                                 PAGE_TABLE_LEVEL::SMALL,
+                                 PRIVILEGE_LEVEL::SUPERVISOR);
 }
 
 void vfs_init() {

@@ -15,7 +15,10 @@ Context *tick(Context* context);
 
 Context *page_fault(Context* context, size_t stval);
 
+void fix_user_page_table(Context* context);
+
 Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
+    fix_user_page_table(context);
     int is_interrupt = (int)(scause >> 63);
     scause &= 31;
     switch (scause) {
@@ -234,5 +237,17 @@ Context *tick(Context* context) {
 
 void set_next_timeout() {
     set_timer(read_time() + INTERVAL);
+}
+
+void fix_user_page_table(Context* context){
+    size_t user_table_base = context->satp << 12;
+    size_t kernel_table_base = register_read_satp() << 12;
+    *(size_t*)kernel_table_base = *(size_t*)user_table_base;
+    PageTableUtil::CreateMapping(kernel_table_base,
+                                 0x38001000,
+                                 0x38001000,
+                                 PAGE_TABLE_LEVEL::SMALL,
+                                 PRIVILEGE_LEVEL::SUPERVISOR);
+    PageTableUtil::FlushCurrentPageTable();
 }
 

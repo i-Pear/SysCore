@@ -61,6 +61,10 @@ public:
         }
     }
 
+    static void FlushCurrentPageTable(){
+        asm volatile("sfence.vma zero, zero");
+    }
+
 private:
     static size_t non_leaf_attributes(PRIVILEGE_LEVEL level){
         if(level == PRIVILEGE_LEVEL::SUPERVISOR){
@@ -86,7 +90,7 @@ private:
 
     static void check_null(size_t virtual_address, size_t physical_address){
         if(virtual_address == 0){
-            printf("virtual address 0 -> 0x%x\n", physical_address);
+            printf("[null pointer exception] virtual address 0 -> 0x%x\n", physical_address);
             panic("");
         }
     }

@@ -1,4 +1,6 @@
+//[!] when you use 0x00000000 - 0x40000000 address, need fix page table
 #define GPIOHS                  0x38001000
+
 #define DMAC                    0x50000000
 #define GPIO                    0x50200000
 #define SPI_SLAVE               0x50240000
