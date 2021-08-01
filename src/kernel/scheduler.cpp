@@ -210,7 +210,7 @@ void check_stack_preparation(size_t st){
     printf("stack check end\n");
 }
 
-void create_process(const char *elf_path) {
+void create_process(const char *elf_path,char* argv[]) {
     FIL fnew;
     printf("elf %s\n", elf_path);
     int res = f_open(&fnew, elf_path, FA_READ);
@@ -258,14 +258,27 @@ void create_process(const char *elf_path) {
 
     // copy envp strings
     size_t sp = (thread_context->sp);
-    List<size_t> envp_starts;
+    List<size_t> envp_strings;
     char filename[]="busybox";
     copy_to_stack(reinterpret_cast<char *&>(sp), filename, strlen(filename) + 1);
     size_t filename_addr=sp;
-
     for(auto item:env){
         copy_to_stack(reinterpret_cast<char *&>(sp), item, strlen(item) + 1);
-        envp_starts.push_back(sp);
+        envp_strings.push_back(sp);
+    }
+    List<size_t> argv_strings;
+    // copy argv strings
+    if(argv){
+        // if has argv
+        for(int i=0;;i++){
+            if(argv[i]){
+                // copy argv
+                copy_to_stack(reinterpret_cast<char *&>(sp), argv[i], strlen(argv[i]) + 1);
+                argv_strings.push_front(sp); // reverse
+            }else{
+                break;
+            }
+        }
     }
     sp-=sp%16; //align
     // aux environments
@@ -293,13 +306,16 @@ void create_process(const char *elf_path) {
     put_aux((size_t**)&sp,0x28, 0);
     sp-=8; // 0 word
     // envp
-    for(auto i=envp_starts.start;i;i=i->next){
+    for(auto i=envp_strings.start; i; i=i->next){
         put_envp((size_t**)&sp,i->data);
     }
     sp-=8; // 0 word
     // argument pointers: argv
+    for(auto i=argv_strings.start;i;i=i->next){
+        put_envp((size_t**)&sp,i->data);
+    }
     put_envp((size_t**)&sp,filename_addr);
-    size_t argv=sp;
+    size_t argv_start=sp;
     // argc
     put_envp((size_t**)&sp,1);
 
@@ -307,7 +323,7 @@ void create_process(const char *elf_path) {
 
     thread_context->sp = reinterpret_cast<size_t>(sp);
     thread_context->a0=1;
-    thread_context->a1=argv;
+    thread_context->a1=argv_start;
 
     /**
      * 此处spp应为0,表示user-mode
@@ -370,10 +386,10 @@ void execute(const char *exec_path) {
         } else {
             sprintf(buf, "%s/%s", running->cwd, exec_path);
         }
-        create_process(exec_path);
+        create_process(exec_path, nullptr);
         exit_process(0);
     } else {
-        create_process(exec_path);
+        create_process(exec_path, nullptr);
         exit_process(0);
     }
 }
@@ -444,7 +460,7 @@ void schedule() {
             panic("There exists a dead waiting loop. All processes are blocked.");
         } else {
             if (has_next_test()) {
-                create_process(get_next_test());
+                create_process(get_next_test(), nullptr);
                 schedule();
             } else {
                 printf("Nothing to run, halt.\n");

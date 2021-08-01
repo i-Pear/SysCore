@@ -71,7 +71,7 @@ int get_running_pid();
 
 int get_running_ppid();
 
-void create_process(const char *elf_path);
+void create_process(const char *elf_path,char* []);
 
 void clone(int flags,size_t stack,int ptid);
 
