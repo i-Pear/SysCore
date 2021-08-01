@@ -7,6 +7,7 @@ void init_heap(){
     size_t start = alloc_page(KERNEL_HEAP_PAGE_NUM * 4096);
     heap_allocator.SetStart(start);
     heap_allocator.SetEnd(start + KERNEL_HEAP_PAGE_NUM * 4096);
+    heap_allocator.Init();
 }
 
 void* k_malloc(size_t size){

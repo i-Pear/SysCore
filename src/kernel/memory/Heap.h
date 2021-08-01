@@ -10,9 +10,6 @@
 
 class HeapAllocator {
 public:
-    HeapAllocator() {
-        Init();
-    }
 
     void SetStart(size_t start){
         start_ = start;
@@ -73,13 +70,13 @@ public:
             bits++;
         }
     }
-private:
+
     void Init() {
         for (size_t i = 0; i < KERNEL_HEAP_BIT_MAP_SIZE; i++) {
             bit_map_[i] = 0;
         }
     }
-
+private:
     void Check(size_t i){
         if(i < 0 || i > KERNEL_HEAP_BIT_MAP_SIZE * 64){
             panic("kernel heap no space")
