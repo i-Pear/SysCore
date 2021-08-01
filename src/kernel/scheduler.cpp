@@ -303,7 +303,7 @@ void create_process(const char *elf_path) {
     // argc
     put_envp((size_t**)&sp,1);
 
-    check_stack_preparation(sp);
+//    check_stack_preparation(sp);
 
     thread_context->sp = reinterpret_cast<size_t>(sp);
     thread_context->a0=1;
