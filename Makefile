@@ -1,7 +1,7 @@
 BUILD = build
 SRC = src
 
-K210-SERIALPORT = /dev/ttyUSB0
+K210-SERIALPORT = /dev/ttyS3
 K210-BURNER = platform/k210/kflash.py
 BOOTLOADER = platform/k210/rustsbi-k210.bin
 K210_BOOTLOADER_SIZE = 131072
@@ -82,19 +82,6 @@ qemu:
 
 	qemu-system-riscv64 -machine virt -nographic -bios platform/qemu/fw_payload.bin -device loader,file=k210.bin,addr=0x80200000 \
 	-m 2000M -smp 2
-
-dqemu:
-	$(GXX) -o $(KERNEL_O) -std=c++11 -w -g -mcmodel=medany -T src/linker-qemu.ld -ffreestanding -nostdlib -fno-exceptions -fno-rtti -Wwrite-strings -fno-use-cxa-atexit\
-                                        $(SRC_ALL) \
-                                        src/asm/boot.s \
-                                        src/asm/interrupt-qemu.s \
-                                        build/driver-qemu.o \
-                                        src/main.cpp \
-                                        -DQEMU
-	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)
-
-	qemu-system-riscv64 -machine virt -nographic -bios platform/qemu/fw_payload.bin -device loader,file=k210.bin,addr=0x80200000 \
-	 -m 2000M -smp 2
 
 dqemu:
 	$(GXX) -o $(KERNEL_O) -std=c++11 -w -g -mcmodel=medany -T src/linker-qemu.ld -O0 -ffreestanding -nostdlib -fno-exceptions -fno-rtti -Wwrite-strings -fno-use-cxa-atexit\
