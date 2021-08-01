@@ -4,6 +4,7 @@
 #include "scheduler.h"
 #include "posix/posix_structs.h"
 #include "fs/file_describer.h"
+#include "memory/Heap.h"
 #include "times.h"
 
 //#define get_actual_page(x) (((x)>0x80000000)?(x):(x)+ get_running_elf_page())

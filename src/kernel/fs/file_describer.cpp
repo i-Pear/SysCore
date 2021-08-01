@@ -1,4 +1,5 @@
 #include "file_describer.h"
+#include "../memory/Heap.h"
 
 // 保留文件描述符个数 fd = 1：stdout
 #define FILE_DESCRIBER_RESERVED_FD_COUNT 3

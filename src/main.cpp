@@ -8,6 +8,8 @@
 #include "kernel/fs/IFS.h"
 #include "kernel/fs/VFS.h"
 #include "kernel/Test.h"
+#include "kernel/memory/memory.h"
+#include "kernel/memory/Heap.h"
 #include "kernel/fs/file_describer.h"
 #include "lib/stl/Trie.h"
 #include "lib/stl/PathUtil.h"
@@ -155,7 +157,8 @@ int main() {
 
     printf("[OS] Memory Init.\n");
     init_memory();
-    init_kernel_heap();
+//    init_kernel_heap();
+    init_heap();
     kernelContext.kernel_satp = register_read_satp() | (8LL << 60);lty(kernelContext.kernel_satp);
     kernelContext.kernel_handle_interrupt = (size_t) handle_interrupt;
     kernelContext.kernel_restore = (size_t) __restore;
