@@ -40,6 +40,9 @@ public:
             table_base = new_addr;
             *pte1 = calc_ppn(new_addr) | non_leaf_attributes(privilege_level);
         }else{
+            if(page_table_level == PAGE_TABLE_LEVEL::LARGE){
+                return;
+            }
             table_base = ((*pte1 >> 10) << 12);
         }
 
@@ -47,12 +50,16 @@ public:
         if(*pte2 == 0){
             if(page_table_level == PAGE_TABLE_LEVEL::MIDDLE){
                 *pte2 = calc_ppn(physical_address) | leaf_attributes(privilege_level);
+                return;
             }
             size_t new_addr = alloc_page(4096);
             memset((char *) new_addr, 0, 4096);
             table_base = new_addr;
             *pte2 = calc_ppn(new_addr) | non_leaf_attributes(privilege_level);
         }else{
+            if(page_table_level == PAGE_TABLE_LEVEL::MIDDLE){
+                return;
+            }
             table_base = ((*pte2 >> 10) << 12);
         }
 

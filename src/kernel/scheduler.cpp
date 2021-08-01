@@ -2,6 +2,7 @@
 #include "self_test.h"
 #include "memory/kernel_stack.h"
 #include "memory/memory.h"
+#include "../lib/stl/PageTableUtil.h"
 //#include "elf_data.h"
 extern "C" {
 #include "../driver/fatfs/ff.h"
@@ -349,6 +350,17 @@ void create_process(const char *elf_path,char* argv[]) {
     // 0x8000_0000 -> 0x8000_0000
     *((size_t *) page_table_base + 2) = (0x80000 << 10) | 0xdf;
     thread_context->satp = (page_table_base >> 12) | (8LL << 60);
+    // elf_page
+    printf("[ELF] elf_page_size = %d\n", elf_page_size);
+    size_t elf_page_num = (elf_page_size + 4096) / 4096;
+    for(size_t i = 1;i < elf_page_num; i++){
+        size_t vir_addr = i * 4096;
+        PageTableUtil::CreateMapping(page_table_base,
+                                     vir_addr,
+                                     elf_page_base + ((vir_addr >> 12) << 12),
+                                     PAGE_TABLE_LEVEL::MIDDLE,
+                                     PRIVILEGE_LEVEL::USER);
+    }
 
     // push into runnable list
     PCB *new_pcb = new PCB;
