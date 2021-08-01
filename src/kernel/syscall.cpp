@@ -433,6 +433,10 @@ size_t sys_sched_yield(Context *context) {
     return (0);
 }
 
+size_t sys_mprotect(Context* context){
+    return 0;
+}
+
 size_t sys_mount(Context *context) {
     return (0);
 }
@@ -459,6 +463,10 @@ size_t sys_lseek(Context* context){
     // Upon successful completion, lseek() returns the resulting offset location as measured in bytes from the beginning of the file.  On error, the value (off_t) -1 is returned and errno is set to indicate the error
     int fd = sysGetRealFd(context->a0);
     return fs->lseek(file_describer_array[fd].path, context->a1, context->a2);
+}
+
+size_t sys_exit_group(Context* context){
+    return sys_exit(context);
 }
 
 size_t sys_readv(Context* context){
@@ -552,6 +560,10 @@ size_t sys_ioctl(Context* context){
     return 0;
 }
 
+size_t sys_rt_sigaction(Context* context){
+    return 0;
+}
+
 
 /// syscall int & register & distribute
 
@@ -631,8 +643,11 @@ void syscall_register() {
     syscall_list[SYS_getegid]=sys_getegid;
     syscall_list[SYS_gettid]=sys_gettid;
     //syscall_list[SYS_tgkill]= sys_tgkill;
+    syscall_list[SYS_mprotect]=sys_mprotect;
+    syscall_list[SYS_exit_group]=sys_exit_group;
 
     syscall_list[SYS_mmap]=sys_mmap;
     syscall_list[SYS_readlinkat] = sys_readlinkat;
     syscall_list[SYS_ioctl] = sys_ioctl;
+    syscall_list[SYS_rt_sigaction]=sys_rt_sigaction;
 }
