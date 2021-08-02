@@ -186,6 +186,8 @@ Context *page_fault(Context* context, size_t stval){
 
     PageTableUtil::CreateMapping(table_base, vir_addr, phy_addr, PAGE_TABLE_LEVEL::SMALL, PRIVILEGE_LEVEL::USER);
 
+//    printf("page fault >> %x\n",vir);
+
     size_t ppn1 = (vir_addr & (0b111111111LL << 30)) >> 30;
     size_t ppn2 = (vir_addr & (0b111111111LL << 21)) >> 21;
     size_t ppn3 = (vir_addr & (0b111111111LL << 12)) >> 12;

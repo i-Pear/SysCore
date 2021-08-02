@@ -560,7 +560,7 @@ size_t sys_readlinkat(Context* context){
     char* buf= reinterpret_cast<char *>((context->a2));
     int length=context->a3;
 
-    strcpy(buf,"/root/stack_scan");
+    strcpy(buf,"/root/busybox");
     return 0;
 }
 
