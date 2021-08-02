@@ -90,7 +90,7 @@ private:
     }
 
     static void check_null(size_t virtual_address, size_t physical_address){
-        if(virtual_address == 0){
+        if(virtual_address >= 0 && virtual_address < 0x1000){
             printf("[null pointer exception] virtual address 0 -> 0x%x\n", physical_address);
             panic("");
         }
