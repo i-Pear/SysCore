@@ -26,6 +26,7 @@ SECTIONS
     .text : {
         /* 把 entry 函数放在最前面 */
         *(.text.entry)
+        *(.align.interrupt)
         /* 要链接的文件的 .text 字段集中放在这里 */
         *(.text .text.*)
     }

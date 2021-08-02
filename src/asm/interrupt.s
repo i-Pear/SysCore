@@ -25,7 +25,7 @@
     LOAD  x\n, \n
 .endm
 
-    .section .text
+    .section .align.interrupt
     .global __interrupt
     .extern handle_interrupt
     .extern debug_func
