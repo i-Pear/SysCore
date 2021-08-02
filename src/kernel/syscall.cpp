@@ -447,6 +447,8 @@ size_t sys_umount2(Context *context) {
 }
 
 size_t sys_fstat(Context* context){
+    return 0;
+
     // fd: 文件句柄；
     // kst: 接收保存文件状态的指针；
     // int ret = fstat(fd, &kst);
@@ -554,6 +556,11 @@ size_t sys_mmap(Context* context){
 
 size_t sys_readlinkat(Context* context){
     int fd = (int) context->a0;
+    const char* pathname= reinterpret_cast<const char *>(get_running_elf_page()+(context->a1));
+    char* buf= reinterpret_cast<char *>((context->a2));
+    int length=context->a3;
+
+    strcpy(buf,"/root/busybox");
     return 0;
 }
 

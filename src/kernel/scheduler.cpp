@@ -200,12 +200,12 @@ void check_stack_preparation(size_t st){
     printf("zero: %d\n",*(sp++));
     // aux
     while (*sp!=0){
-        if(*sp==31){
+        if(*sp==31||*sp==33){
             printf("[aux] %d  ",*(sp++));
             printf("[aux] %s\n",*(sp++));
         }else{
             printf("[aux] %d  ",*(sp++));
-            printf("[aux] %d\n",*(sp++));
+            printf("[aux] 0x%x\n",*(sp++));
         }
     }
     printf("stack check end\n");
@@ -236,9 +236,9 @@ void create_process(const char *elf_path,char* argv[]) {
      * 用户栈
      * 栈通常向低地址方向增长，故此处增加__page_size
      */
-    size_t stack_page = (size_t) alloc_page(4096);
-    memset(reinterpret_cast<void *>(stack_page), 0, 4096);
-    thread_context->sp = stack_page + __page_size - 10 * 8;
+    size_t stack_page = (size_t) alloc_page(4096*5);
+    memset(reinterpret_cast<void *>(stack_page), 0, 4096*5);
+    thread_context->sp = stack_page + __page_size*5 - 10 * 8;
 
 
     const char *env[] = {
@@ -281,30 +281,58 @@ void create_process(const char *elf_path,char* argv[]) {
             }
         }
     }
+    copy_to_stack(reinterpret_cast<char *&>(sp), "ELF", strlen("ELF") + 1);
+    size_t elf_str_addr=sp;
     sp-=sp%16; //align
     // aux environments
-    put_aux((size_t**)&sp,0, 0);
-    put_aux((size_t**)&sp,0, 0);
-    put_aux((size_t**)&sp,AT_EXECFN, filename_addr);
-    put_aux((size_t**)&sp,AT_CLKTCK, 64);
-    put_aux((size_t**)&sp,AT_HWCAP, 0x112d);
-    put_aux((size_t**)&sp,AT_EGID, 0);
-    put_aux((size_t**)&sp,AT_GID, 0);
-    put_aux((size_t**)&sp,AT_EUID, 0);
-    put_aux((size_t**)&sp,AT_UID, 0);
-    put_aux((size_t**)&sp,AT_ENTRY, entry);
-    put_aux((size_t**)&sp,AT_FLAGS, 0);
-    put_aux((size_t**)&sp,AT_BASE, 0);
-    put_aux((size_t**)&sp,AT_PAGESZ, 0x1000);
-    put_aux((size_t**)&sp,AT_PHNUM, ph_num);
-    put_aux((size_t**)&sp,AT_PHENT, sizeof(Elf64_Phdr));
-    put_aux((size_t**)&sp,AT_PHDR, ph_off);
-    put_aux((size_t**)&sp,0x2d, 0);
-    put_aux((size_t**)&sp,0x2c, 0);
-    put_aux((size_t**)&sp,0x2b, 0);
-    put_aux((size_t**)&sp,0x2a, 0);
-    put_aux((size_t**)&sp,0x29, 0);
+
+    put_aux((size_t**)&sp,AT_NULL, 0);
     put_aux((size_t**)&sp,0x28, 0);
+    put_aux((size_t**)&sp,0x29, 0);
+    put_aux((size_t**)&sp,0x2a, 0);
+    put_aux((size_t**)&sp,0x2b, 0);
+    put_aux((size_t**)&sp,0x2c, 0);
+    put_aux((size_t**)&sp,0x2d, 0);
+
+    put_aux((size_t**)&sp,AT_PHDR, entry + ph_off);               // 3
+    put_aux((size_t**)&sp,AT_PHENT, sizeof(Elf64_Phdr));  // 4
+    put_aux((size_t**)&sp,AT_PHNUM, ph_num);              // 5
+    put_aux((size_t**)&sp,AT_PAGESZ, 0x1000);                 // 6
+    put_aux((size_t**)&sp,AT_BASE, 0);                        // 7
+    put_aux((size_t**)&sp,AT_FLAGS, 0);                       // 8
+    put_aux((size_t**)&sp,AT_ENTRY, entry);              // 9
+    put_aux((size_t**)&sp,AT_UID, 0);                         // 11
+    put_aux((size_t**)&sp,AT_EUID, 0);                        // 12
+    put_aux((size_t**)&sp,AT_GID, 0);                         // 13
+    put_aux((size_t**)&sp,AT_EGID, 0);                        // 14
+    put_aux((size_t**)&sp,AT_HWCAP, 0x112d);                  // 16
+    put_aux((size_t**)&sp,AT_CLKTCK, 64);                     // 17
+    put_aux((size_t**)&sp,AT_EXECFN, filename_addr);       // 31
+
+
+//    put_aux((size_t**)&sp,0, 0);
+//    put_aux((size_t**)&sp,0, 0);
+//    put_aux((size_t**)&sp,AT_EXECFN, filename_addr); //31
+//    put_aux((size_t**)&sp,AT_CLKTCK, 0x64); //17
+//    put_aux((size_t**)&sp,AT_HWCAP, 0x112d); //16
+//    put_aux((size_t**)&sp,AT_EGID, 0); //14
+//    put_aux((size_t**)&sp,AT_GID, 0); //13
+//    put_aux((size_t**)&sp,AT_EUID, 0); //12
+//    put_aux((size_t**)&sp,AT_UID, 0); //11
+//    put_aux((size_t**)&sp,AT_ENTRY, entry); //9
+//    put_aux((size_t**)&sp,AT_FLAGS, 0); //8
+//    put_aux((size_t**)&sp,AT_BASE, 0); //7
+//    put_aux((size_t**)&sp,AT_PAGESZ, 0x1000); //6
+//    put_aux((size_t**)&sp,AT_PHNUM, ph_num); //5
+//    put_aux((size_t**)&sp,AT_PHENT, sizeof(Elf64_Phdr)); //4 -> 0x38(ss_new)
+//    put_aux((size_t**)&sp,AT_PHDR, ph_off); //3 !
+//    put_aux((size_t**)&sp,45, 0);
+//    put_aux((size_t**)&sp,44, 0);
+//    put_aux((size_t**)&sp,43, 0);
+//    put_aux((size_t**)&sp,42, 0);
+//    put_aux((size_t**)&sp,41, 0);
+//    put_aux((size_t**)&sp,40, 0);
+//    put_aux((size_t**)&sp,33, elf_str_addr);
     sp-=8; // 0 word
     // envp
     for(auto i=envp_strings.start; i; i=i->next){
@@ -323,7 +351,7 @@ void create_process(const char *elf_path,char* argv[]) {
 //    check_stack_preparation(sp);
 
     thread_context->sp = reinterpret_cast<size_t>(sp);
-    thread_context->a0=1;
+//    thread_context->a0=1;
     thread_context->a1=argv_start;
 
     /**
