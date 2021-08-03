@@ -68,7 +68,18 @@ void init_thread() {
     init_file_describer();
     init_self_tests();
 
-    add_test("/busybox");
+//    add_test("/busybox_new false");
+//    add_test("/busybox_new true");
+//    add_test("/busybox_new echo 123");
+//    add_test("/busybox_new uname");
+//    add_test("/busybox_new ash -c exit");
+//    add_test("/busybox_new sh -c exit");
+//    add_test("/busybox_new clear");
+//    add_test("/busybox_new basename /aaa/bbb");
+//    add_test("/busybox_new expr 1 + 1");
+//    add_test("/busybox_new printf abc\n");
+    add_test("/busybox_new pwd");
+
 //    add_test("/yield");
 //    add_test("/fork");
 //    add_test("/clone");

@@ -229,6 +229,7 @@ size_t sys_gettimeofday(Context *context) {
 }
 
 size_t sys_exit(Context *context) {
+    printf("Program exited with exit code 0x%x\n",context->a0);
     exit_process(context->a0);
     return context->a0;
 }
@@ -458,6 +459,10 @@ size_t sys_fstat(Context* context){
     return fs->fstat(file_describer_array[fd].path, stat);
 }
 
+size_t sys_fstatat(Context* context) {
+    return 0;
+}
+
 size_t sys_lseek(Context* context){
     // int fd
     // size_t offset
@@ -511,7 +516,7 @@ size_t sys_brk(Context* context){
     if(require!=0){
         return require;
     }else{
-        return 0x80500000;
+        return 0x85000000;
     }
 }
 
@@ -639,6 +644,7 @@ void syscall_register() {
     syscall_list[SYS_mount] = sys_mount;
     syscall_list[SYS_umount2] = sys_umount2;
     syscall_list[SYS_fstat] = sys_fstat;
+    syscall_list[SYS_fstatat] = sys_fstatat;
     syscall_list[SYS_lseek] = sys_lseek;
     syscall_list[SYS_readv] = sys_readv;
     syscall_list[SYS_writev] = sys_writev;

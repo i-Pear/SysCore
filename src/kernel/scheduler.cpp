@@ -211,7 +211,46 @@ void check_stack_preparation(size_t st){
     printf("stack check end\n");
 }
 
-void create_process(const char *elf_path,char* argv[]) {
+void create_process(const char *_command) {
+    char* command=new char [strlen(_command)+1];
+    strcpy(command,_command);
+    // split command with space
+    int space_count=0;
+    char* p=command;
+    while (*p){
+        if(*p==' ')space_count++;
+        p++;
+    }
+
+    if(space_count==0){
+        create_process(command, nullptr);
+    }else{
+        // create argv
+        char** argv=new char* [space_count];
+        // copy to argv
+        int pos=0;
+        p=command;
+        while (*p==' ')p++; // erase heading spaces
+        int in_space=false;
+        while (*p){
+            if(*p==' '){
+                *p='\0';
+                in_space=true;
+            }else{
+                if(in_space){
+                    in_space= false;
+                    argv[pos++]=p;
+                }
+            }
+            p++;
+        }
+
+        create_process(command, (const char **)(argv));
+        delete[] argv;
+    }
+}
+
+void create_process(const char *elf_path,const char* argv[]) {
     FIL fnew;
     printf("elf %s\n", elf_path);
     int res = f_open(&fnew, elf_path, FA_READ);
@@ -228,7 +267,7 @@ void create_process(const char *elf_path,char* argv[]) {
     size_t elf_page_base, entry, elf_page_size,ph_off;
     int ph_num;
     load_elf(elf_file_cache, file_size, &elf_page_base, &elf_page_size, &entry,&ph_off,&ph_num);
-    // dealloc_page(elf_file_cache);
+    dealloc_page(reinterpret_cast<size_t>(elf_file_cache));
 
     Context *thread_context = new(Context);
     thread_context->sstatus = register_read_sstatus();
@@ -346,13 +385,13 @@ void create_process(const char *elf_path,char* argv[]) {
     put_envp((size_t**)&sp,filename_addr);
     size_t argv_start=sp;
     // argc
-    put_envp((size_t**)&sp,1);
+    put_envp((size_t**)&sp,argv_strings.length()+1);
 
 //    check_stack_preparation(sp);
 
     thread_context->sp = reinterpret_cast<size_t>(sp);
 //    thread_context->a0=1;
-    thread_context->a1=argv_start;
+//    thread_context->a1=argv_start;
 
     /**
      * 此处spp应为0,表示user-mode
@@ -415,10 +454,10 @@ void execute(const char *exec_path) {
         } else {
             sprintf(buf, "%s/%s", running->cwd, exec_path);
         }
-        create_process(exec_path, nullptr);
+        create_process(exec_path);
         exit_process(0);
     } else {
-        create_process(exec_path, nullptr);
+        create_process(exec_path);
         exit_process(0);
     }
 }
@@ -431,9 +470,9 @@ void exit_process(int exit_ret) {
         // printf("unfreeze pid=%d\n",parent->pid);
         parent->signal_list.push_back(make_pair(running->pid, exit_ret));
     }
-//     dealloc_page(running->elf_page_base);
+    dealloc_page(running->elf_page_base);
     // TODO: dealloc_page(running->page_table);
-    // dealloc_page(running->stack);
+    dealloc_page(running->stack);
 
     // free file describer
     // TODO: free file describer
@@ -489,10 +528,14 @@ void schedule() {
             panic("There exists a dead waiting loop. All processes are blocked.");
         } else {
             if (has_next_test()) {
-                create_process(get_next_test(), nullptr);
+                char* argv[2];
+                char q[]="false";
+                argv[0]=q;
+                argv[1]=0;
+                create_process(get_next_test());
                 schedule();
             } else {
-                printf("Nothing to run, halt.\n");
+                panic("Nothing to run, shutdown.\n");
                 while (1);
             }
         }
