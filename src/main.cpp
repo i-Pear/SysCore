@@ -107,7 +107,6 @@ void busybox_test(){
 //    add_test("busybox_new ls");
 //    add_test("busybox_new sleep 1");
 //    add_test("busybox_new touch test.txt");
-//    add_test("busybox_new echo \"hello world\" > test.txt");
 //    add_test("busybox_new cat test.txt");
 //    add_test("busybox_new cut -c 3 test.txt");
 //    add_test("busybox_new od test.txt");
@@ -115,11 +114,6 @@ void busybox_test(){
 //    add_test("busybox_new tail test.txt");
 //    add_test("busybox_new hexdump -C test.txt");
 //    add_test("busybox_new md5sum test.txt");
-//    add_test("busybox_new echo \"bbbbbbb\" >> test.txt");
-//    add_test("busybox_new echo \"aaaaaaa\" >> test.txt");
-//    add_test("busybox_new echo \"2222222\" >> test.txt");
-//    add_test("busybox_new echo \"1111111\" >> test.txt");
-//    add_test("busybox_new echo \"bbbbbbb\" >> test.txt");
 //    add_test("busybox_new sort test.txt | ./busybox uniq");
 //    add_test("busybox_new stat test.txt");
 //    add_test("busybox_new strings test.txt");
