@@ -250,6 +250,8 @@ void create_process(const char *_command) {
     }
 }
 
+size_t rrr=12345678;
+
 void create_process(const char *elf_path,const char* argv[]) {
     FIL fnew;
     printf("elf %s\n", elf_path);
@@ -346,6 +348,7 @@ void create_process(const char *elf_path,const char* argv[]) {
     put_aux((size_t**)&sp,AT_EGID, 0);                        // 14
     put_aux((size_t**)&sp,AT_HWCAP, 0x112d);                  // 16
     put_aux((size_t**)&sp,AT_CLKTCK, 64);                     // 17
+    put_aux((size_t**)&sp,AT_RANDOM, (size_t)&rrr);                     // 17
     put_aux((size_t**)&sp,AT_EXECFN, filename_addr);       // 31
 
 
