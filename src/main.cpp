@@ -38,6 +38,104 @@ void test_lib() {
     TestFile testFile;
 }
 
+void simple_test(){
+//    add_test("/yield");
+//    add_test("/fork");
+//    add_test("/clone");
+//    add_test("/write");
+//    add_test("/uname");
+//    add_test("/times");
+//    add_test("/getpid");
+//    add_test("/getppid");
+//    add_test("/open");
+//    add_test("/read");
+//    add_test("/close");
+//    add_test("/openat");
+//    add_test("/getcwd");
+//    add_test("/dup");
+//    add_test("/getdents");
+//    add_test("/dup2");
+//    add_test("/wait");
+//    add_test("/exit");
+//    add_test("/execve");
+//    add_test("/gettimeofday");
+//    add_test("/mkdir_");
+//    add_test("/chdir");
+//    add_test("/waitpid");
+//    add_test("/sleep");
+//    add_test("/unlink");
+//    add_test("/mount");
+//    add_test("/umount");
+//    add_test("/fstat");
+}
+
+void busybox_test(){
+
+    // tested
+//    add_test("busybox_new ash -c exit");
+//    add_test("busybox_new sh -c exit");
+//    add_test("busybox_new du");
+//    add_test("busybox_new expr 1 + 1");
+//    add_test("busybox_new false");
+//    add_test("busybox_new true");
+//    add_test("busybox_new clear");
+//    add_test("busybox_new uname");
+//    add_test("busybox_new printf abc\n");
+//    add_test("busybox_new basename /aaa/bbb");
+//    add_test("busybox_new dirname /aaa/bbb");
+//    add_test("busybox_new echo 123");
+//    add_test("busybox_new printf \"abc\n\"");
+
+    // working
+//    add_test("busybox_new pwd");
+
+    // TODO: misc tests
+//    add_test("busybox_new echo \"#### independent command test\"");
+//    add_test("busybox_new cal");
+//    add_test("busybox_new date");
+//    add_test("busybox_new df");
+//    add_test("busybox_new dmesg");
+//    add_test("busybox_new which ls");
+//    add_test("busybox_new uptime");
+//    add_test("busybox_new ps");
+//    add_test("busybox_new free");
+//    add_test("busybox_new hwclock");
+//    add_test("busybox_new kill 10");
+
+    // TODO: file system tests
+//    add_test("busybox_new ls");
+//    add_test("busybox_new sleep 1");
+//    add_test("busybox_new touch test.txt");
+//    add_test("busybox_new echo \"hello world\" > test.txt");
+//    add_test("busybox_new cat test.txt");
+//    add_test("busybox_new cut -c 3 test.txt");
+//    add_test("busybox_new od test.txt");
+//    add_test("busybox_new head test.txt");
+//    add_test("busybox_new tail test.txt");
+//    add_test("busybox_new hexdump -C test.txt");
+//    add_test("busybox_new md5sum test.txt");
+//    add_test("busybox_new echo \"ccccccc\" >> test.txt");
+//    add_test("busybox_new echo \"bbbbbbb\" >> test.txt");
+//    add_test("busybox_new echo \"aaaaaaa\" >> test.txt");
+//    add_test("busybox_new echo \"2222222\" >> test.txt");
+//    add_test("busybox_new echo \"1111111\" >> test.txt");
+//    add_test("busybox_new echo \"bbbbbbb\" >> test.txt");
+//    add_test("busybox_new sort test.txt | ./busybox uniq");
+//    add_test("busybox_new stat test.txt");
+//    add_test("busybox_new strings test.txt");
+//    add_test("busybox_new wc test.txt");
+//    add_test("busybox_new [ -f test.txt ]");
+//    add_test("busybox_new more test.txt");
+//    add_test("busybox_new rm test.txt");
+//    add_test("busybox_new mkdir test_dir");
+//    add_test("busybox_new mv test_dir test");
+//    add_test("busybox_new rmdir test");
+//    add_test("busybox_new grep hello busybox_cmd.txt");
+//    add_test("busybox_new cp busybox_cmd.txt busybox_cmd.bak");
+//    add_test("busybox_new rm busybox_cmd.bak");
+//    add_test("busybox_new find -name \"busybox_cmd.txt\"");
+}
+
 /**
  * 此处打算通过 sret 进入u-mode
  * 中断后硬件会执行以下动作：
@@ -68,46 +166,8 @@ void init_thread() {
     init_file_describer();
     init_self_tests();
 
-    add_test("/busybox_new false");
-//    add_test("/busybox_new true");
-//    add_test("/busybox_new echo 123");
-//    add_test("/busybox_new uname");
-//    add_test("/busybox_new ash -c exit");
-//    add_test("/busybox_new sh -c exit");
-//    add_test("/busybox_new clear");
-//    add_test("/busybox_new basename /aaa/bbb");
-//    add_test("/busybox_new expr 1 + 1");
-//    add_test("/busybox_new printf abc\n");
-//    add_test("/busybox_new pwd");
-
-//    add_test("/yield");
-//    add_test("/fork");
-//    add_test("/clone");
-//    add_test("/write");
-//    add_test("/uname");
-//    add_test("/times");
-//    add_test("/getpid");
-//    add_test("/getppid");
-//    add_test("/open");
-//    add_test("/read");
-//    add_test("/close");
-//    add_test("/openat");
-//    add_test("/getcwd");
-//    add_test("/dup");
-//    add_test("/getdents");
-//    add_test("/dup2");
-//    add_test("/wait");
-//    add_test("/exit");
-//    add_test("/execve");
-//    add_test("/gettimeofday");
-//    add_test("/mkdir_");
-//    add_test("/chdir");
-//    add_test("/waitpid");
-//    add_test("/sleep");
-//    add_test("/unlink");
-//    add_test("/mount");
-//    add_test("/umount");
-//    add_test("/fstat");
+//    simple_test();
+    busybox_test();
 
     // IO tests
 //    add_test("/test_output");

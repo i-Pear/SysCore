@@ -303,7 +303,7 @@ size_t sys_getcwd(Context *context) {
     }
     strcpy(ret, current_work_dir);
     // TODO: 如果用户使用虚拟地址此处会返回真实地址，这不合理
-    return (int) ((size_t) ret);
+    return (size_t) (ret);
 }
 
 size_t sys_dup(Context *context) {
