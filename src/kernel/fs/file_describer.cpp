@@ -62,6 +62,9 @@ void init_file_describer() {
     File_Describer_Data fakeData = {.redirect_fd = 0};
     File_Describer_Create(1, FILE_DESCRIBER_REGULAR, FILE_ACCESS_WRITE, fakeData, "/dev/console");
     File_Describer_Plus(1);
+
+    File_Describer_Create(2, FILE_DESCRIBER_REGULAR, FILE_ACCESS_WRITE, fakeData, "/dev/console");
+    File_Describer_Plus(2);
 }
 
 int fd_search_a_empty_file_describer() {
