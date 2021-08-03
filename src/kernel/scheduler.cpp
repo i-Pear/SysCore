@@ -280,7 +280,7 @@ void create_process(const char *elf_path,const char* argv[]) {
     size_t elf_page_base, entry, elf_page_size,ph_off;
     int ph_num;
     load_elf(elf_file_cache, file_size, &elf_page_base, &elf_page_size, &entry,&ph_off,&ph_num);
-    dealloc_page(reinterpret_cast<size_t>(elf_file_cache));
+//    dealloc_page(reinterpret_cast<size_t>(elf_file_cache));
 
     Context *thread_context = new(Context);
     thread_context->sstatus = register_read_sstatus();
@@ -346,7 +346,7 @@ void create_process(const char *elf_path,const char* argv[]) {
     put_aux((size_t**)&sp,0x2c, 0);
     put_aux((size_t**)&sp,0x2d, 0);
 
-    put_aux((size_t**)&sp,AT_PHDR, ph_off);               // 3
+    put_aux((size_t**)&sp,AT_PHDR,(size_t)elf_file_cache+(size_t)ph_off);               // 3
     put_aux((size_t**)&sp,AT_PHENT, sizeof(Elf64_Phdr));  // 4
     put_aux((size_t**)&sp,AT_PHNUM, ph_num);              // 5
     put_aux((size_t**)&sp,AT_PAGESZ, 0x1000);                 // 6
