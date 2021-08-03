@@ -335,7 +335,7 @@ void create_process(const char *elf_path,const char* argv[]) {
     put_aux((size_t**)&sp,0x2c, 0);
     put_aux((size_t**)&sp,0x2d, 0);
 
-    put_aux((size_t**)&sp,AT_PHDR, entry + ph_off);               // 3
+    put_aux((size_t**)&sp,AT_PHDR, ph_off);               // 3
     put_aux((size_t**)&sp,AT_PHENT, sizeof(Elf64_Phdr));  // 4
     put_aux((size_t**)&sp,AT_PHNUM, ph_num);              // 5
     put_aux((size_t**)&sp,AT_PAGESZ, 0x1000);                 // 6
