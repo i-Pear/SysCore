@@ -92,7 +92,7 @@ private:
     static void check_null(size_t virtual_address, size_t physical_address){
         if(virtual_address == 0 ){
             printf("[null pointer exception] virtual address 0x%x -> 0x%x\n", virtual_address, physical_address);
-//            panic("");
+            panic("");
         }
     }
 
