@@ -538,8 +538,8 @@ void schedule() {
                 create_process(get_next_test());
                 schedule();
             } else {
-                panic("Nothing to run, shutdown.\n");
-                while (1);
+                printf(">>> Nothing to run, shutdown. <<<\n");
+                shutdown();
             }
         }
     }

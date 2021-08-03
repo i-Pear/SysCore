@@ -512,7 +512,7 @@ size_t sys_writev(Context* context){
 
 size_t sys_brk(Context* context){
     size_t require=context->a0;
-    printf("brk: require= 0x%x\n",require);
+//    printf("brk: require= 0x%x\n",require);
     if(require!=0){
         return require;
     }else{

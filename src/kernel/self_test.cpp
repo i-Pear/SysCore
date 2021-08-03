@@ -19,6 +19,6 @@ int has_next_test(){
 }
 
 const char* get_next_test(){
-    printf("Running %s\n",tests[test_cnt]);
+    printf("Running \"%s\"\n",tests[test_cnt]);
     return tests[test_cnt++];
 }
