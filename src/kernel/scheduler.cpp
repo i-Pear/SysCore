@@ -215,39 +215,50 @@ void create_process(const char *_command) {
     char* command=new char [strlen(_command)+1];
     strcpy(command,_command);
     // split command with space
-    int space_count=0;
+    List<char*> splits;
     char* p=command;
+
+    bool in_space=true;
     while (*p){
-        if(*p==' ')space_count++;
+        if(*p=='"'){
+            p++;
+            splits.push_back(p);
+            while (*p!='"')p++;
+            // *p = '"'
+            *p='\0';
+            p++;
+            in_space=true;
+            continue;
+        }
+        if(*p==' '){
+            if(!in_space){
+                in_space= true;
+                *p='\0';
+            }
+        }else{
+            if(in_space){
+                in_space= false;
+                splits.push_back(p);
+            }
+        }
         p++;
     }
 
-    if(space_count==0){
-        create_process(command, nullptr);
-    }else{
-        // create argv
-        char** argv=new char* [space_count];
-        // copy to argv
-        int pos=0;
-        p=command;
-        while (*p==' ')p++; // erase heading spaces
-        int in_space=false;
-        while (*p){
-            if(*p==' '){
-                *p='\0';
-                in_space=true;
-            }else{
-                if(in_space){
-                    in_space= false;
-                    argv[pos++]=p;
-                }
-            }
-            p++;
-        }
+    int argc=splits.length();
+    char** argv=new char*[argc];
 
-        create_process(command, (const char **)(argv));
-        delete[] argv;
+    auto i=splits.start;
+    char* elf= i->data;
+    i=i->next;
+
+    int pos=0;
+    while (i){
+        argv[pos++]=i->data;
+        i=i->next;
     }
+    argv[pos]= nullptr;
+
+    create_process(elf, (const char **)argv);
 }
 
 size_t rrr=12345678;

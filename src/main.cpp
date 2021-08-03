@@ -85,12 +85,13 @@ void busybox_test(){
 //    add_test("busybox_new dirname /aaa/bbb");
 //    add_test("busybox_new echo 123");
 //    add_test("busybox_new printf \"abc\n\"");
+//    add_test("busybox_new echo \"#### independent command test\"");
 
     // working
 //    add_test("busybox_new pwd");
+//    add_test("busybox_new sh -c \"echo ccccccc > test.txt \"");
 
     // TODO: misc tests
-//    add_test("busybox_new echo \"#### independent command test\"");
 //    add_test("busybox_new cal");
 //    add_test("busybox_new date");
 //    add_test("busybox_new df");
@@ -114,7 +115,6 @@ void busybox_test(){
 //    add_test("busybox_new tail test.txt");
 //    add_test("busybox_new hexdump -C test.txt");
 //    add_test("busybox_new md5sum test.txt");
-//    add_test("busybox_new echo \"ccccccc\" >> test.txt");
 //    add_test("busybox_new echo \"bbbbbbb\" >> test.txt");
 //    add_test("busybox_new echo \"aaaaaaa\" >> test.txt");
 //    add_test("busybox_new echo \"2222222\" >> test.txt");
