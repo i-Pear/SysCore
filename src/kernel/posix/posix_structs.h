@@ -36,6 +36,12 @@ typedef struct
     unsigned long long usec; // 微秒数
 } TimeVal;
 
+struct timespec {
+    long   tv_sec;        /* seconds */
+    long   tv_nsec;       /* nanoseconds [0 .. 999999999] */
+};
+
+
 typedef struct
 {
     unsigned long long dev;    // 文件所在磁盘驱动器号，不考虑

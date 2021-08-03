@@ -418,11 +418,19 @@ size_t sys_wait4(Context *context) {
     return (wait((int *)get_actual_page(context->a1)));
 }
 
-size_t sys_nanosleep(Context *context) {
-    TimeVal *timeVal = (TimeVal *)get_actual_page(context->a0);
-    time_seconds += timeVal->sec;
-    time_macro_seconds += timeVal->usec;
-    return (0);
+size_t sys_clock_nanosleep(Context *context) {
+    int clock_id=context->a0;
+    int flags=context->a1;
+    const auto *request= (const timespec*)(context->a2);
+    auto *remain = (timespec *)(context->a3);
+
+    time_seconds += request->tv_sec;
+    time_macro_seconds += request->tv_nsec;
+
+    remain->tv_sec=0;
+    remain->tv_nsec=0;
+
+    return 0;
 }
 
 size_t sys_clone(Context *context) {
@@ -638,7 +646,7 @@ void syscall_register() {
     syscall_list[SYS_times] = sys_times;
     syscall_list[SYS_uname] = sys_uname;
     syscall_list[SYS_wait4] = sys_wait4;
-    syscall_list[SYS_nanosleep] = sys_nanosleep;
+    syscall_list[SYS_clock_nanosleep] = sys_clock_nanosleep;
     syscall_list[SYS_clone] = sys_clone;
     syscall_list[SYS_sched_yield] = sys_sched_yield;
     syscall_list[SYS_mount] = sys_mount;

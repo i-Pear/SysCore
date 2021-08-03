@@ -124,7 +124,7 @@ void init_memory(){
     memset(global_pages, 0, sizeof(global_pages));
     printf("Reserved page num=%d\n", __reserved_page_num);
     printf("origin kernel_end: 0x%x\n",get_kernel_end());
-    __kernel_end=get_kernel_end();
+    __kernel_end=0x84000000;
     __kernel_end=(__kernel_end+__page_size-1)/__page_size*__page_size;
     printf("kernel end= 0x%x\n",__kernel_end);
     int page_count=(__memory_end-__kernel_end)/__page_size;
