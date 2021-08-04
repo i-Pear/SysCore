@@ -463,11 +463,16 @@ size_t sys_fstat(Context* context){
     // int ret = fstat(fd, &kst);
     // 返回值：成功返回0，失败返回-1；
     int fd = sysGetRealFd(context->a0);
-    auto* stat = (kstat*) get_actual_page(context->a1);
+    auto* stat = (struct kstat*) get_actual_page(context->a1);
     return fs->fstat(file_describer_array[fd].path, stat);
 }
 
 size_t sys_fstatat(Context* context) {
+    int dirfd=context->a0;
+    auto *pathname= reinterpret_cast<const char *>(context->a1);
+    auto *statbuf= reinterpret_cast<struct kstat *>(context->a2);
+    int flags=context->a3;
+
     return 0;
 }
 
@@ -526,6 +531,17 @@ size_t sys_brk(Context* context){
     }else{
         return 0x85000000;
     }
+}
+
+size_t sys_clock_gettime(Context* context){
+    int clock_id=context->a0;
+    auto *timespec= reinterpret_cast<struct timespec *>(context->a1);
+
+    // time at 2021.8.4
+    timespec->tv_sec=1628039567;
+    timespec->tv_nsec=865893346;
+
+    return 0;
 }
 
 size_t sys_getuid(Context* context){
@@ -672,4 +688,5 @@ void syscall_register() {
     syscall_list[SYS_readlinkat] = sys_readlinkat;
     syscall_list[SYS_ioctl] = sys_ioctl;
     syscall_list[SYS_rt_sigaction]=sys_rt_sigaction;
+    syscall_list[SYS_clock_gettime]=sys_clock_gettime;
 }

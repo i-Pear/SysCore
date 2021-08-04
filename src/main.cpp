@@ -86,18 +86,16 @@ void busybox_test(){
 //    add_test("busybox_new echo 123");
 //    add_test("busybox_new printf \"abc\n\"");
 //    add_test("busybox_new echo \"#### independent command test\"");
-    add_test("busybox_new sleep 1");
+//    add_test("busybox_new sleep 1");
+//    add_test("busybox_new cal");
+//    add_test("busybox_new date");
 
     // working
 //    add_test("busybox_new pwd");
-//    add_test("busybox_new sh -c \"echo ccccccc > test.txt \"");
 
     // TODO: misc tests
-//    add_test("busybox_new cal");
-//    add_test("busybox_new date");
-//    add_test("busybox_new df");
-//    add_test("busybox_new dmesg");
-//    add_test("busybox_new which ls");
+//    add_test("busybox_new df");         // too complex, skip
+//    add_test("busybox_new dmesg");      // too complex, skip
 //    add_test("busybox_new uptime");
 //    add_test("busybox_new ps");
 //    add_test("busybox_new free");
@@ -105,8 +103,10 @@ void busybox_test(){
 //    add_test("busybox_new kill 10");
 
     // TODO: file system tests
+//    add_test("busybox_new which ls");
 //    add_test("busybox_new ls");
 //    add_test("busybox_new touch test.txt");
+//    add_test("busybox_new sh -c \"echo ccccccc > test.txt \"");
 //    add_test("busybox_new cat test.txt");
 //    add_test("busybox_new cut -c 3 test.txt");
 //    add_test("busybox_new od test.txt");
