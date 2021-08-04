@@ -278,9 +278,10 @@ void create_process(const char *elf_path,const char* argv[]) {
     f_close(&fnew);
 //    printf("File read successfully.\n");
     size_t elf_page_base, entry, elf_page_size,ph_off;
+    Elf64_Phdr* kernel_phdr;
     int ph_num;
-    load_elf(elf_file_cache, file_size, &elf_page_base, &elf_page_size, &entry,&ph_off,&ph_num);
-//    dealloc_page(reinterpret_cast<size_t>(elf_file_cache));
+    load_elf(elf_file_cache, file_size, &elf_page_base, &elf_page_size, &entry, &ph_off, &ph_num,&kernel_phdr);
+    dealloc_page(reinterpret_cast<size_t>(elf_file_cache));
 
     Context *thread_context = new(Context);
     thread_context->sstatus = register_read_sstatus();
@@ -346,7 +347,7 @@ void create_process(const char *elf_path,const char* argv[]) {
     put_aux((size_t**)&sp,0x2c, 0);
     put_aux((size_t**)&sp,0x2d, 0);
 
-    put_aux((size_t**)&sp,AT_PHDR,(size_t)elf_file_cache+(size_t)ph_off);               // 3
+    put_aux((size_t**)&sp,AT_PHDR,(size_t)kernel_phdr);               // 3
     put_aux((size_t**)&sp,AT_PHENT, sizeof(Elf64_Phdr));  // 4
     put_aux((size_t**)&sp,AT_PHNUM, ph_num);              // 5
     put_aux((size_t**)&sp,AT_PAGESZ, 0x1000);                 // 6
@@ -439,6 +440,7 @@ void create_process(const char *elf_path,const char* argv[]) {
     new_pcb->thread_context = thread_context;
     new_pcb->elf_page_base = elf_page_base;
     new_pcb->page_table = page_table_base;
+    new_pcb->kernel_phdr=kernel_phdr;
     // TODO: 初始化工作目录为/，这不合理
     memset(new_pcb->cwd, 0, sizeof(new_pcb->cwd));
     new_pcb->cwd[0] = '/';
@@ -487,6 +489,7 @@ void exit_process(int exit_ret) {
     dealloc_page(running->elf_page_base);
     // TODO: dealloc_page(running->page_table);
     dealloc_page(running->stack);
+    delete [] running->kernel_phdr;
 
     // free file describer
     // TODO: free file describer

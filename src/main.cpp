@@ -86,7 +86,7 @@ void busybox_test(){
 //    add_test("busybox_new echo 123");
 //    add_test("busybox_new printf \"abc\n\"");
 //    add_test("busybox_new echo \"#### independent command test\"");
-//    add_test("busybox_new sleep 1");
+    add_test("busybox_new sleep 1");
 
     // working
 //    add_test("busybox_new pwd");

@@ -26,6 +26,8 @@ public:
     size_t stack_size;
     size_t elf_page_size;
 
+    Elf64_Phdr* kernel_phdr;
+
     Context * thread_context;
     char cwd[MAX_PATH_LENGTH];
 

@@ -2,7 +2,7 @@
 #include "../lib/stl/stl.h"
 #include "memory/memory.h"
 
-void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_page_size,size_t* entry,Elf64_Off* e_phoff,int* phnum) {
+void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_page_size,size_t* entry,Elf64_Off* e_phoff,int* phnum,Elf64_Phdr** kernel_phdr) {
     // check magic number
     if (_elf_data[0] != 0x7f || _elf_data[1] != 0x45 || _elf_data[2] != 0x4c || _elf_data[3] != 0x46) {
         printf("[ELF LOADER] Invalid ELF File! \n");
@@ -61,6 +61,10 @@ void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_p
     memset(exec,0,need_alloc_page);
     *elf_page_size=need_alloc_page;
     // printf("elf segment count = %d \n",load_segment_count);
+
+    // copy kernel Phdr
+    *kernel_phdr= (new Elf64_Phdr[Ehdr->e_phnum]);
+    memcpy(*kernel_phdr,phdr, sizeof(Elf64_Phdr)*Ehdr->e_phnum);
 
     for (int i = 0; i < Ehdr->e_phnum; i++) {
         if (phdr[i].p_type != PT_LOAD)continue;
