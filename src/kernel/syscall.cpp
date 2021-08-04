@@ -601,6 +601,25 @@ size_t sys_rt_sigaction(Context* context){
     return 0;
 }
 
+size_t sys_getrusage(Context* context){
+    int who=context->a0;
+    struct rusage *usage= reinterpret_cast<struct rusage *>(context->a1);
+
+    memset(usage,0,sizeof (rusage));
+
+    time_seconds += 1;
+    time_macro_seconds += 1;
+
+    usage->ru_stime.tv_sec=time_seconds-100;
+    usage->ru_stime.tv_usec=time_macro_seconds;
+
+    usage->ru_utime.tv_sec=time_seconds-100;
+    usage->ru_utime.tv_usec=time_macro_seconds;
+    printf(">%d ",time_seconds-100);
+
+    return 0;
+}
+
 size_t sys_kill(Context* context){
     int pid=context->a0;
     int signal=context->a1;
@@ -721,6 +740,7 @@ void syscall_register() {
     syscall_list[SYS_exit_group]=sys_exit_group;
     syscall_list[SYS_kill]=sys_kill;
     syscall_list[SYS_sysinfo]=sys_sysinfo;
+    syscall_list[SYS_getrusage]= sys_getrusage;
 
     syscall_list[SYS_mmap]=sys_mmap;
     syscall_list[SYS_readlinkat] = sys_readlinkat;

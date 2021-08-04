@@ -68,6 +68,7 @@
 #define SYS_sethostname 161
 #define SYS_getrlimit 163
 #define SYS_setrlimit 164
+#define SYS_getrusage 165
 #define SYS_umask 166
 #define SYS_prctl 167
 #define SYS_adjtimex 171

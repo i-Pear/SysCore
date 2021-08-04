@@ -161,8 +161,7 @@ void init_thread() {
 //    simple_test();
     busybox_test();
 
-    // IO tests
-//    add_test("/test_output");
+    add_test("/lmbench_all bw_pipe -P 1");
 
     schedule();
 }
