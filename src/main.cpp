@@ -90,8 +90,6 @@ void busybox_test(){
 //    add_test("busybox_new cal");
 //    add_test("busybox_new date");
 //    add_test("busybox_new kill 10");
-
-    // working
 //    add_test("busybox_new pwd");
 
     // TODO: misc tests
