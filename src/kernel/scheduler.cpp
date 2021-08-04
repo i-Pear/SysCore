@@ -13,21 +13,30 @@ int global_pid = 1;
 // Warning: when do sth with running, sync with latest running_context first
 Context *running_context;
 
-PCB *search_by_pid(int pid) {
+PCB *search_by_pid(List<PCB*>** list,int pid) {
     // search in running
-    if (running != nullptr && running->pid == pid)return running;
+    if (running != nullptr && running->pid == pid){
+        *list= nullptr;
+        return running;
+    }
     // search in runnable
     auto cnt = runnable.start;
     while (cnt != nullptr) {
         // printf(">> runnable pid=%d\n",cnt->PCB->pid);
-        if (cnt->data->pid == pid)return cnt->data;
+        if (cnt->data->pid == pid){
+            *list=&runnable;
+            return cnt->data;
+        }
         cnt = cnt->next;
     }
     // search in blocked
     cnt = blocked.start;
     while (cnt != nullptr) {
         // printf(">> blocked pid=%d\n",cnt->PCB->pid);
-        if (cnt->data->pid == pid)return cnt->data;
+        if (cnt->data->pid == pid){
+            *list=&blocked;
+            return cnt->data;
+        }
         cnt = cnt->next;
     }
     return nullptr;
@@ -480,23 +489,8 @@ void execute(const char *exec_path) {
 
 void exit_process(int exit_ret) {
     // printf("process %d start to exit\n",running->pid);
-    // send signal
-    PCB *parent = search_by_pid(running->ppid);
-    if (parent != nullptr) {
-        // printf("unfreeze pid=%d\n",parent->pid);
-        parent->signal_list.push_back(make_pair(running->pid, exit_ret));
-    }
-    dealloc_page(running->elf_page_base);
-    // TODO: dealloc_page(running->page_table);
-    dealloc_page(running->stack);
-    delete [] running->kernel_phdr;
+    running->kill(exit_ret);
 
-    // free file describer
-    // TODO: free file describer
-
-    // TODO: free lists
-
-    delete running->thread_context;
     delete running;
     running = nullptr;
     schedule();
@@ -601,5 +595,26 @@ PCB::PCB(const PCB &other):occupied_file_describer(other.occupied_file_describer
 }
 
 PCB::PCB(): occupied_kernel_heap(new List<size_t>){
+
+}
+
+void PCB::kill(int exit_ret) {
+    // send signal
+    List<PCB*>* list;
+    PCB *parent = search_by_pid(&list,ppid);
+    if (parent != nullptr) {
+        // printf("unfreeze pid=%d\n",parent->pid);
+        parent->signal_list.push_back(make_pair(pid, exit_ret));
+    }
+    dealloc_page(elf_page_base);
+    // TODO: dealloc_page(running->page_table);
+    dealloc_page(stack);
+    delete [] kernel_phdr;
+    delete thread_context;
+
+    // free file describer
+    // TODO: free file describer
+
+    // TODO: free lists
 
 }

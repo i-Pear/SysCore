@@ -44,6 +44,8 @@ public:
 
     PCB(const PCB& other);
 
+    void kill(int exit_ret);
+
 };
 
 extern List<PCB*> runnable,blocked;
@@ -72,6 +74,8 @@ size_t get_running_elf_page();
 int get_running_pid();
 
 int get_running_ppid();
+
+PCB *search_by_pid(List<PCB*>** list,int pid);
 
 void create_process(const char *elf_path);
 

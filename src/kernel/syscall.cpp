@@ -601,6 +601,43 @@ size_t sys_rt_sigaction(Context* context){
     return 0;
 }
 
+size_t sys_kill(Context* context){
+    int pid=context->a0;
+    int signal=context->a1;
+
+    List<PCB*>* list;
+    auto* process=search_by_pid(&list,pid);
+    if(process== nullptr){
+        return -1;
+    }
+    process->kill(1);
+    if(list){
+        for(auto i=list->start;i;i=i->next){
+            if(i->data==process){
+                list->erase(i);
+                break;
+            }
+        }
+    }
+    return 0;
+}
+
+size_t sys_sysinfo(Context* context){
+    auto *info= reinterpret_cast<sysinfo *>(context->a0);
+
+    info->uptime=114514;
+    for(int i=0;i<3;i++){
+        info->loads[i]=0;
+    }
+    info->totalram=1024*1024;
+    info->freeram=114514;
+    info->sharedram=114514;
+    info->bufferram=114514;
+    info->totalswap=114514;
+    info->freeswap=114514;
+    info->procs=100;
+    return 0;
+}
 
 /// syscall int & register & distribute
 
@@ -639,7 +676,6 @@ Context *syscall(Context *context) {
     context->sepc += 4;
     return context;
 }
-
 
 void syscall_register() {
     syscall_list[SYS_getchar] = sys_getchar;
@@ -683,6 +719,8 @@ void syscall_register() {
     //syscall_list[SYS_tgkill]= sys_tgkill;
     syscall_list[SYS_mprotect]=sys_mprotect;
     syscall_list[SYS_exit_group]=sys_exit_group;
+    syscall_list[SYS_kill]=sys_kill;
+    syscall_list[SYS_sysinfo]=sys_sysinfo;
 
     syscall_list[SYS_mmap]=sys_mmap;
     syscall_list[SYS_readlinkat] = sys_readlinkat;

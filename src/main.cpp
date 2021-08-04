@@ -89,6 +89,7 @@ void busybox_test(){
 //    add_test("busybox_new sleep 1");
 //    add_test("busybox_new cal");
 //    add_test("busybox_new date");
+//    add_test("busybox_new kill 10");
 
     // working
 //    add_test("busybox_new pwd");
@@ -96,11 +97,10 @@ void busybox_test(){
     // TODO: misc tests
 //    add_test("busybox_new df");         // too complex, skip
 //    add_test("busybox_new dmesg");      // too complex, skip
-//    add_test("busybox_new uptime");
-//    add_test("busybox_new ps");
-//    add_test("busybox_new free");
-//    add_test("busybox_new hwclock");
-//    add_test("busybox_new kill 10");
+//    add_test("busybox_new uptime");     // too complex, skip
+//    add_test("busybox_new free");       // need /proc/meminfo
+//    add_test("busybox_new ps");         // need /proc
+//    add_test("busybox_new hwclock");    // need /etc/localtime
 
     // TODO: file system tests
 //    add_test("busybox_new which ls");
