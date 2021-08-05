@@ -6,7 +6,7 @@
 #include "sysctl.c"
 #include "utils.c"
 
-
+#include "rtc/rtc.c"
 
 // fatfs
 #include "fatfs/ff.c"

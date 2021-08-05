@@ -3,6 +3,8 @@
 
 #include "../posix/posix_structs.h"
 
+void init_rtc();
+
 unsigned long mktime(const unsigned int year,
                      const unsigned int mon,
                      const unsigned int day,

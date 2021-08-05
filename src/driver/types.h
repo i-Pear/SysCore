@@ -11,11 +11,17 @@ typedef unsigned short uint16;
 typedef unsigned int  uint32;
 typedef unsigned long uint64;
 
+#ifndef __cplusplus
+typedef _Bool bool;
+#endif
+
 typedef unsigned long uintptr_t;
 typedef uint64 pde_t;
 
 // #define NULL ((void *)0)
 #define NULL 0
+#define false 0
+#define true 1
 
 #define readb(addr) (*(volatile uint8 *)(addr))
 #define readw(addr) (*(volatile uint16 *)(addr))

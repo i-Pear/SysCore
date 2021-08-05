@@ -2,10 +2,10 @@
 #include "register.h"
 #include "../lib/stl/stl.h"
 #include "scheduler.h"
+#include "time/time.h"
 #include "posix/posix_structs.h"
 #include "fs/file_describer.h"
 #include "memory/Heap.h"
-#include "times.h"
 
 //#define get_actual_page(x) (((x)>0x80000000)?(x):(x)+ get_running_elf_page())
 #define get_actual_page(x) (x)
@@ -224,7 +224,7 @@ size_t sys_execve(Context *context) {
 }
 
 size_t sys_gettimeofday(Context *context) {
-    get_timespec((TimeVal*)get_actual_page(context->a0));
+//    spec((TimeVal*)get_actual_page(context->a0));
     return 0;
 }
 
@@ -424,9 +424,6 @@ size_t sys_clock_nanosleep(Context *context) {
     const auto *request= (const timespec*)(context->a2);
     auto *remain = (timespec *)(context->a3);
 
-    time_seconds += request->tv_sec;
-    time_macro_seconds += request->tv_nsec;
-
     remain->tv_sec=0;
     remain->tv_nsec=0;
 
@@ -537,9 +534,7 @@ size_t sys_clock_gettime(Context* context){
     int clock_id=context->a0;
     auto *timespec= reinterpret_cast<struct timespec *>(context->a1);
 
-    // time at 2021.8.4
-    timespec->tv_sec=1628039567;
-    timespec->tv_nsec=865893346;
+    CurrentTimeSpec(timespec);
 
     return 0;
 }
@@ -607,15 +602,12 @@ size_t sys_getrusage(Context* context){
 
     memset(usage,0,sizeof (rusage));
 
-    time_seconds += 1;
-    time_macro_seconds += 1;
 
-    usage->ru_stime.tv_sec=time_seconds-100;
-    usage->ru_stime.tv_usec=time_macro_seconds;
+    usage->ru_stime.tv_sec=0;
+    usage->ru_stime.tv_usec=0;
 
-    usage->ru_utime.tv_sec=time_seconds-100;
-    usage->ru_utime.tv_usec=time_macro_seconds;
-    printf(">%d ",time_seconds-100);
+    usage->ru_utime.tv_sec=0;
+    usage->ru_utime.tv_usec=0;
 
     return 0;
 }

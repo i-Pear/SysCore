@@ -3,7 +3,6 @@
 #include "kernel/scheduler.h"
 #include "kernel/self_test.h"
 #include "kernel/memory/kernel_stack.h"
-#include "kernel/times.h"
 #include "lib/stl/string.h"
 #include "kernel/fs/IFS.h"
 #include "kernel/fs/VFS.h"
@@ -144,8 +143,8 @@ void busybox_test(){
 void init_thread() {
     printf("[OS] test library\n");
     test_lib();
-    printf("[OS] times init.\n");
-    init_times();
+    printf("[OS] rtc init.\n");
+    init_rtc();
     printf("[OS] fix page table before driver\n");
     fix_kernel_page_table();
     printf("[OS] bsp init.\n");
