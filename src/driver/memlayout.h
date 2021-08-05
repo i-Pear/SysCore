@@ -15,3 +15,5 @@
 #define SYSCTL                  0x50440000
 
 #define FPIOA                   0x502B0000
+
+#define RTC                     0x50460000

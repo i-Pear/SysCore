@@ -13,7 +13,7 @@ GCC = riscv64-unknown-elf-gcc
 GXX = riscv64-unknown-elf-c++
 OBJCOPY = riscv64-unknown-elf-objcopy
 
-SRC_ALL = $(wildcard src/lib/*.h src/lib/*.cpp src/lib/stl/*.h src/lib/stl/*.cpp src/kernel/*.h src/kernel/*.cpp src/kernel/memory/*.h src/kernel/memory/*.cpp src/kernel/fs/*.h src/kernel/fs/*.cpp src/kernel/posix/*.h src/kernel/posix/*.cpp)
+SRC_ALL = $(wildcard src/lib/*.h src/lib/*.cpp src/lib/stl/*.h src/lib/stl/*.cpp src/kernel/*.h src/kernel/*.cpp src/kernel/memory/*.h src/kernel/memory/*.cpp src/kernel/fs/*.h src/kernel/fs/*.cpp src/kernel/posix/*.h src/kernel/posix/*.cpp src/kernel/time/*.h src/kernel/time/*.c src/kernel/time/*.cpp)
 SRC_DRIVER = src/driver/all_driver_in_one.c
 OBJ_DRIVER = $(BUILD)/driver.o
 #SRC_FATFS = $(wildcard src/driver/fatfs/*.h src/driver/fatfs/*.c)
@@ -80,7 +80,7 @@ qemu:
                                         -DQEMU
 	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)
 
-	qemu-system-riscv64 -machine virt -nographic -bios platform/qemu/fw_payload.bin -device loader,file=k210.bin,addr=0x80200000 \
+	qemu-system-riscv64 -machine virt -nographic -bios platform/qemu/fw_payload.bin -rtc base=utc -device loader,file=k210.bin,addr=0x80200000 \
 	-m 2000M -smp 2
 
 dqemu:
@@ -93,7 +93,7 @@ dqemu:
                                         -DQEMU
 	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)
 
-	qemu-system-riscv64 -machine virt -nographic -bios platform/qemu/fw_payload.bin -device loader,file=k210.bin,addr=0x80200000 \
+	qemu-system-riscv64 -machine virt -nographic -bios platform/qemu/fw_payload.bin -rtc base=utc -device loader,file=k210.bin,addr=0x80200000 \
 	-S -s -m 2000M -smp 2
 
 debug:

@@ -161,7 +161,7 @@ void init_thread() {
 //    simple_test();
     busybox_test();
 
-    add_test("/lmbench_all bw_pipe -P 1");
+    add_test("/lmbench_new bw_pipe -P 1");
 
     schedule();
 }
@@ -176,6 +176,7 @@ void fix_kernel_page_table(){
                                  physical_address,
                                  PAGE_TABLE_LEVEL::SMALL,
                                  PRIVILEGE_LEVEL::SUPERVISOR);
+
 }
 
 void vfs_init() {
