@@ -16,6 +16,7 @@
 #include "lib/stl/RefCountPtr.h"
 #include "lib/stl/UniquePtr.h"
 #include "lib/stl/PageTableUtil.h"
+#include "kernel/time/time.h"
 
 void vfs_init();
 void fix_kernel_page_table();
