@@ -68,6 +68,9 @@ flash:
 	@sudo dd if=fs.img of=$(sd);
 
 qemu-driver:
+	@echo "Press enter to start..."
+	@read REPLY
+	@if [ ! -d "build" ]; then mkdir build; fi
 	$(GCC) -o build/driver-qemu.o -w -g -mcmodel=medany -ffreestanding -nostdlib -c $(SRC_DRIVER) -DQEMU
 
 qemu:
