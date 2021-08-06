@@ -45,11 +45,15 @@ public:
 
 private:
     void increase() {
-        atomic_count_->inc();
+        if(atomic_count_){
+            atomic_count_->inc();
+        }
     }
 
     void decrease() {
-        atomic_count_->dec();
+        if(atomic_count_){
+            atomic_count_->dec();
+        }
         if (atomic_count_ && atomic_count_->count() == 0) {
             release();
         }
