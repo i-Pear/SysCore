@@ -20,13 +20,13 @@ public:
     int pid;
     int ppid;
     size_t stack;
-    size_t elf_page_base;
-    size_t page_table;
+    RefCountPtr<size_t> elf_page_base;
+    RefCountPtr<size_t> page_table;
 
     size_t stack_size;
     size_t elf_page_size;
 
-    Elf64_Phdr* kernel_phdr;
+    RefCountPtr<Elf64_Phdr> kernel_phdr;
 
     Context * thread_context;
     char cwd[MAX_PATH_LENGTH];

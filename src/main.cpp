@@ -39,34 +39,34 @@ void test_lib() {
 }
 
 void simple_test(){
-//    add_test("/yield");
-//    add_test("/fork");
-//    add_test("/clone");
-//    add_test("/write");
-//    add_test("/uname");
-//    add_test("/times");
-//    add_test("/getpid");
-//    add_test("/getppid");
-//    add_test("/open");
-//    add_test("/read");
-//    add_test("/close");
-//    add_test("/openat");
-//    add_test("/getcwd");
-//    add_test("/dup");
-//    add_test("/getdents");
-//    add_test("/dup2");
-//    add_test("/wait");
-//    add_test("/exit");
-//    add_test("/execve");
-//    add_test("/gettimeofday");
-//    add_test("/mkdir_");
-//    add_test("/chdir");
-//    add_test("/waitpid");
-//    add_test("/sleep");
-//    add_test("/unlink");
-//    add_test("/mount");
-//    add_test("/umount");
-//    add_test("/fstat");
+    add_test("/yield");
+    add_test("/fork");
+    add_test("/clone");
+    add_test("/write");
+    add_test("/uname");
+    add_test("/times");
+    add_test("/getpid");
+    add_test("/getppid");
+    add_test("/open");
+    add_test("/read");
+    add_test("/close");
+    add_test("/openat");
+    add_test("/getcwd");
+    add_test("/dup");
+    add_test("/getdents");
+    add_test("/dup2");
+    add_test("/wait");
+    add_test("/exit");
+    add_test("/execve");
+    add_test("/gettimeofday");
+    add_test("/mkdir_");
+    add_test("/chdir");
+    add_test("/waitpid");
+    add_test("/sleep");
+    add_test("/unlink");
+    add_test("/mount");
+    add_test("/umount");
+    add_test("/fstat");
 }
 
 void busybox_test(){
@@ -158,10 +158,10 @@ void init_thread() {
     init_file_describer();
     init_self_tests();
 
-//    simple_test();
-    busybox_test();
+    simple_test();
+//    busybox_test();
 
-    add_test("/lmbench_new bw_pipe -P 1");
+//    add_test("/lmbench_new bw_pipe -P 1");
 
     schedule();
 }

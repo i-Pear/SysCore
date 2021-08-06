@@ -141,7 +141,7 @@ void clone(int flags, size_t stack, int ptid) {
         memcpy(reinterpret_cast<void *>(stack), reinterpret_cast<const void *>(running->stack), running->stack_size);
 
         size_t elf_page_base = alloc_page(running->elf_page_size);
-        memcpy(reinterpret_cast<void *>(elf_page_base), reinterpret_cast<const void *>(running->elf_page_base),
+        memcpy(reinterpret_cast<void *>(elf_page_base), reinterpret_cast<const void *>(running->elf_page_base.getPtr()),
                running->elf_page_size);
 
         size_t page_table = alloc_page(4096);
@@ -153,8 +153,9 @@ void clone(int flags, size_t stack, int ptid) {
         child_pcb->thread_context->a0 = 0;
         child_pcb->stack = stack;
         child_pcb->thread_context->sp = running->thread_context->sp - running->stack + stack;
-        child_pcb->elf_page_base = elf_page_base;
-        child_pcb->page_table = page_table;
+        child_pcb->elf_page_base = RefCountPtr<size_t>((size_t *)elf_page_base);
+        child_pcb->page_table = RefCountPtr<size_t>((size_t*)page_table);
+        child_pcb->kernel_phdr=running->kernel_phdr;
 
         runnable.push_back(child_pcb);
     }
@@ -164,7 +165,7 @@ void clone(int flags, size_t stack, int ptid) {
 
 size_t get_running_elf_page() {
     if (running == nullptr)return 0;
-    return running->elf_page_base;
+    return size_t(running->elf_page_base.getPtr());
 }
 
 int get_running_pid() {
@@ -447,9 +448,9 @@ void create_process(const char *elf_path,const char* argv[]) {
     new_pcb->ppid = 1;
     new_pcb->stack = stack_page;
     new_pcb->thread_context = thread_context;
-    new_pcb->elf_page_base = elf_page_base;
-    new_pcb->page_table = page_table_base;
-    new_pcb->kernel_phdr=kernel_phdr;
+    new_pcb->elf_page_base = RefCountPtr<size_t>((size_t*)elf_page_base);
+    new_pcb->page_table = RefCountPtr<size_t>((size_t*)page_table_base);
+    new_pcb->kernel_phdr=RefCountPtr<Elf64_Phdr>(kernel_phdr);
     // TODO: 初始化工作目录为/，这不合理
     memset(new_pcb->cwd, 0, sizeof(new_pcb->cwd));
     new_pcb->cwd[0] = '/';
@@ -594,7 +595,7 @@ PCB::PCB(const PCB &other):occupied_file_describer(other.occupied_file_describer
 
 }
 
-PCB::PCB(): occupied_kernel_heap(new List<size_t>){
+PCB::PCB(): occupied_kernel_heap(new List<size_t>()){
 
 }
 
@@ -606,10 +607,8 @@ void PCB::kill(int exit_ret) {
         // printf("unfreeze pid=%d\n",parent->pid);
         parent->signal_list.push_back(make_pair(pid, exit_ret));
     }
-    dealloc_page(elf_page_base);
     // TODO: dealloc_page(running->page_table);
     dealloc_page(stack);
-//    delete [] kernel_phdr;
     delete thread_context;
 
     // free file describer

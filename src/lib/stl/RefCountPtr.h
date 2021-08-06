@@ -27,6 +27,10 @@ public:
         return *this;
     }
 
+    Ptr* getPtr() {
+        return atomic_count_->ptr();
+    }
+
     Ptr* operator->() {
         return atomic_count_->ptr();
     }
