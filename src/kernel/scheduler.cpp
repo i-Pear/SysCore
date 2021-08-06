@@ -609,7 +609,7 @@ void PCB::kill(int exit_ret) {
     dealloc_page(elf_page_base);
     // TODO: dealloc_page(running->page_table);
     dealloc_page(stack);
-    delete [] kernel_phdr;
+//    delete [] kernel_phdr;
     delete thread_context;
 
     // free file describer
