@@ -21,21 +21,17 @@ void k_free(size_t p){
 }
 
 void *operator new (size_t size){
-    return (void*)heap_allocator.Alloc(size);
+    return k_malloc(size);
 }
 
 void *operator new[](size_t size){
-    return (void*)heap_allocator.Alloc(size);
+    return k_malloc(size);
 }
 
 void operator delete(void *p){
-    if(p != nullptr){
-        heap_allocator.DeAlloc((size_t) p);
-    }
+    k_free((size_t)p);
 }
 
 void operator delete[](void *p){
-    if(p != nullptr){
-        heap_allocator.DeAlloc((size_t) p);
-    }
+    k_free((size_t)p);
 }
