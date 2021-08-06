@@ -7,6 +7,7 @@
 #include "kernel/fs/IFS.h"
 #include "kernel/fs/VFS.h"
 #include "kernel/Test.h"
+#include "lib/stl/vector.h"
 #include "kernel/memory/memory.h"
 #include "kernel/memory/Heap.h"
 #include "kernel/fs/file_describer.h"
