@@ -3,6 +3,7 @@
 
 #include "stdbool.h"
 #include "stddef.h"
+#include "stl.h"
 
 template <typename T>
 struct Vector{
@@ -51,6 +52,18 @@ struct Vector{
     void pop_back(){
         assert(size>0);
         size--;
+    }
+
+    void erase(T element){
+        for(int i=0;i<size;i++){
+            if(_data[i]==element){
+                size--;
+                for(int j=i;i<size;i++){
+                    _data[j]=_data[j+1];
+                }
+                break;
+            }
+        }
     }
 
 };
