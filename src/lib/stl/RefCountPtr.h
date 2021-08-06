@@ -35,7 +35,7 @@ public:
         return atomic_count_->ptr();
     }
 
-    Ptr operator*() {
+    Ptr& operator*() {
         return *atomic_count_->ptr();
     }
 

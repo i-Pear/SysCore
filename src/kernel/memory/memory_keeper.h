@@ -4,7 +4,7 @@
 #include "../../lib/stl/vector.h"
 #include "../../lib/stl/RefCountPtr.h"
 
-class _MemKeeper{
+class MemKeeper{
 public:
 
     Vector<void*> elements;
@@ -13,9 +13,7 @@ public:
 
     void erase(void* p);
 
-    ~_MemKeeper();
+    ~MemKeeper();
 };
-
-typedef RefCountPtr<_MemKeeper> MemKeeper;
 
 #endif //OS_RISC_V_MEMORY_KEEPER_H

@@ -8,6 +8,7 @@
 #include "../lib/stl/list.h"
 #include "../lib/stl/map.h"
 #include "../lib/stl/RefCountPtr.h"
+#include "memory/brk_control.h"
 
 #define MAX_PATH_LENGTH 32
 
@@ -27,6 +28,8 @@ public:
     size_t elf_page_size;
 
     RefCountPtr<Elf64_Phdr> kernel_phdr;
+
+    RefCountPtr<BrkControl> brk_control;
 
     Context * thread_context;
     char cwd[MAX_PATH_LENGTH];
