@@ -34,6 +34,10 @@ void fatfs_init(){
         printf("fat init failed\n");
     }
 }
+void open_memory_lock(){
+    sysctl_pll_enable(SYSCTL_PLL1);
+    syscyl_clock_enable(SYSCTL_CLOCK_PLL1);
+}
 #ifdef QEMU
 extern unsigned char fs_img[];
 #endif
@@ -42,4 +46,5 @@ void driver_init(){
     bsp_init();
 #endif
     fatfs_init();
+    open_memory_lock();
 }

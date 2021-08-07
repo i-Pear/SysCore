@@ -127,7 +127,7 @@ void init_memory(){
 #ifdef QEMU
     __kernel_end=0x84000000;
 #else
-    __kernel_end=0x800b0000;
+    __kernel_end=get_kernel_end();
 #endif
     __kernel_end=(__kernel_end+__page_size-1)/__page_size*__page_size;
     printf("kernel end= 0x%x\n",__kernel_end);
