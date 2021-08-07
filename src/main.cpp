@@ -188,6 +188,8 @@ void vfs_init() {
     fs = new VFS(ifs);
 
     auto *stdout = new StdoutFs;
+
+    /** /dev/console **/
     fs->root->appendChild(new File("dev", ifs));
     fs->mkdir("/dev", O_DIRECTORY | O_RDWR);
 
@@ -195,6 +197,7 @@ void vfs_init() {
     assert(dev != nullptr);
     dev->appendChild(new File("console", stdout));
 
+    /** /sys/pipe **/
     fs->root->appendChild(new File("sys", ifs));
     fs->mkdir("/sys", O_DIRECTORY | O_RDWR);
 
@@ -206,6 +209,25 @@ void vfs_init() {
 
     auto* sys_pipe = fs->root->first_child->search("/sys/pipe");
     assert(sys_pipe != nullptr);
+
+
+    /** /proc/self/exe **/
+    fs->root->appendChild(new File("proc", ifs));
+    fs->mkdir("/proc", O_DIRECTORY | O_RDWR);
+
+    auto* proc = fs->root->first_child->search("/proc");
+    assert(proc != nullptr);
+
+    proc->appendChild(new File("self", ifs));
+    fs->mkdir("/proc/self", O_DIRECTORY | O_RDWR);
+
+    auto* self = fs->root->first_child->search("/proc/self");
+    assert(self != nullptr);
+
+    self->appendChild(new File("exe", nullptr));
+
+    auto* exe = fs->root->first_child->search("/proc/self/exe");
+    assert(exe != nullptr);
 }
 
 int main() {

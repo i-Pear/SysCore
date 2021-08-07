@@ -27,9 +27,9 @@ public:
     }
 
     explicit File(const String &fileName, File *parentFile, IFS *ifs) : name(fileName), parent(parentFile), fs(ifs),
-                                                                        ino(global_ino++) {}
+                                                                        ino(global_ino++), soft_link_(nullptr) {}
 
-    explicit File(const String &fileName, IFS *ifs) : name(fileName), fs(ifs), ino(global_ino++) {}
+    explicit File(const String &fileName, IFS *ifs) : name(fileName), fs(ifs), ino(global_ino++), soft_link_(nullptr) {}
 
     void setNext(File *nextFile) {
         next = nextFile;
@@ -128,6 +128,21 @@ public:
     File *search(size_t i_no) {
         return innerSearch(this, i_no);
     }
+
+    void CreateSoftLink(File* file){
+        soft_link_ = file;
+    }
+
+    File* GetSoftLink(){
+        return soft_link_;
+    }
+
+    void DeleteSoftLink(){
+        soft_link_ = nullptr;
+    }
+
+private:
+    File* soft_link_;
 };
 
 class VFS {
@@ -188,6 +203,27 @@ public:
             return file;
         }
         return file->first_child->search(path);
+    }
+
+    String ReadLink(const char* path){
+        auto* file = search(root, path);
+        if(file == nullptr){
+            printf("can't find \"%s\"\n", path);
+            panic("")
+        }
+        while (file->GetSoftLink() != nullptr){
+            file = file->GetSoftLink();
+        }
+        return GetPathByFile(file);
+    }
+
+    static String GetPathByFile(File* file){
+        String res;
+        while (file){
+            res = file->name + res;
+            file = file->parent;
+        }
+        return res;
     }
 
     int open(const char *path, int flag) {

@@ -1,5 +1,6 @@
 #include "scheduler.h"
 #include "self_test.h"
+#include "fs/VFS.h"
 #include "memory/kernel_stack.h"
 #include "memory/memory.h"
 //#include "elf_data.h"
@@ -273,6 +274,15 @@ void create_process(const char *_command) {
     create_process(elf, (const char **)argv);
 }
 
+
+void CreateSoftLink(const char* elf_path){
+    auto* exe = fs->root->first_child->search("/proc/self/exe");
+    assert(exe != nullptr);
+    auto* elf = fs->root->first_child->search(elf_path);
+    assert(elf != nullptr);
+    exe->CreateSoftLink(elf);
+}
+
 size_t rrr=12345678;
 
 void create_process(const char *elf_path,const char* argv[]) {
@@ -282,6 +292,7 @@ void create_process(const char *elf_path,const char* argv[]) {
     if (res != FR_OK) {
         panic("read error")
     }
+    CreateSoftLink(elf_path);
     int file_size = fnew.obj.objsize;
     char *elf_file_cache = (char *) alloc_page(file_size);
     printf("Start read file...\n");

@@ -580,7 +580,12 @@ size_t sys_readlinkat(Context* context){
     char* buf= reinterpret_cast<char *>((context->a2));
     int length=context->a3;
 
-    strcpy(buf,"/root/busybox");
+    if(pathname != nullptr && strlen(pathname) > 0 && pathname[0] == '/'){
+        String linkedFilePath = fs->ReadLink(pathname);
+        strcpy(buf, linkedFilePath.c_str());
+    }else{
+        panic("un supported param in readlinkat")
+    }
     return 0;
 }
 
