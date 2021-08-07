@@ -6,6 +6,8 @@
 #include "sysctl.c"
 #include "utils.c"
 
+#include "sleep/sleep.c"
+#include "plic/plic.c"
 #include "rtc/rtc.c"
 
 // fatfs

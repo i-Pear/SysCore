@@ -93,3 +93,17 @@ void init_rtc() {
     freq = sysctl_clock_get_freq(SYSCTL_CLOCK_IN0);
     rtc_timer_set(2021, 6, 1, 23, 59, 59);
 }
+
+uint64 r_time (void) {
+    uint64 res;
+    asm volatile(
+    "rdtime %0"
+    :"=r"(res)
+    );
+    return res;
+}
+
+uint64 timer(void){
+    uint64 usec = r_time() * 50 * 1000000UL / sysctl_clock_get_freq(SYSCTL_CLOCK_CPU);
+    return usec;
+}
