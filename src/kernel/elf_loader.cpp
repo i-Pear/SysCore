@@ -1,6 +1,7 @@
 #include "elf_loader.h"
 #include "../lib/stl/stl.h"
 #include "memory/memory.h"
+#include "memory/Heap.h"
 
 void load_elf(FIL* elf_file,size_t* elf_page_base,size_t* elf_page_size,size_t* entry,Elf64_Off* e_phoff,int* phnum,Elf64_Phdr** kernel_phdr) {
     uint32_t read_bytes;
@@ -46,7 +47,6 @@ void load_elf(FIL* elf_file,size_t* elf_page_base,size_t* elf_page_size,size_t* 
 #ifdef DEBUG_ELF
     printf("[ELF LOADER] ELF entry: %x\n", Ehdr->e_entry);
 #endif
-    char *exec;
     *e_phoff=Ehdr->e_phoff;
     *phnum=Ehdr->e_phnum;
 
@@ -64,21 +64,22 @@ void load_elf(FIL* elf_file,size_t* elf_page_base,size_t* elf_page_size,size_t* 
         load_segment_count++;
         need_alloc_page= max(need_alloc_page,phdr[i].p_vaddr+phdr[i].p_filesz);
     }
-    exec = (char *) alloc_page(need_alloc_page);
-    memset(exec,0,need_alloc_page);
-    *elf_page_size=need_alloc_page;
     // printf("elf segment count = %d \n",load_segment_count);
 
     for (int i = 0; i < Ehdr->e_phnum; i++) {
         if (phdr[i].p_type != PT_LOAD)continue;
         if (phdr[i].p_filesz == 0)continue;
 
+        size_t copy_start=phdr[i].p_offset;
+        copy_start=copy_start/4096*4096; //align
+
+        size_t copy_end=
+
         f_lseek(elf_file,phdr[i].p_offset);
         char *segment_target_addr = phdr[i].p_vaddr + exec;
         f_read(elf_file,segment_target_addr,phdr[i].p_filesz,&read_bytes);
     }
 
-    *elf_page_base=(size_t)exec;
     *entry=Ehdr->e_entry;
 #ifdef DEBUG_ELF
     printf("[ELF LOADER] ELF loaded successfully\n");

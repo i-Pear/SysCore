@@ -25,7 +25,7 @@ struct Vector{
         }
     }
 
-    T& operator [] (int n){
+    T& operator [] (int n)const{
         assert(n<capacity);
         return _data[n];
     }

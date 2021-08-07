@@ -39,6 +39,10 @@ public:
         return *atomic_count_->ptr();
     }
 
+    const Ptr& operator*() const{
+        return *atomic_count_->ptr();
+    }
+
     explicit operator bool() const {
         return atomic_count_->ptr() != nullptr;
     }

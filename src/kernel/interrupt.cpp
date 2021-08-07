@@ -177,6 +177,7 @@ Context *page_fault(Context* context, size_t stval){
     size_t vir_addr = stval;
     size_t table_base = satp << 12;
     size_t phy_addr = get_running_elf_page() + ((vir_addr >> 12) << 12);
+    panic("why page fault?")
 
     size_t* vir= reinterpret_cast<size_t *>(vir_addr);
     size_t* real= reinterpret_cast<size_t *>(phy_addr);

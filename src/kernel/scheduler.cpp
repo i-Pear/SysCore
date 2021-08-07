@@ -3,7 +3,7 @@
 #include "fs/VFS.h"
 #include "memory/kernel_stack.h"
 #include "memory/memory.h"
-//#include "elf_data.h"
+#include "memory/elf_control.h"
 extern "C" {
 #include "../driver/fatfs/ff.h"
 }
