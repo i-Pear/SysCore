@@ -362,6 +362,101 @@ int sysctl_clock_enable(sysctl_clock_t clock)
     return 0;
 }
 
+int sysctl_pll_enable(sysctl_pll_t pll)
+{
+    /*
+     *       ---+
+     * PWRDN    |
+     *          +-------------------------------------------------------------
+     *          ^
+     *          |
+     *          |
+     *          t1
+     *                 +------------------+
+     * RESET           |                  |
+     *       ----------+                  +-----------------------------------
+     *                 ^                  ^                              ^
+     *                 |<----- t_rst ---->|<---------- t_lock ---------->|
+     *                 |                  |                              |
+     *                 t2                 t3                             t4
+     */
+
+    if(pll >= SYSCTL_PLL_MAX)
+        return -1;
+
+    switch(pll)
+    {
+        case SYSCTL_PLL0:
+            /* Do not bypass PLL */
+            sysctl->pll0.pll_bypass0 = 0;
+            /*
+             * Power on the PLL, negtive from PWRDN
+             * 0 is power off
+             * 1 is power on
+             */
+            sysctl->pll0.pll_pwrd0 = 1;
+            /*
+             * Reset trigger of the PLL, connected RESET
+             * 0 is free
+             * 1 is reset
+             */
+            sysctl->pll0.pll_reset0 = 0;
+            sysctl->pll0.pll_reset0 = 1;
+            __asm__ volatile("nop");
+            __asm__ volatile("nop");
+            sysctl->pll0.pll_reset0 = 0;
+            break;
+
+            case SYSCTL_PLL1:
+                /* Do not bypass PLL */
+                sysctl->pll1.pll_bypass1 = 0;
+                /*
+                 * Power on the PLL, negtive from PWRDN
+                 * 0 is power off
+                 * 1 is power on
+                 */
+                sysctl->pll1.pll_pwrd1 = 1;
+                /*
+                 * Reset trigger of the PLL, connected RESET
+                 * 0 is free
+                 * 1 is reset
+                 */
+                sysctl->pll1.pll_reset1 = 0;
+                sysctl->pll1.pll_reset1 = 1;
+                __asm__ volatile("nop");
+                __asm__ volatile("nop");
+                sysctl->pll1.pll_reset1 = 0;
+                break;
+
+                case SYSCTL_PLL2:
+                    /* Do not bypass PLL */
+                    sysctl->pll2.pll_bypass2 = 0;
+                    /*
+                     * Power on the PLL, negtive from PWRDN
+                     * 0 is power off
+                     * 1 is power on
+                     */
+                    sysctl->pll2.pll_pwrd2 = 1;
+                    /*
+                     * Reset trigger of the PLL, connected RESET
+                     * 0 is free
+                     * 1 is reset
+                     */
+                    sysctl->pll2.pll_reset2 = 0;
+                    sysctl->pll2.pll_reset2 = 1;
+                    __asm__ volatile("nop");
+                    __asm__ volatile("nop");
+                    sysctl->pll2.pll_reset2 = 0;
+                    break;
+
+                    default:
+                        break;
+    }
+
+    return 0;
+}
+
+
 int sysctl_dma_select(sysctl_dma_channel_t channel, sysctl_dma_select_t select)
 {
     sysctl_dma_sel0_t dma_sel0;
