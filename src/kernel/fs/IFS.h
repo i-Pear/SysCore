@@ -140,6 +140,10 @@ public:
         }
         return count;
     }
+
+    int fstat(const char *path, kstat *stat) override {
+        return 0;
+    }
 };
 
 class PipeFs: public IFS{

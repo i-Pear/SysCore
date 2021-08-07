@@ -35,8 +35,10 @@ void fatfs_init(){
     }
 }
 void open_memory_lock(){
+#ifndef QEMU
     sysctl_pll_enable(SYSCTL_PLL1);
     sysctl_clock_enable(SYSCTL_CLOCK_PLL1);
+#endif
 }
 #ifdef QEMU
 extern unsigned char fs_img[];
