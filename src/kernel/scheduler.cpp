@@ -286,25 +286,17 @@ void CreateSoftLink(const char* elf_path){
 size_t rrr=12345678;
 
 void create_process(const char *elf_path,const char* argv[]) {
-    FIL fnew;
+    FIL elf_file;
     printf("elf %s\n", elf_path);
-    int res = f_open(&fnew, elf_path, FA_READ);
+    int res = f_open(&elf_file, elf_path, FA_READ);
     if (res != FR_OK) {
         panic("read error")
     }
-    CreateSoftLink(elf_path);
-    int file_size = fnew.obj.objsize;
-    char *elf_file_cache = (char *) alloc_page(file_size);
-    printf("Start read file...\n");
-    uint32_t read_bytes;
-    f_read(&fnew, elf_file_cache, file_size, &read_bytes);
-    f_close(&fnew);
-//    printf("File read successfully.\n");
     size_t elf_page_base, entry, elf_page_size,ph_off;
     Elf64_Phdr* kernel_phdr;
     int ph_num;
-    load_elf(elf_file_cache, file_size, &elf_page_base, &elf_page_size, &entry, &ph_off, &ph_num,&kernel_phdr);
-    dealloc_page(reinterpret_cast<size_t>(elf_file_cache));
+    load_elf(&elf_file, &elf_page_base, &elf_page_size, &entry, &ph_off, &ph_num, &kernel_phdr);
+    f_close(&elf_file);
 
     Context *thread_context = new(Context);
     thread_context->sstatus = register_read_sstatus();

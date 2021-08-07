@@ -74,8 +74,8 @@ void busybox_test(){
 
     // tested
     add_test("busybox_new ash -c exit");
-//    add_test("busybox_new sh -c exit");
-//    add_test("busybox_new du");
+    add_test("busybox_new sh -c exit");
+    add_test("busybox_new du");
 //    add_test("busybox_new expr 1 + 1");
 //    add_test("busybox_new false");
 //    add_test("busybox_new true");
@@ -163,7 +163,7 @@ void init_thread() {
     busybox_test();
 
 //    add_test("/lmbench_new bw_pipe -P 1");
-    add_test("busybox_new ash -c exit");
+//    add_test("busybox_new ash -c exit");
 
     schedule();
 }

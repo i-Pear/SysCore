@@ -2,14 +2,17 @@
 #include "../lib/stl/stl.h"
 #include "memory/memory.h"
 
-void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_page_size,size_t* entry,Elf64_Off* e_phoff,int* phnum,Elf64_Phdr** kernel_phdr) {
+void load_elf(FIL* elf_file,size_t* elf_page_base,size_t* elf_page_size,size_t* entry,Elf64_Off* e_phoff,int* phnum,Elf64_Phdr** kernel_phdr) {
+    uint32_t read_bytes;
+    auto* Ehdr=new Elf64_Ehdr();
+    f_lseek(elf_file,0);
+    f_read(elf_file,Ehdr, sizeof(Elf64_Ehdr),&read_bytes);
     // check magic number
-    if (_elf_data[0] != 0x7f || _elf_data[1] != 0x45 || _elf_data[2] != 0x4c || _elf_data[3] != 0x46) {
+    if (Ehdr->e_ident[0] != 0x7f || Ehdr->e_ident[1] != 0x45 || Ehdr->e_ident[2] != 0x4c || Ehdr->e_ident[3] != 0x46) {
         printf("[ELF LOADER] Invalid ELF File! \n");
         shutdown();
         return;
     }
-    const char *elf_start = _elf_data;
 // #define DEBUG_ELF
     // read elf header
 #ifdef DEBUG_ELF
@@ -33,13 +36,12 @@ void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_p
      * Elf64_Half	e_shstrndx;
      * } Elf64_Ehdr;
      */
-
-    // Elf64_Ehdr *header = elf_read(&elf_start, sizeof(Elf64_Ehdr));
-    Elf64_Ehdr *Ehdr = (Elf64_Ehdr *) elf_start;
     if (Ehdr->e_type == 2) {
 #ifdef DEBUG_ELF
-        printf("[ELF LOADER] This a Executable file. OK.\n");
+        printf("[ELF LOADER] This is a Executable file. OK.\n");
 #endif
+    }else{
+        panic("[ELF LOADER] This is not a Executable file.")
     }
 #ifdef DEBUG_ELF
     printf("[ELF LOADER] ELF entry: %x\n", Ehdr->e_entry);
@@ -48,7 +50,12 @@ void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_p
     *e_phoff=Ehdr->e_phoff;
     *phnum=Ehdr->e_phnum;
 
-    Elf64_Phdr *phdr = (Elf64_Phdr *) (elf_start + Ehdr->e_phoff);
+    // copy kernel Phdr
+    *kernel_phdr= new Elf64_Phdr[Ehdr->e_phnum];
+    f_lseek(elf_file,Ehdr->e_phoff);
+    f_read(elf_file,*kernel_phdr, sizeof(Elf64_Phdr)*Ehdr->e_phnum,&read_bytes);
+
+    Elf64_Phdr *phdr = *kernel_phdr;
     int load_segment_count=0;
     size_t need_alloc_page=0;
     for (int i = 0; i < Ehdr->e_phnum; i++) {
@@ -62,18 +69,13 @@ void load_elf(const char* _elf_data,int size,size_t* elf_page_base,size_t* elf_p
     *elf_page_size=need_alloc_page;
     // printf("elf segment count = %d \n",load_segment_count);
 
-    // copy kernel Phdr
-    *kernel_phdr= (new Elf64_Phdr[Ehdr->e_phnum]);
-    memcpy(*kernel_phdr,phdr, sizeof(Elf64_Phdr)*Ehdr->e_phnum);
-
     for (int i = 0; i < Ehdr->e_phnum; i++) {
         if (phdr[i].p_type != PT_LOAD)continue;
         if (phdr[i].p_filesz == 0)continue;
 
-        const char *segment_start_addr = elf_start + phdr[i].p_offset;
+        f_lseek(elf_file,phdr[i].p_offset);
         char *segment_target_addr = phdr[i].p_vaddr + exec;
-
-        memcpy(segment_target_addr, segment_start_addr, phdr[i].p_filesz);
+        f_read(elf_file,segment_target_addr,phdr[i].p_filesz,&read_bytes);
     }
 
     *elf_page_base=(size_t)exec;
