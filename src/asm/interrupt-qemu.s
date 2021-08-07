@@ -66,12 +66,12 @@ __interrupt:
 
     la t0, kernelContext
     # kernel_satp
-    ld t1, 0(t0)
-    csrw satp, t1
+    # ld t1, 0(t0)
+    # csrw satp, t1
     # kernel_handle_interrupt
     ld t2, 16(t0)
 
-    sfence.vma zero,zero
+    # sfence.vma zero,zero
 
     # 调用 handle_interrupt，传入参数
     # context: &mut Context

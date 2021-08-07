@@ -146,8 +146,8 @@ void init_thread() {
     test_lib();
 //    printf("[OS] rtc init.\n");
 //    init_rtc();
-    printf("[OS] fix page table before driver\n");
-    fix_kernel_page_table();
+//    printf("[OS] fix page table before driver\n");
+//    fix_kernel_page_table();
     printf("[OS] bsp init.\n");
     driver_init();
     printf("[FS] fs init.\n");

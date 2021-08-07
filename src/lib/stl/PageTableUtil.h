@@ -26,7 +26,7 @@ public:
                               PRIVILEGE_LEVEL privilege_level){
         check_null(virtual_address, physical_address);
         check_table_base(table_base);
-        if(page_table_level == PAGE_TABLE_LEVEL::LARGE || page_table_level == PAGE_TABLE_LEVEL::MIDDLE){
+        if(page_table_level == PAGE_TABLE_LEVEL::MIDDLE){
             panic('un supported page_table_level, please use level small')
         }
         size_t ppn1 = get_ppn1(virtual_address);
@@ -35,6 +35,10 @@ public:
 
         size_t* pte1 = (size_t *)table_base + ppn1;
         if(*pte1 == 0){
+            if(page_table_level == PAGE_TABLE_LEVEL::LARGE){
+                *pte1 = calc_ppn(physical_address) | leaf_attributes(privilege_level);
+                return;
+            }
             table_base = GetClearPage();
             *pte1 = calc_ppn(table_base) | non_leaf_attributes(privilege_level);
         }else{
@@ -83,12 +87,13 @@ public:
 
 private:
     static size_t non_leaf_attributes(PRIVILEGE_LEVEL level){
-        if(level == PRIVILEGE_LEVEL::SUPERVISOR){
-            return 0xc1;
-        }else if(level == PRIVILEGE_LEVEL::USER){
-            return 0xd1;
-        }
         return 0xd1;
+//        if(level == PRIVILEGE_LEVEL::SUPERVISOR){
+//            return 0xc1;
+//        }else if(level == PRIVILEGE_LEVEL::USER){
+//            return 0xd1;
+//        }
+//        return 0xd1;
     }
 
     static size_t leaf_attributes(PRIVILEGE_LEVEL level){

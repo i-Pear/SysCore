@@ -439,8 +439,25 @@ void create_process(const char *elf_path,const char* argv[]) {
      * 2. 未使用的页表项应该置0
      */
     size_t page_table_base = PageTableUtil::GetClearPage();
-    // 0x8000_0000 -> 0x8000_0000
-    *((size_t *) page_table_base + 2) = (0x80000 << 10) | 0xdf;
+    // 0x3800_1000 -> 0x3800_1000 (4K)
+    PageTableUtil::CreateMapping(page_table_base,
+                                 0x38001000,
+                                 0x38001000,
+                                 PAGE_TABLE_LEVEL::SMALL,
+                                 PRIVILEGE_LEVEL::SUPERVISOR);
+    // 0x4000_0000 -> 0c4000_0000 (1G)
+    PageTableUtil::CreateMapping(page_table_base,
+                                 0x40000000,
+                                 0x40000000,
+                                 PAGE_TABLE_LEVEL::LARGE,
+                                 PRIVILEGE_LEVEL::SUPERVISOR);
+    // 0x8000_0000 -> 0x8000_0000 (1G)
+    PageTableUtil::CreateMapping(page_table_base,
+                                 0x80000000,
+                                 0x80000000,
+                                 PAGE_TABLE_LEVEL::LARGE,
+                                 PRIVILEGE_LEVEL::USER);
+//    *((size_t *) page_table_base + 2) = (0x80000 << 10) | 0xdf;
     thread_context->satp = (page_table_base >> 12) | (8LL << 60);
 
     // push into runnable list
