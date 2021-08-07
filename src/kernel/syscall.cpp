@@ -6,6 +6,7 @@
 #include "posix/posix_structs.h"
 #include "fs/file_describer.h"
 #include "memory/Heap.h"
+#include "posix/errno.h"
 
 //#define get_actual_page(x) (((x)>0x80000000)?(x):(x)+ get_running_elf_page())
 #define get_actual_page(x) (x)
@@ -653,6 +654,21 @@ size_t sys_sysinfo(Context* context){
     return 0;
 }
 
+size_t sys_utimensat(Context* context){
+    int dir_fd = static_cast<int>(context->a0);
+    char* pathname = reinterpret_cast<char*>(context->a1);
+    auto* times = reinterpret_cast<struct timespec*>(context->a2);
+    int flags = static_cast<int>(context->a0);
+
+    char* path = atFdCWD(dir_fd, pathname);
+    if(fs->fstat(path, nullptr) == -1){
+        return -ENOENT;
+    }else{
+        panic("unsupported type in utimensat\n");
+    }
+    return 0;
+}
+
 /// syscall int & register & distribute
 
 void syscall_init() {
@@ -668,27 +684,25 @@ void syscall_unhandled(Context *context) {
 }
 
 void syscall_distribute(int syscall_id, Context *context) {
+#define STRACE
     static int syscall_is_initialized = 0;
     if (syscall_is_initialized != 1) {
         syscall_init();
         syscall_register();
         syscall_is_initialized = 1;
     }
-
-    printf("[syscall] %d",syscall_id);
-    if(syscall_name_list[syscall_id] != nullptr){
-        printf(", %s", syscall_name_list[syscall_id]);
-    }
-    printf("\n");
-
     assert(syscall_id >= 0 && syscall_id < SYSCALL_LIST_LENGTH);
     assert(context != NULL);
 
     if (syscall_list[syscall_id] != NULL) {
         context->a0 = syscall_list[syscall_id](context);
+#ifdef STRACE
+        printf("[syscall] %d, %s = %d\n", syscall_id, syscall_name_list[syscall_id], context->a0);
+#endif
     } else {
         syscall_unhandled(context);
     }
+#undef STRACE
 }
 
 Context *syscall(Context *context) {
@@ -746,5 +760,6 @@ void syscall_register() {
     REGISTER(ioctl);
     REGISTER(rt_sigaction);
     REGISTER(clock_gettime);
+    REGISTER(utimensat);
 #undef REGISTER
 }
