@@ -27,7 +27,7 @@ public:
         check_null(virtual_address, physical_address);
         check_table_base(table_base);
         if(page_table_level == PAGE_TABLE_LEVEL::MIDDLE){
-            panic('un supported page_table_level, please use level small')
+            panic('un supported page_table_level, please use level small or large')
         }
         size_t ppn1 = get_ppn1(virtual_address);
         size_t ppn2 = get_ppn2(virtual_address);
@@ -86,6 +86,7 @@ public:
     }
 
 private:
+    // mark non leaf node as USER level, because user & kernel can access same non leaf entry
     static size_t non_leaf_attributes(PRIVILEGE_LEVEL level){
         return 0xd1;
 //        if(level == PRIVILEGE_LEVEL::SUPERVISOR){
