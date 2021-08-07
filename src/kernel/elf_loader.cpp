@@ -66,6 +66,7 @@ void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_
     }
     // printf("elf segment count = %d \n",load_segment_count);
 
+    elf_control->init_segments();
     for (int i = 0; i < Ehdr->e_phnum; i++) {
         if (phdr[i].p_type != PT_LOAD)continue;
         if (phdr[i].p_filesz == 0)continue;
@@ -77,7 +78,6 @@ void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_
         target_end= (target_end + 4096 - 1) / 4096 * 4096; // align: open interval
 
         char buf[4096];
-        elf_control->init_segments();
 
         for(size_t p=target_start; p < target_end; p+=4096){
             // p is pointer to page start
@@ -94,14 +94,13 @@ void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_
                 size_t copy_end= min(p-target_start+phdr[i].p_offset+4096,phdr[i].p_offset+phdr[i].p_filesz);
                 f_lseek(elf_file,copy_start);
                 f_read(elf_file,buf,copy_end-copy_start,&read_bytes);
-                if(phdr[i].p_flags&PF_W){
-                    elf_control->bind_data_page(p, size_t(buf));
-                }else{
-                    elf_control->bind_text_page(p, size_t(buf));
-                }
+            }
+            if(phdr[i].p_flags&PF_W){
+                elf_control->bind_data_page(p, size_t(buf));
+            }else{
+                elf_control->bind_text_page(p, size_t(buf));
             }
         }
-
     }
 
     *entry=Ehdr->e_entry;
