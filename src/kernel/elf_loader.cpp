@@ -3,7 +3,7 @@
 #include "memory/memory.h"
 #include "memory/Heap.h"
 
-void load_elf(FIL* elf_file,size_t* elf_page_base,size_t* elf_page_size,size_t* entry,Elf64_Off* e_phoff,int* phnum,Elf64_Phdr** kernel_phdr) {
+void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_phoff,int* phnum,Elf64_Phdr** kernel_phdr) {
     uint32_t read_bytes;
     auto* Ehdr=new Elf64_Ehdr();
     f_lseek(elf_file,0);
@@ -70,17 +70,42 @@ void load_elf(FIL* elf_file,size_t* elf_page_base,size_t* elf_page_size,size_t* 
         if (phdr[i].p_type != PT_LOAD)continue;
         if (phdr[i].p_filesz == 0)continue;
 
-        size_t copy_start=phdr[i].p_offset;
-        copy_start=copy_start/4096*4096; //align
+        size_t target_start=phdr[i].p_vaddr;
+        target_start= target_start / 4096 * 4096; //align start: close interval
 
-        size_t copy_end=
+        size_t target_end= phdr[i].p_vaddr + phdr[i].p_memsz;
+        target_end= (target_end + 4096 - 1) / 4096 * 4096; // align: open interval
 
-        f_lseek(elf_file,phdr[i].p_offset);
-        char *segment_target_addr = phdr[i].p_vaddr + exec;
-        f_read(elf_file,segment_target_addr,phdr[i].p_filesz,&read_bytes);
+        char buf[4096];
+
+        for(size_t p=target_start; p < target_end; p+=4096){
+            // p is pointer to page start
+            memset(buf,0,4096);
+            /**
+             * target page range: [ p , p+4096 )
+             * source page range: [ p-target_start+phdr[i].p_offset , p-target_start+phdr[i].p_offset+4096 )
+             * available total source range: [ phdr[i].p_offset , phdr[i].p_offset+phdr[i].p_filesz )
+             */
+            if(p - target_start + phdr[i].p_offset + 4096 <= phdr[i].p_offset){
+                // skip copying
+            }else{
+                size_t copy_start=p-target_start+phdr[i].p_offset;
+                size_t copy_end= min(p-target_start+phdr[i].p_offset+4096,phdr[i].p_offset+phdr[i].p_filesz);
+                f_lseek(elf_file,copy_start);
+                f_read(elf_file,buf,copy_end-copy_start,&read_bytes);
+                if(phdr[i].p_flags&PF_W){
+                    elf_control->bind_data_page(p, size_t(buf));
+                }else{
+                    elf_control->bind_text_page(p, size_t(buf));
+                }
+            }
+        }
+
     }
 
     *entry=Ehdr->e_entry;
+
+    delete Ehdr;
 #ifdef DEBUG_ELF
     printf("[ELF LOADER] ELF loaded successfully\n");
 #endif

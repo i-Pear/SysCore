@@ -4,6 +4,7 @@
 #include "memory/kernel_stack.h"
 #include "memory/memory.h"
 #include "memory/elf_control.h"
+
 extern "C" {
 #include "../driver/fatfs/ff.h"
 }
@@ -14,18 +15,18 @@ int global_pid = 1;
 // Warning: when do sth with running, sync with latest running_context first
 Context *running_context;
 
-PCB *search_by_pid(List<PCB*>** list,int pid) {
+PCB *search_by_pid(List<PCB *> **list, int pid) {
     // search in running
-    if (running != nullptr && running->pid == pid){
-        *list= nullptr;
+    if (running != nullptr && running->pid == pid) {
+        *list = nullptr;
         return running;
     }
     // search in runnable
     auto cnt = runnable.start;
     while (cnt != nullptr) {
         // printf(">> runnable pid=%d\n",cnt->PCB->pid);
-        if (cnt->data->pid == pid){
-            *list=&runnable;
+        if (cnt->data->pid == pid) {
+            *list = &runnable;
             return cnt->data;
         }
         cnt = cnt->next;
@@ -34,8 +35,8 @@ PCB *search_by_pid(List<PCB*>** list,int pid) {
     cnt = blocked.start;
     while (cnt != nullptr) {
         // printf(">> blocked pid=%d\n",cnt->PCB->pid);
-        if (cnt->data->pid == pid){
-            *list=&blocked;
+        if (cnt->data->pid == pid) {
+            *list = &blocked;
             return cnt->data;
         }
         cnt = cnt->next;
@@ -67,7 +68,7 @@ size_t file_describer_convert(size_t file_id) {
     return running->occupied_file_describer.get(file_id);
 }
 
-void bind_kernel_heap(size_t addr){
+void bind_kernel_heap(size_t addr) {
     running->occupied_kernel_heap->push_back(addr);
 }
 
@@ -141,10 +142,6 @@ void clone(int flags, size_t stack, int ptid) {
         size_t stack = alloc_page(running->stack_size);
         memcpy(reinterpret_cast<void *>(stack), reinterpret_cast<const void *>(running->stack), running->stack_size);
 
-        size_t elf_page_base = alloc_page(running->elf_page_size);
-        memcpy(reinterpret_cast<void *>(elf_page_base), reinterpret_cast<const void *>(running->elf_page_base.getPtr()),
-               running->elf_page_size);
-
         size_t page_table = alloc_page(4096);
         memset(reinterpret_cast<void *>(page_table), 0, 4096);
         *((size_t *) page_table + 2) = (0x80000 << 10) | 0xdf;
@@ -154,21 +151,15 @@ void clone(int flags, size_t stack, int ptid) {
         child_pcb->thread_context->a0 = 0;
         child_pcb->stack = stack;
         child_pcb->thread_context->sp = running->thread_context->sp - running->stack + stack;
-        child_pcb->elf_page_base = RefCountPtr<size_t>((size_t *)elf_page_base);
-        child_pcb->page_table = RefCountPtr<size_t>((size_t*)page_table);
-        child_pcb->kernel_phdr=running->kernel_phdr;
+        child_pcb->page_table = RefCountPtr<size_t>((size_t *) page_table);
+        child_pcb->kernel_phdr = running->kernel_phdr;
 
-        child_pcb->brk_control=RefCountPtr<BrkControl>(new BrkControl(*running->brk_control,page_table));
+        child_pcb->brk_control = RefCountPtr<BrkControl>(new BrkControl(*running->brk_control, page_table));
 
         runnable.push_back(child_pcb);
     }
     // sync with running_context
     *running_context = *running->thread_context;
-}
-
-size_t get_running_elf_page() {
-    if (running == nullptr)return 0;
-    return size_t(running->elf_page_base.getPtr());
 }
 
 int get_running_pid() {
@@ -179,123 +170,124 @@ int get_running_ppid() {
     return running->ppid;
 }
 
-void copy_to_stack(char*& sp,const void* _source,int length){
-    const char* source= static_cast<const char *>(_source);
-    sp-=length;
-    for(int i=0;i<length;i++){
-        sp[i]=source[i];
+void copy_to_stack(char *&sp, const void *_source, int length) {
+    const char *source = static_cast<const char *>(_source);
+    sp -= length;
+    for (int i = 0; i < length; i++) {
+        sp[i] = source[i];
     }
 }
 
-void put_aux(size_t** sp,size_t aux_id,size_t aux_val){
-    *(--*sp)=aux_val;
-    *(--*sp)=aux_id;
+void put_aux(size_t **sp, size_t aux_id, size_t aux_val) {
+    *(--*sp) = aux_val;
+    *(--*sp) = aux_id;
 }
 
-void put_envp(size_t** sp,size_t aux_val){
-    *(--*sp)=aux_val;
+void put_envp(size_t **sp, size_t aux_val) {
+    *(--*sp) = aux_val;
 }
 
-void check_stack_preparation(size_t st){
-    size_t* sp= reinterpret_cast<size_t *>(st);
-    int argc=*(sp++);
-    printf("argc= %d\n",argc);
-    for(int i=0;i<argc;i++){
-        printf("argv[%d]: %s\n",i,*(sp++));
+void check_stack_preparation(size_t st) {
+    size_t *sp = reinterpret_cast<size_t *>(st);
+    int argc = *(sp++);
+    printf("argc= %d\n", argc);
+    for (int i = 0; i < argc; i++) {
+        printf("argv[%d]: %s\n", i, *(sp++));
     }
     // zero
-    printf("zero: %d\n",*(sp++));
+    printf("zero: %d\n", *(sp++));
     // envp
-    while (*sp!=0){
-        printf("[envp] %s\n",*(sp++));
+    while (*sp != 0) {
+        printf("[envp] %s\n", *(sp++));
     }
     // zero
-    printf("zero: %d\n",*(sp++));
+    printf("zero: %d\n", *(sp++));
     // aux
-    while (*sp!=0){
-        if(*sp==31||*sp==33){
-            printf("[aux] %d  ",*(sp++));
-            printf("[aux] %s\n",*(sp++));
-        }else{
-            printf("[aux] %d  ",*(sp++));
-            printf("[aux] 0x%x\n",*(sp++));
+    while (*sp != 0) {
+        if (*sp == 31 || *sp == 33) {
+            printf("[aux] %d  ", *(sp++));
+            printf("[aux] %s\n", *(sp++));
+        } else {
+            printf("[aux] %d  ", *(sp++));
+            printf("[aux] 0x%x\n", *(sp++));
         }
     }
     printf("stack check end\n");
 }
 
 void create_process(const char *_command) {
-    char* command=new char [strlen(_command)+1];
-    strcpy(command,_command);
+    char *command = new char[strlen(_command) + 1];
+    strcpy(command, _command);
     // split command with space
-    List<char*> splits;
-    char* p=command;
+    List<char *> splits;
+    char *p = command;
 
-    bool in_space=true;
-    while (*p){
-        if(*p=='"'){
+    bool in_space = true;
+    while (*p) {
+        if (*p == '"') {
             p++;
             splits.push_back(p);
-            while (*p!='"')p++;
+            while (*p != '"')p++;
             // *p = '"'
-            *p='\0';
+            *p = '\0';
             p++;
-            in_space=true;
+            in_space = true;
             continue;
         }
-        if(*p==' '){
-            if(!in_space){
-                in_space= true;
-                *p='\0';
+        if (*p == ' ') {
+            if (!in_space) {
+                in_space = true;
+                *p = '\0';
             }
-        }else{
-            if(in_space){
-                in_space= false;
+        } else {
+            if (in_space) {
+                in_space = false;
                 splits.push_back(p);
             }
         }
         p++;
     }
 
-    int argc=splits.length();
-    char** argv=new char*[argc];
+    int argc = splits.length();
+    char **argv = new char *[argc];
 
-    auto i=splits.start;
-    char* elf= i->data;
-    i=i->next;
+    auto i = splits.start;
+    char *elf = i->data;
+    i = i->next;
 
-    int pos=0;
-    while (i){
-        argv[pos++]=i->data;
-        i=i->next;
+    int pos = 0;
+    while (i) {
+        argv[pos++] = i->data;
+        i = i->next;
     }
-    argv[pos]= nullptr;
+    argv[pos] = nullptr;
 
-    create_process(elf, (const char **)argv);
+    create_process(elf, (const char **) argv);
 }
 
 
-void CreateSoftLink(const char* elf_path){
-    auto* exe = fs->root->first_child->search("/proc/self/exe");
+void CreateSoftLink(const char *elf_path) {
+    auto *exe = fs->root->first_child->search("/proc/self/exe");
     assert(exe != nullptr);
-    auto* elf = fs->root->first_child->search(elf_path);
+    auto *elf = fs->root->first_child->search(elf_path);
     assert(elf != nullptr);
     exe->CreateSoftLink(elf);
 }
 
-size_t rrr=12345678;
+size_t rrr = 12345678;
 
-void create_process(const char *elf_path,const char* argv[]) {
+void create_process(const char *elf_path, const char *argv[]) {
     FIL elf_file;
     printf("elf %s\n", elf_path);
     int res = f_open(&elf_file, elf_path, FA_READ);
     if (res != FR_OK) {
         panic("read error")
     }
-    size_t elf_page_base, entry, elf_page_size,ph_off;
-    Elf64_Phdr* kernel_phdr;
+    size_t entry, ph_off;
+    Elf64_Phdr *kernel_phdr;
     int ph_num;
-    load_elf(&elf_file, &elf_page_base, &elf_page_size, &entry, &ph_off, &ph_num, &kernel_phdr);
+    RefCountPtr<Elf_Control> elf_control;
+    load_elf(&elf_file, elf_control.getPtr(), &entry, &ph_off, &ph_num, &kernel_phdr);
     f_close(&elf_file);
 
     Context *thread_context = new(Context);
@@ -304,9 +296,9 @@ void create_process(const char *elf_path,const char* argv[]) {
      * 用户栈
      * 栈通常向低地址方向增长，故此处增加__page_size
      */
-    size_t stack_page = (size_t) alloc_page(4096*5);
-    memset(reinterpret_cast<void *>(stack_page), 0, 4096*5);
-    thread_context->sp = stack_page + __page_size*5 - 10 * 8;
+    size_t stack_page = (size_t) alloc_page(4096 * 5);
+    memset(reinterpret_cast<void *>(stack_page), 0, 4096 * 5);
+    thread_context->sp = stack_page + __page_size * 5 - 10 * 8;
 
 
     const char *env[] = {
@@ -328,55 +320,55 @@ void create_process(const char *elf_path,const char* argv[]) {
     // copy envp strings
     size_t sp = (thread_context->sp);
     List<size_t> envp_strings;
-    char filename[]="busybox";
+    char filename[] = "busybox";
     copy_to_stack(reinterpret_cast<char *&>(sp), filename, strlen(filename) + 1);
-    size_t filename_addr=sp;
-    for(auto item:env){
+    size_t filename_addr = sp;
+    for (auto item:env) {
         copy_to_stack(reinterpret_cast<char *&>(sp), item, strlen(item) + 1);
         envp_strings.push_back(sp);
     }
     List<size_t> argv_strings;
     // copy argv strings
-    if(argv){
+    if (argv) {
         // if has argv
-        for(int i=0;;i++){
-            if(argv[i]){
+        for (int i = 0;; i++) {
+            if (argv[i]) {
                 // copy argv
                 copy_to_stack(reinterpret_cast<char *&>(sp), argv[i], strlen(argv[i]) + 1);
                 argv_strings.push_front(sp); // reverse
-            }else{
+            } else {
                 break;
             }
         }
     }
     copy_to_stack(reinterpret_cast<char *&>(sp), "ELF", strlen("ELF") + 1);
-    size_t elf_str_addr=sp;
-    sp-=sp%16; //align
+    size_t elf_str_addr = sp;
+    sp -= sp % 16; //align
     // aux environments
 
-    put_aux((size_t**)&sp,AT_NULL, 0);
-    put_aux((size_t**)&sp,0x28, 0);
-    put_aux((size_t**)&sp,0x29, 0);
-    put_aux((size_t**)&sp,0x2a, 0);
-    put_aux((size_t**)&sp,0x2b, 0);
-    put_aux((size_t**)&sp,0x2c, 0);
-    put_aux((size_t**)&sp,0x2d, 0);
+    put_aux((size_t **) &sp, AT_NULL, 0);
+    put_aux((size_t **) &sp, 0x28, 0);
+    put_aux((size_t **) &sp, 0x29, 0);
+    put_aux((size_t **) &sp, 0x2a, 0);
+    put_aux((size_t **) &sp, 0x2b, 0);
+    put_aux((size_t **) &sp, 0x2c, 0);
+    put_aux((size_t **) &sp, 0x2d, 0);
 
-    put_aux((size_t**)&sp,AT_PHDR,(size_t)kernel_phdr);               // 3
-    put_aux((size_t**)&sp,AT_PHENT, sizeof(Elf64_Phdr));  // 4
-    put_aux((size_t**)&sp,AT_PHNUM, ph_num);              // 5
-    put_aux((size_t**)&sp,AT_PAGESZ, 0x1000);                 // 6
-    put_aux((size_t**)&sp,AT_BASE, 0);                        // 7
-    put_aux((size_t**)&sp,AT_FLAGS, 0);                       // 8
-    put_aux((size_t**)&sp,AT_ENTRY, entry);              // 9
-    put_aux((size_t**)&sp,AT_UID, 0);                         // 11
-    put_aux((size_t**)&sp,AT_EUID, 0);                        // 12
-    put_aux((size_t**)&sp,AT_GID, 0);                         // 13
-    put_aux((size_t**)&sp,AT_EGID, 0);                        // 14
-    put_aux((size_t**)&sp,AT_HWCAP, 0x112d);                  // 16
-    put_aux((size_t**)&sp,AT_CLKTCK, 64);                     // 17
-    put_aux((size_t**)&sp,AT_RANDOM, (size_t)&rrr);                     // 17
-    put_aux((size_t**)&sp,AT_EXECFN, filename_addr);       // 31
+    put_aux((size_t **) &sp, AT_PHDR, (size_t) kernel_phdr);               // 3
+    put_aux((size_t **) &sp, AT_PHENT, sizeof(Elf64_Phdr));  // 4
+    put_aux((size_t **) &sp, AT_PHNUM, ph_num);              // 5
+    put_aux((size_t **) &sp, AT_PAGESZ, 0x1000);                 // 6
+    put_aux((size_t **) &sp, AT_BASE, 0);                        // 7
+    put_aux((size_t **) &sp, AT_FLAGS, 0);                       // 8
+    put_aux((size_t **) &sp, AT_ENTRY, entry);              // 9
+    put_aux((size_t **) &sp, AT_UID, 0);                         // 11
+    put_aux((size_t **) &sp, AT_EUID, 0);                        // 12
+    put_aux((size_t **) &sp, AT_GID, 0);                         // 13
+    put_aux((size_t **) &sp, AT_EGID, 0);                        // 14
+    put_aux((size_t **) &sp, AT_HWCAP, 0x112d);                  // 16
+    put_aux((size_t **) &sp, AT_CLKTCK, 64);                     // 17
+    put_aux((size_t **) &sp, AT_RANDOM, (size_t) &rrr);                     // 17
+    put_aux((size_t **) &sp, AT_EXECFN, filename_addr);       // 31
 
 
 //    put_aux((size_t**)&sp,0, 0);
@@ -402,20 +394,20 @@ void create_process(const char *elf_path,const char* argv[]) {
 //    put_aux((size_t**)&sp,41, 0);
 //    put_aux((size_t**)&sp,40, 0);
 //    put_aux((size_t**)&sp,33, elf_str_addr);
-    sp-=8; // 0 word
+    sp -= 8; // 0 word
     // envp
-    for(auto i=envp_strings.start; i; i=i->next){
-        put_envp((size_t**)&sp,i->data);
+    for (auto i = envp_strings.start; i; i = i->next) {
+        put_envp((size_t **) &sp, i->data);
     }
-    sp-=8; // 0 word
+    sp -= 8; // 0 word
     // argument pointers: argv
-    for(auto i=argv_strings.start;i;i=i->next){
-        put_envp((size_t**)&sp,i->data);
+    for (auto i = argv_strings.start; i; i = i->next) {
+        put_envp((size_t **) &sp, i->data);
     }
-    put_envp((size_t**)&sp,filename_addr);
-    size_t argv_start=sp;
+    put_envp((size_t **) &sp, filename_addr);
+    size_t argv_start = sp;
     // argc
-    put_envp((size_t**)&sp,argv_strings.length()+1);
+    put_envp((size_t **) &sp, argv_strings.length() + 1);
 
 //    check_stack_preparation(sp);
 
@@ -469,15 +461,13 @@ void create_process(const char *elf_path,const char* argv[]) {
     new_pcb->ppid = 1;
     new_pcb->stack = stack_page;
     new_pcb->thread_context = thread_context;
-    new_pcb->elf_page_base = RefCountPtr<size_t>((size_t*)elf_page_base);
-    new_pcb->page_table = RefCountPtr<size_t>((size_t*)page_table_base);
-    new_pcb->kernel_phdr=RefCountPtr<Elf64_Phdr>(kernel_phdr);
-    new_pcb->brk_control=RefCountPtr<BrkControl>(new BrkControl(page_table_base));
+    new_pcb->elf_control = elf_control;
+    new_pcb->page_table = RefCountPtr<size_t>((size_t *) page_table_base);
+    new_pcb->kernel_phdr = RefCountPtr<Elf64_Phdr>(kernel_phdr);
+    new_pcb->brk_control = RefCountPtr<BrkControl>(new BrkControl(page_table_base));
     // TODO: 初始化工作目录为/，这不合理
     memset(new_pcb->cwd, 0, sizeof(new_pcb->cwd));
     new_pcb->cwd[0] = '/';
-
-    new_pcb->elf_page_size = elf_page_size;
     new_pcb->stack_size = 4096;
 
     runnable.push_back(new_pcb);
@@ -549,9 +539,9 @@ void schedule() {
                     // remove it from blocked list
                     blocked.erase(cnt);
                     // get signal to return value
-                    running->thread_context->a0=running->signal_list.start->data.first;
-                    if(running->wstatus){
-                        *running->wstatus=running->signal_list.start->data.second<<8;
+                    running->thread_context->a0 = running->signal_list.start->data.first;
+                    if (running->wstatus) {
+                        *running->wstatus = running->signal_list.start->data.second << 8;
                     }
                     running->signal_list.pop_front();
 
@@ -562,10 +552,10 @@ void schedule() {
             panic("There exists a dead waiting loop. All processes are blocked.");
         } else {
             if (has_next_test()) {
-                char* argv[2];
-                char q[]="false";
-                argv[0]=q;
-                argv[1]=0;
+                char *argv[2];
+                char q[] = "false";
+                argv[0] = q;
+                argv[1] = 0;
                 create_process(get_next_test());
                 schedule();
             } else {
@@ -580,7 +570,7 @@ int wait(int *wstatus) {
 //    printf("process %d start to wait\n",running->pid);
     if (!running->signal_list.is_empty()) {
         // return immediately
-        int ret=running->signal_list.start->data.first;
+        int ret = running->signal_list.start->data.first;
 //        if(wstatus){
 //            *wstatus=running->signal_list.start->data.second<<8;
 //        }
@@ -601,30 +591,14 @@ int wait(int *wstatus) {
     schedule();
 }
 
-PCB::PCB(const PCB &other):occupied_file_describer(other.occupied_file_describer){
-    pid=other.pid;
-    ppid=other.ppid;
-    stack=other.stack;
-    elf_page_base=other.elf_page_base;
-    page_table=other.page_table;
-
-    stack_size=other.stack_size;
-    elf_page_size=other.elf_page_size;
-    occupied_kernel_heap = other.occupied_kernel_heap;
-
-    thread_context = nullptr;
-    strcpy(cwd, other.cwd);
-
-}
-
-PCB::PCB(): occupied_kernel_heap(new List<size_t>()){
+PCB::PCB() : occupied_kernel_heap(new List<size_t>()) {
 
 }
 
 void PCB::kill(int exit_ret) {
     // send signal
-    List<PCB*>* list;
-    PCB *parent = search_by_pid(&list,ppid);
+    List<PCB *> *list;
+    PCB *parent = search_by_pid(&list, ppid);
     if (parent != nullptr) {
         // printf("unfreeze pid=%d\n",parent->pid);
         parent->signal_list.push_back(make_pair(pid, exit_ret));

@@ -4,10 +4,10 @@
 #include <elf.h>
 #include "stdio.h"
 #include "../driver/fatfs/ff.h"
-//#include "memory/kernel_heap.h"
+#include "memory/elf_control.h"
 
 //#define DEBUG_ELF
 
-void load_elf(FIL* elf_file,size_t* elf_page_base,size_t* elf_page_size,size_t* entry,Elf64_Off* e_phoff,int* phnum,Elf64_Phdr ** kernel_phdr);
+void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_phoff,int* phnum,Elf64_Phdr ** kernel_phdr);
 
 #endif //OS_RISC_V_ELF_LOADER_H

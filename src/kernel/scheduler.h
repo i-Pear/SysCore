@@ -9,6 +9,7 @@
 #include "../lib/stl/map.h"
 #include "../lib/stl/RefCountPtr.h"
 #include "memory/brk_control.h"
+#include "memory/elf_control.h"
 
 #define MAX_PATH_LENGTH 32
 
@@ -21,11 +22,11 @@ public:
     int pid;
     int ppid;
     size_t stack;
-    RefCountPtr<size_t> elf_page_base;
+    size_t stack_size;
+
     RefCountPtr<size_t> page_table;
 
-    size_t stack_size;
-    size_t elf_page_size;
+    RefCountPtr<Elf_Control> elf_control;
 
     RefCountPtr<Elf64_Phdr> kernel_phdr;
 

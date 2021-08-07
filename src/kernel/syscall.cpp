@@ -576,7 +576,7 @@ size_t sys_mmap(Context* context){
 
 size_t sys_readlinkat(Context* context){
     int fd = (int) context->a0;
-    const char* pathname= reinterpret_cast<const char *>(get_running_elf_page()+(context->a1));
+    const char* pathname= reinterpret_cast<const char *>(context->a1);
     char* buf= reinterpret_cast<char *>((context->a2));
     int length=context->a3;
 

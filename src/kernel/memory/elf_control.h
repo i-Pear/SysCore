@@ -5,6 +5,7 @@
 #include "../../lib/stl/list.h"
 #include "memory.h"
 #include "../../lib/stl/PageTableUtil.h"
+#include "../../lib/stl/RefCountPtr.h"
 
 struct elf_ctl_page{
     size_t v_addr;
