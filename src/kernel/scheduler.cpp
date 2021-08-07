@@ -277,6 +277,31 @@ void CreateSoftLink(const char *elf_path) {
 size_t rrr = 12345678;
 
 void create_process(const char *elf_path, const char *argv[]) {
+    /**
+     * 页表处理
+     * 1. satp应由物理页首地址右移12位并且或上（8 << 60），表示开启sv39分页模式
+     * 2. 未使用的页表项应该置0
+     */
+    size_t page_table_base = PageTableUtil::GetClearPage();
+    // 0x3800_1000 -> 0x3800_1000 (4K)
+    PageTableUtil::CreateMapping(page_table_base,
+                                 0x38001000,
+                                 0x38001000,
+                                 PAGE_TABLE_LEVEL::SMALL,
+                                 PRIVILEGE_LEVEL::SUPERVISOR);
+    // 0x4000_0000 -> 0c4000_0000 (1G)
+    PageTableUtil::CreateMapping(page_table_base,
+                                 0x40000000,
+                                 0x40000000,
+                                 PAGE_TABLE_LEVEL::LARGE,
+                                 PRIVILEGE_LEVEL::SUPERVISOR);
+    // 0x8000_0000 -> 0x8000_0000 (1G)
+    PageTableUtil::CreateMapping(page_table_base,
+                                 0x80000000,
+                                 0x80000000,
+                                 PAGE_TABLE_LEVEL::LARGE,
+                                 PRIVILEGE_LEVEL::USER);
+
     FIL elf_file;
     printf("elf %s\n", elf_path);
     int res = f_open(&elf_file, elf_path, FA_READ);
@@ -286,7 +311,7 @@ void create_process(const char *elf_path, const char *argv[]) {
     size_t entry, ph_off;
     Elf64_Phdr *kernel_phdr;
     int ph_num;
-    RefCountPtr<Elf_Control> elf_control;
+    RefCountPtr<Elf_Control> elf_control(new Elf_Control(page_table_base));
     load_elf(&elf_file, elf_control.getPtr(), &entry, &ph_off, &ph_num, &kernel_phdr);
     f_close(&elf_file);
 
@@ -428,30 +453,7 @@ void create_process(const char *elf_path, const char *argv[]) {
      * 此处sepc为中断后返回地址
      */
     thread_context->sepc = entry;
-    /**
-     * 页表处理
-     * 1. satp应由物理页首地址右移12位并且或上（8 << 60），表示开启sv39分页模式
-     * 2. 未使用的页表项应该置0
-     */
-    size_t page_table_base = PageTableUtil::GetClearPage();
-    // 0x3800_1000 -> 0x3800_1000 (4K)
-    PageTableUtil::CreateMapping(page_table_base,
-                                 0x38001000,
-                                 0x38001000,
-                                 PAGE_TABLE_LEVEL::SMALL,
-                                 PRIVILEGE_LEVEL::SUPERVISOR);
-    // 0x4000_0000 -> 0c4000_0000 (1G)
-    PageTableUtil::CreateMapping(page_table_base,
-                                 0x40000000,
-                                 0x40000000,
-                                 PAGE_TABLE_LEVEL::LARGE,
-                                 PRIVILEGE_LEVEL::SUPERVISOR);
-    // 0x8000_0000 -> 0x8000_0000 (1G)
-    PageTableUtil::CreateMapping(page_table_base,
-                                 0x80000000,
-                                 0x80000000,
-                                 PAGE_TABLE_LEVEL::LARGE,
-                                 PRIVILEGE_LEVEL::USER);
+
 //    *((size_t *) page_table_base + 2) = (0x80000 << 10) | 0xdf;
     thread_context->satp = (page_table_base >> 12) | (8LL << 60);
 
@@ -552,10 +554,6 @@ void schedule() {
             panic("There exists a dead waiting loop. All processes are blocked.");
         } else {
             if (has_next_test()) {
-                char *argv[2];
-                char q[] = "false";
-                argv[0] = q;
-                argv[1] = 0;
                 create_process(get_next_test());
                 schedule();
             } else {

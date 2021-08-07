@@ -78,6 +78,11 @@ public:
         );
     }
 
+    void init_segments(){
+        segments[0]=RefCountPtr<elf_ctl_segment>(new elf_ctl_segment(true));
+        segments[1]=RefCountPtr<elf_ctl_segment>(new elf_ctl_segment(false));
+    }
+
     void bind_text_page(size_t target_v_addr,size_t source_mem_addr){
         segments[0]->add(page_table,target_v_addr,source_mem_addr);
     }

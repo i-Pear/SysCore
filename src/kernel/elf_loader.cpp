@@ -77,6 +77,7 @@ void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_
         target_end= (target_end + 4096 - 1) / 4096 * 4096; // align: open interval
 
         char buf[4096];
+        elf_control->init_segments();
 
         for(size_t p=target_start; p < target_end; p+=4096){
             // p is pointer to page start
