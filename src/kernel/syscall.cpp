@@ -15,6 +15,8 @@
 
 /// lazy init syscall list
 size_t (*syscall_list[SYSCALL_LIST_LENGTH])(Context *context);
+/// syscall id -> name map
+char* syscall_name_list[SYSCALL_LIST_LENGTH];
 
 
 /// functions declaration
@@ -655,7 +657,8 @@ size_t sys_sysinfo(Context* context){
 
 void syscall_init() {
     for (int i = 0; i < SYSCALL_LIST_LENGTH; i++) {
-        syscall_list[i] = NULL;
+        syscall_list[i] = nullptr;
+        syscall_name_list[i] = nullptr;
     }
 }
 
@@ -665,13 +668,18 @@ void syscall_unhandled(Context *context) {
 }
 
 void syscall_distribute(int syscall_id, Context *context) {
-//    printf("[syscall] %d\n",syscall_id);
     static int syscall_is_initialized = 0;
     if (syscall_is_initialized != 1) {
         syscall_init();
         syscall_register();
         syscall_is_initialized = 1;
     }
+
+    printf("[syscall] %d",syscall_id);
+    if(syscall_name_list[syscall_id] != nullptr){
+        printf(", %s", syscall_name_list[syscall_id]);
+    }
+    printf("\n");
 
     assert(syscall_id >= 0 && syscall_id < SYSCALL_LIST_LENGTH);
     assert(context != NULL);
@@ -690,54 +698,53 @@ Context *syscall(Context *context) {
 }
 
 void syscall_register() {
-    syscall_list[SYS_getchar] = sys_getchar;
-    syscall_list[SYS_write] = sys_write;
-    syscall_list[SYS_execve] = sys_execve;
-    syscall_list[SYS_gettimeofday] = sys_gettimeofday;
-    syscall_list[SYS_exit] = sys_exit;
-    syscall_list[SYS_getppid] = sys_getppid;
-    syscall_list[SYS_getpid] = sys_getpid;
-    syscall_list[SYS_openat] = sys_openat;
-    syscall_list[SYS_read] = sys_read;
-    syscall_list[SYS_close] = sys_close;
-    syscall_list[SYS_getcwd] = sys_getcwd;
-    syscall_list[SYS_dup] = sys_dup;
-    syscall_list[SYS_dup3] = sys_dup3;
-    syscall_list[SYS_chdir] = sys_chdir;
-    syscall_list[SYS_getdents64] = sys_getdents64;
-    syscall_list[SYS_mkdirat] = sys_mkdirat;
-    syscall_list[SYS_unlinkat] = sys_unlinkat;
-    syscall_list[SYS_times] = sys_times;
-    syscall_list[SYS_uname] = sys_uname;
-    syscall_list[SYS_wait4] = sys_wait4;
-    syscall_list[SYS_clock_nanosleep] = sys_clock_nanosleep;
-    syscall_list[SYS_clone] = sys_clone;
-    syscall_list[SYS_sched_yield] = sys_sched_yield;
-    syscall_list[SYS_mount] = sys_mount;
-    syscall_list[SYS_umount2] = sys_umount2;
-    syscall_list[SYS_fstat] = sys_fstat;
-    syscall_list[SYS_fstatat] = sys_fstatat;
-    syscall_list[SYS_lseek] = sys_lseek;
-    syscall_list[SYS_readv] = sys_readv;
-    syscall_list[SYS_writev] = sys_writev;
-    syscall_list[SYS_brk]=sys_brk;
-    syscall_list[SYS_faccessat]=sys_faccessat;
-
-    syscall_list[SYS_getuid]=sys_getuid;
-    syscall_list[SYS_geteuid]=sys_geteuid;
-    syscall_list[SYS_getgid]=sys_getgid;
-    syscall_list[SYS_getegid]=sys_getegid;
-    syscall_list[SYS_gettid]=sys_gettid;
-    //syscall_list[SYS_tgkill]= sys_tgkill;
-    syscall_list[SYS_mprotect]=sys_mprotect;
-    syscall_list[SYS_exit_group]=sys_exit_group;
-    syscall_list[SYS_kill]=sys_kill;
-    syscall_list[SYS_sysinfo]=sys_sysinfo;
-    syscall_list[SYS_getrusage]= sys_getrusage;
-
-    syscall_list[SYS_mmap]=sys_mmap;
-    syscall_list[SYS_readlinkat] = sys_readlinkat;
-    syscall_list[SYS_ioctl] = sys_ioctl;
-    syscall_list[SYS_rt_sigaction]=sys_rt_sigaction;
-    syscall_list[SYS_clock_gettime]=sys_clock_gettime;
+#define REGISTER(x) syscall_list[SYS_##x] = sys_##x, syscall_name_list[SYS_##x] = #x
+    REGISTER(getchar);
+    REGISTER(write);
+    REGISTER(execve);
+    REGISTER(gettimeofday);
+    REGISTER(exit);
+    REGISTER(getppid);
+    REGISTER(getpid);
+    REGISTER(openat);
+    REGISTER(read);
+    REGISTER(close);
+    REGISTER(getcwd);
+    REGISTER(dup);
+    REGISTER(dup3);
+    REGISTER(chdir);
+    REGISTER(getdents64);
+    REGISTER(mkdirat);
+    REGISTER(unlinkat);
+    REGISTER(times);
+    REGISTER(uname);
+    REGISTER(wait4);
+    REGISTER(clock_nanosleep);
+    REGISTER(clone);
+    REGISTER(sched_yield);
+    REGISTER(mount);
+    REGISTER(umount2);
+    REGISTER(fstat);
+    REGISTER(fstatat);
+    REGISTER(lseek);
+    REGISTER(readv);
+    REGISTER(writev);
+    REGISTER(brk);
+    REGISTER(faccessat);
+    REGISTER(getuid);
+    REGISTER(geteuid);
+    REGISTER(getgid);
+    REGISTER(getegid);
+    REGISTER(gettid);
+    REGISTER(mprotect);
+    REGISTER(exit_group);
+    REGISTER(kill);
+    REGISTER(sysinfo);
+    REGISTER(getrusage);
+    REGISTER(mmap);
+    REGISTER(readlinkat);
+    REGISTER(ioctl);
+    REGISTER(rt_sigaction);
+    REGISTER(clock_gettime);
+#undef REGISTER
 }
