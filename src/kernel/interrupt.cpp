@@ -186,40 +186,40 @@ Context *page_fault(Context* context, size_t stval){
 
     PageTableUtil::CreateMapping(table_base, vir_addr, phy_addr, PAGE_TABLE_LEVEL::SMALL, PRIVILEGE_LEVEL::USER);
 
-//    printf("page fault >> %x\n",vir);
+    printf("page fault >> 0x%x\n",vir);
 
-    size_t ppn1 = (vir_addr & (0b111111111LL << 30)) >> 30;
-    size_t ppn2 = (vir_addr & (0b111111111LL << 21)) >> 21;
-    size_t ppn3 = (vir_addr & (0b111111111LL << 12)) >> 12;
-
-    size_t* pte1 = (size_t *)table_base + ppn1;
-    if(*pte1 == 0){
-        size_t new_addr = alloc_page(4096);
-        memset((char *) new_addr, 0, 4096);
-        table_base = new_addr;
-        *pte1 = ((new_addr >> 12) << 10) | 0xd1;
-    }else{
-        table_base = ((*pte1 >> 10) << 12);
-    }
-
-    size_t* pte2 = (size_t*)table_base + ppn2;
-
-    if(*pte2 == 0){
-        size_t new_addr = alloc_page(4096);
-        memset((char *) new_addr, 0, 4096);
-        table_base = new_addr;
-        *pte2 = ((new_addr >> 12) << 10) | 0xd1;
-    }else{
-        table_base = ((*pte2 >> 10) << 12);
-    }
-
-    size_t* pte3 = (size_t*)table_base + ppn3;
-
-    if(*pte3 == 0){
-        *pte3 = ((phy_addr >> 12) << 10) | 0xdf;
-    }else{
-        table_base = ((*pte3 >> 10) << 12);
-    }
+//    size_t ppn1 = (vir_addr & (0b111111111LL << 30)) >> 30;
+//    size_t ppn2 = (vir_addr & (0b111111111LL << 21)) >> 21;
+//    size_t ppn3 = (vir_addr & (0b111111111LL << 12)) >> 12;
+//
+//    size_t* pte1 = (size_t *)table_base + ppn1;
+//    if(*pte1 == 0){
+//        size_t new_addr = alloc_page(4096);
+//        memset((char *) new_addr, 0, 4096);
+//        table_base = new_addr;
+//        *pte1 = ((new_addr >> 12) << 10) | 0xd1;
+//    }else{
+//        table_base = ((*pte1 >> 10) << 12);
+//    }
+//
+//    size_t* pte2 = (size_t*)table_base + ppn2;
+//
+//    if(*pte2 == 0){
+//        size_t new_addr = alloc_page(4096);
+//        memset((char *) new_addr, 0, 4096);
+//        table_base = new_addr;
+//        *pte2 = ((new_addr >> 12) << 10) | 0xd1;
+//    }else{
+//        table_base = ((*pte2 >> 10) << 12);
+//    }
+//
+//    size_t* pte3 = (size_t*)table_base + ppn3;
+//
+//    if(*pte3 == 0){
+//        *pte3 = ((phy_addr >> 12) << 10) | 0xdf;
+//    }else{
+//        table_base = ((*pte3 >> 10) << 12);
+//    }
 
     return context;
 }
@@ -245,8 +245,8 @@ void set_next_timeout() {
 }
 
 void fix_user_page_table(Context* context){
-    size_t user_table_base = context->satp << 12;
-    size_t kernel_table_base = register_read_satp() << 12;
+    size_t user_table_base = PageTableUtil::CalculateTableBaseBySatp(context->satp);
+    size_t kernel_table_base = PageTableUtil::CalculateTableBaseBySatp(register_read_satp());
     *(size_t*)kernel_table_base = *(size_t*)user_table_base;
     PageTableUtil::CreateMapping(kernel_table_base,
                                  0x38001000,

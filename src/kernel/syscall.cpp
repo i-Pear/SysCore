@@ -660,7 +660,7 @@ void syscall_unhandled(Context *context) {
 }
 
 void syscall_distribute(int syscall_id, Context *context) {
-//    printf("[syscall] %d\n",syscall_id);
+    printf("[syscall] %d\n",syscall_id);
     static int syscall_is_initialized = 0;
     if (syscall_is_initialized != 1) {
         syscall_init();

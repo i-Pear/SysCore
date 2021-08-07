@@ -6,7 +6,9 @@
 #include "../../lib/stl/stl.h"
 #include "../../lib/stl/PageTableUtil.h"
 
-#define BRK_VIRT_BEGIN 0xa0000000
+//#define BRK_VIRT_BEGIN 0xa0000000
+// because [0x80000000, 0xc0000000) be used to map kernel big page (1G)
+#define BRK_VIRT_BEGIN 0xc0000000
 
 class BrkControl {
 private:
@@ -55,7 +57,7 @@ public:
 
     size_t brk(size_t p) {
         if (!brk_init) {
-            size_t page = alloc_page(4096);
+            size_t page = PageTableUtil::GetClearPage();
             page_count = 1;
             memKeeper.add(reinterpret_cast<void *>(page));
             PageTableUtil::CreateMapping(pageTable, BRK_VIRT_BEGIN, page,

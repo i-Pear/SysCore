@@ -438,8 +438,7 @@ void create_process(const char *elf_path,const char* argv[]) {
      * 1. satp应由物理页首地址右移12位并且或上（8 << 60），表示开启sv39分页模式
      * 2. 未使用的页表项应该置0
      */
-    size_t page_table_base = (size_t) alloc_page(4096);
-    memset(reinterpret_cast<void *>(page_table_base), 0, 4096);
+    size_t page_table_base = PageTableUtil::GetClearPage();
     // 0x8000_0000 -> 0x8000_0000
     *((size_t *) page_table_base + 2) = (0x80000 << 10) | 0xdf;
     thread_context->satp = (page_table_base >> 12) | (8LL << 60);
