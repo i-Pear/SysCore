@@ -12,6 +12,8 @@ struct elf_ctl_page{
     size_t m_addr;
 };
 
+extern bool chh;
+
 /**
  * manages an elf_segment: contains many pages
  */
@@ -32,6 +34,15 @@ public:
                                      PAGE_TABLE_LEVEL::SMALL,
                                      PRIVILEGE_LEVEL::USER);
         pages.push_back({target_v_addr,page});
+
+        if(chh)
+        {
+            size_t res=0;
+            for(char* c=(char*)page;c<(char*)(page+4096);c++){
+                res=(res*10007+*c)%1000000007;
+            }
+            printf("vaddr pos=0x%x - 0x%x   checksum: 0x%x\n",target_v_addr,target_v_addr+4096,res);
+        }
     }
 
     bool is_text() const{
@@ -84,10 +95,12 @@ public:
     }
 
     void bind_text_page(size_t target_v_addr,size_t source_mem_addr){
+        chh= false;
         segments[0]->add(page_table,target_v_addr,source_mem_addr);
     }
 
     void bind_data_page(size_t target_v_addr,size_t source_mem_addr){
+        chh= true;
         segments[1]->add(page_table,target_v_addr,source_mem_addr);
     }
 };

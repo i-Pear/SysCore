@@ -311,7 +311,7 @@ void create_process(const char *elf_path, const char *argv[]) {
     size_t entry, ph_off;
     Elf64_Phdr *kernel_phdr;
     int ph_num;
-    RefCountPtr<Elf_Control> elf_control(new Elf_Control(page_table_base));
+    RefCountPtr<Elf_Control> elf_control(new Elf_Control(register_read_satp() << 12));
     load_elf(&elf_file, elf_control.getPtr(), &entry, &ph_off, &ph_num, &kernel_phdr);
     f_close(&elf_file);
 
@@ -366,8 +366,6 @@ void create_process(const char *elf_path, const char *argv[]) {
             }
         }
     }
-    copy_to_stack(reinterpret_cast<char *&>(sp), "ELF", strlen("ELF") + 1);
-    size_t elf_str_addr = sp;
     sp -= sp % 16; //align
     // aux environments
 
@@ -434,7 +432,7 @@ void create_process(const char *elf_path, const char *argv[]) {
     // argc
     put_envp((size_t **) &sp, argv_strings.length() + 1);
 
-//    check_stack_preparation(sp);
+    check_stack_preparation(sp);
 
     thread_context->sp = reinterpret_cast<size_t>(sp);
 //    thread_context->a0=1;
