@@ -24,6 +24,10 @@ void fix_kernel_page_table();
 extern "C" {
 #include "driver/interface.h"
 #include "driver/fatfs/ff.h"
+#include "driver/sysctl.h"
+#include "driver/sleep/sleep.h"
+#include "driver/rtc/rtc.h"
+#include "driver/plic/plic.h"
 }
 
 extern "C" void __cxa_pure_virtual() {
@@ -230,6 +234,9 @@ void vfs_init() {
     assert(exe != nullptr);
 }
 
+
+
+
 int main() {
     printf("   _____            _____               \n"
            "  / ____|          / ____|              \n"
@@ -250,7 +257,14 @@ int main() {
     kernelContext.kernel_handle_interrupt = (size_t) handle_interrupt;
     kernelContext.kernel_restore = (size_t) __restore;
 
-    init_thread();
+    // init_thread();
+    uint64 start = timer();
+    uint64 end = timer();
+    while (1) {
+        sleep(1);
+        end = timer();
+        printf("%d\n",end-start);
+    }
     // unreachable
     panic("Unreachable code!");
     return 0;

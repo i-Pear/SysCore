@@ -57,32 +57,6 @@ uint32 sysctl_get_freq(void)
     return sysctl->clk_freq.clk_freq;
 }
 
-uint32_t sysctl_clock_source_get_freq(sysctl_clock_source_t input) {
-    uint32_t result;
-
-    switch (input) {
-        case SYSCTL_SOURCE_IN0:
-            result = SYSCTRL_CLOCK_FREQ_IN0;
-            break;
-        case SYSCTL_SOURCE_PLL0:
-            result = sysctl_pll_get_freq(SYSCTL_PLL0);
-            break;
-        case SYSCTL_SOURCE_PLL1:
-            result = sysctl_pll_get_freq(SYSCTL_PLL1);
-            break;
-        case SYSCTL_SOURCE_PLL2:
-            result = sysctl_pll_get_freq(SYSCTL_PLL2);
-            break;
-        case SYSCTL_SOURCE_ACLK:
-            result = sysctl_clock_get_freq(SYSCTL_CLOCK_ACLK);
-            break;
-        default:
-            result = 0;
-            break;
-    }
-    return result;
-}
-
 static int sysctl_clock_bus_en(sysctl_clock_t clock, uint8 en)
 {
     /*
@@ -151,56 +125,6 @@ static int sysctl_clock_bus_en(sysctl_clock_t clock, uint8 en)
     }
 
     return 0;
-}
-
-uint32_t sysctl_pll_get_freq(sysctl_pll_t pll) {
-    uint32_t freq_in = 0, freq_out = 0;
-    uint32_t nr = 0, nf = 0, od = 0;
-    uint8_t select = 0;
-
-    if (pll >= SYSCTL_PLL_MAX) return 0;
-
-    switch (pll) {
-        case SYSCTL_PLL0:
-            freq_in = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-            nr = sysctl->pll0.clkr0 + 1;
-            nf = sysctl->pll0.clkf0 + 1;
-            od = sysctl->pll0.clkod0 + 1;
-            break;
-
-        case SYSCTL_PLL1:
-            freq_in = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-            nr = sysctl->pll1.clkr1 + 1;
-            nf = sysctl->pll1.clkf1 + 1;
-            od = sysctl->pll1.clkod1 + 1;
-            break;
-
-        case SYSCTL_PLL2:
-            /*
-             * Get input freq accroding select register
-             */
-            select = sysctl->pll2.pll_ckin_sel2;
-            if (select < sizeof(get_source_pll2))
-                freq_in = sysctl_clock_source_get_freq(get_source_pll2[select]);
-            else
-                return 0;
-
-            nr = sysctl->pll2.clkr2 + 1;
-            nf = sysctl->pll2.clkf2 + 1;
-            od = sysctl->pll2.clkod2 + 1;
-            break;
-
-        default:
-            break;
-    }
-
-    /*
-     * Get final PLL output freq
-     * FOUT = FIN / NR * NF / OD
-     */
-    // freq_out = (double)freq_in / (double)nr * (double)nf / (double)od;
-    freq_out = freq_in / nr * nf / od;
-    return freq_out;
 }
 
 static int sysctl_clock_device_en(sysctl_clock_t clock, uint8 en)
@@ -502,448 +426,142 @@ int sysctl_dma_select(sysctl_dma_channel_t channel, sysctl_dma_select_t select)
     return 0;
 }
 
-uint32_t sysctl_clock_get_freq(sysctl_clock_t clock) {
-    uint32_t source = 0;
-    uint32_t result = 0;
+int sysctl_clock_get_clock_select(sysctl_clock_select_t which)
+{
+    int clock_select = 0;
 
-    switch (clock) {
+    switch(which)
+    {
         /*
-         * The clock IN0
+         * Select and get clock select value
          */
-        case SYSCTL_CLOCK_IN0:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-            result = source;
+        case SYSCTL_CLOCK_SELECT_PLL0_BYPASS:
+            clock_select = (int)sysctl->pll0.pll_bypass0;
+            break;
+        case SYSCTL_CLOCK_SELECT_PLL1_BYPASS:
+            clock_select = (int)sysctl->pll1.pll_bypass1;
+            break;
+        case SYSCTL_CLOCK_SELECT_PLL2_BYPASS:
+            clock_select = (int)sysctl->pll2.pll_bypass2;
+            break;
+        case SYSCTL_CLOCK_SELECT_PLL2:
+            clock_select = (int)sysctl->pll2.pll_ckin_sel2;
+            break;
+        case SYSCTL_CLOCK_SELECT_ACLK:
+            clock_select = (int)sysctl->clk_sel0.aclk_sel;
+            break;
+        case SYSCTL_CLOCK_SELECT_SPI3:
+            clock_select = (int)sysctl->clk_sel0.spi3_clk_sel;
+            break;
+        case SYSCTL_CLOCK_SELECT_TIMER0:
+            clock_select = (int)sysctl->clk_sel0.timer0_clk_sel;
+            break;
+        case SYSCTL_CLOCK_SELECT_TIMER1:
+            clock_select = (int)sysctl->clk_sel0.timer1_clk_sel;
+            break;
+        case SYSCTL_CLOCK_SELECT_TIMER2:
+            clock_select = (int)sysctl->clk_sel0.timer2_clk_sel;
+            break;
+        case SYSCTL_CLOCK_SELECT_SPI3_SAMPLE:
+            clock_select = (int)sysctl->clk_sel1.spi3_sample_clk_sel;
             break;
 
-            /*
-             * These clock directly under PLL clock domain
-             * They are using gated divider.
-             */
-        case SYSCTL_CLOCK_PLL0:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
-            result = source;
-            break;
-        case SYSCTL_CLOCK_PLL1:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL1);
-            result = source;
-            break;
-        case SYSCTL_CLOCK_PLL2:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL2);
-            result = source;
-            break;
-
-            /*
-             * These clock directly under ACLK clock domain
-             */
-        case SYSCTL_CLOCK_CPU:
-            switch (sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_ACLK)) {
-                case 0:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-                    break;
-                case 1:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0) /
-                             (2ULL << sysctl_clock_get_threshold(SYSCTL_THRESHOLD_ACLK));
-                    break;
-                default:
-                    break;
-            }
-            result = source;
-            break;
-        case SYSCTL_CLOCK_DMA:
-            switch (sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_ACLK)) {
-                case 0:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-                    break;
-                case 1:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0) /
-                             (2ULL << sysctl_clock_get_threshold(SYSCTL_THRESHOLD_ACLK));
-                    break;
-                default:
-                    break;
-            }
-            result = source;
-            break;
-        case SYSCTL_CLOCK_FFT:
-            switch (sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_ACLK)) {
-                case 0:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-                    break;
-                case 1:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0) /
-                             (2ULL << sysctl_clock_get_threshold(SYSCTL_THRESHOLD_ACLK));
-                    break;
-                default:
-                    break;
-            }
-            result = source;
-            break;
-        case SYSCTL_CLOCK_ACLK:
-            switch (sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_ACLK)) {
-                case 0:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-                    break;
-                case 1:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0) /
-                             (2ULL << sysctl_clock_get_threshold(SYSCTL_THRESHOLD_ACLK));
-                    break;
-                default:
-                    break;
-            }
-            result = source;
-            break;
-        case SYSCTL_CLOCK_HCLK:
-            switch (sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_ACLK)) {
-                case 0:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-                    break;
-                case 1:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0) /
-                             (2ULL << sysctl_clock_get_threshold(SYSCTL_THRESHOLD_ACLK));
-                    break;
-                default:
-                    break;
-            }
-            result = source;
-            break;
-
-            /*
-             * These clock under ACLK clock domain.
-             * They are using gated divider.
-             */
-        case SYSCTL_CLOCK_SRAM0:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_ACLK);
-            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_SRAM0) + 1);
-            break;
-        case SYSCTL_CLOCK_SRAM1:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_ACLK);
-            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_SRAM1) + 1);
-            break;
-        case SYSCTL_CLOCK_ROM:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_ACLK);
-            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_ROM) + 1);
-            break;
-        case SYSCTL_CLOCK_DVP:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_ACLK);
-            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_DVP) + 1);
-            break;
-
-            /*
-             * These clock under ACLK clock domain.
-             * They are using even divider.
-             */
-        case SYSCTL_CLOCK_APB0:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_ACLK);
-            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_APB0) + 1);
-            break;
-        case SYSCTL_CLOCK_APB1:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_ACLK);
-            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_APB1) + 1);
-            break;
-        case SYSCTL_CLOCK_APB2:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_ACLK);
-            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_APB2) + 1);
-            break;
-
-            /*
-             * These clock under AI clock domain.
-             * They are using gated divider.
-             */
-        case SYSCTL_CLOCK_AI:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL1);
-            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_AI) + 1);
-            break;
-
-            /*
-             * These clock under I2S clock domain.
-             * They are using even divider.
-             */
-        case SYSCTL_CLOCK_I2S0:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL2);
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_I2S0) + 1) * 2);
-            break;
-        case SYSCTL_CLOCK_I2S1:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL2);
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_I2S1) + 1) * 2);
-            break;
-        case SYSCTL_CLOCK_I2S2:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL2);
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_I2S2) + 1) * 2);
-            break;
-
-            /*
-             * These clock under WDT clock domain.
-             * They are using even divider.
-             */
-        case SYSCTL_CLOCK_WDT0:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_WDT0) + 1) * 2);
-            break;
-        case SYSCTL_CLOCK_WDT1:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_WDT1) + 1) * 2);
-            break;
-
-            /*
-             * These clock under PLL0 clock domain.
-             * They are using even divider.
-             */
-        case SYSCTL_CLOCK_SPI0:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_SPI0) + 1) * 2);
-            break;
-        case SYSCTL_CLOCK_SPI1:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_SPI1) + 1) * 2);
-            break;
-        case SYSCTL_CLOCK_SPI2:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_SPI2) + 1) * 2);
-            break;
-        case SYSCTL_CLOCK_I2C0:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_I2C0) + 1) * 2);
-            break;
-        case SYSCTL_CLOCK_I2C1:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_I2C1) + 1) * 2);
-            break;
-        case SYSCTL_CLOCK_I2C2:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_I2C2) + 1) * 2);
-            break;
-
-            /*
-             * These clock under PLL0_SEL clock domain.
-             * They are using even divider.
-             */
-        case SYSCTL_CLOCK_SPI3:
-            switch (sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_SPI3)) {
-                case 0:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-                    break;
-                case 1:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
-                    break;
-                default:
-                    break;
-            }
-
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_SPI3) + 1) * 2);
-            break;
-        case SYSCTL_CLOCK_TIMER0:
-            switch (sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_TIMER0)) {
-                case 0:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-                    break;
-                case 1:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
-                    break;
-                default:
-                    break;
-            }
-
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_TIMER0) + 1) * 2);
-            break;
-        case SYSCTL_CLOCK_TIMER1:
-            switch (sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_TIMER1)) {
-                case 0:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-                    break;
-                case 1:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
-                    break;
-                default:
-                    break;
-            }
-
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_TIMER1) + 1) * 2);
-            break;
-        case SYSCTL_CLOCK_TIMER2:
-            switch (sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_TIMER2)) {
-                case 0:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-                    break;
-                case 1:
-                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
-                    break;
-                default:
-                    break;
-            }
-
-            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_TIMER2) + 1) * 2);
-            break;
-
-            /*
-             * These clock under MISC clock domain.
-             * They are using even divider.
-             */
-
-            /*
-             * These clock under APB0 clock domain.
-             * They are using even divider.
-             */
-        case SYSCTL_CLOCK_GPIO:
-            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB0);
-            result = source;
-            break;
-        case SYSCTL_CLOCK_UART1:
-            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB0);
-            result = source;
-            break;
-        case SYSCTL_CLOCK_UART2:
-            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB0);
-            result = source;
-            break;
-        case SYSCTL_CLOCK_UART3:
-            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB0);
-            result = source;
-            break;
-        case SYSCTL_CLOCK_FPIOA:
-            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB0);
-            result = source;
-            break;
-        case SYSCTL_CLOCK_SHA:
-            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB0);
-            result = source;
-            break;
-
-            /*
-             * These clock under APB1 clock domain.
-             * They are using even divider.
-             */
-        case SYSCTL_CLOCK_AES:
-            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB1);
-            result = source;
-            break;
-        case SYSCTL_CLOCK_OTP:
-            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB1);
-            result = source;
-            break;
-        case SYSCTL_CLOCK_RTC:
-            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
-            result = source;
-            break;
-
-            /*
-             * These clock under APB2 clock domain.
-             * They are using even divider.
-             */
-            /*
-             * Do nothing.
-             */
         default:
+            break;
+    }
+
+    return clock_select;
+}
+
+uint32 sysctl_clock_source_get_freq(sysctl_clock_source_t input)
+{
+    uint32 result;
+
+    switch(input)
+    {
+        case SYSCTL_SOURCE_IN0:
+            result = SYSCTRL_CLOCK_FREQ_IN0;
+            break;
+        case SYSCTL_SOURCE_PLL0:
+            result = sysctl_pll_get_freq(SYSCTL_PLL0);
+            break;
+        case SYSCTL_SOURCE_PLL1:
+            result = sysctl_pll_get_freq(SYSCTL_PLL1);
+            break;
+        case SYSCTL_SOURCE_PLL2:
+            result = sysctl_pll_get_freq(SYSCTL_PLL2);
+            break;
+        case SYSCTL_SOURCE_ACLK:
+            result = sysctl_clock_get_freq(SYSCTL_CLOCK_ACLK);
+            break;
+        default:
+            result = 0;
             break;
     }
     return result;
 }
 
-void sysctl_reset(sysctl_reset_t reset) {
-    sysctl_reset_ctl(reset, 1);
-    usleep(10);
-    sysctl_reset_ctl(reset, 0);
-}
 
+uint32 sysctl_pll_get_freq(sysctl_pll_t pll)
+{
+    uint32 freq_in = 0, freq_out = 0;
+    uint32 nr = 0, nf = 0, od = 0;
+    uint8 select = 0;
 
-void sysctl_reset_ctl(sysctl_reset_t reset, uint8_t rst_value) {
-    switch (reset) {
-        case SYSCTL_RESET_SOC:
-            sysctl->soft_reset.soft_reset = rst_value;
+    if(pll >= SYSCTL_PLL_MAX)
+        return 0;
+
+    switch(pll)
+    {
+        case SYSCTL_PLL0:
+            freq_in = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+            nr = sysctl->pll0.clkr0 + 1;
+            nf = sysctl->pll0.clkf0 + 1;
+            od = sysctl->pll0.clkod0 + 1;
             break;
-        case SYSCTL_RESET_ROM:
-            sysctl->peri_reset.rom_reset = rst_value;
+
+        case SYSCTL_PLL1:
+            freq_in = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+            nr = sysctl->pll1.clkr1 + 1;
+            nf = sysctl->pll1.clkf1 + 1;
+            od = sysctl->pll1.clkod1 + 1;
             break;
-        case SYSCTL_RESET_DMA:
-            sysctl->peri_reset.dma_reset = rst_value;
-            break;
-        case SYSCTL_RESET_AI:
-            sysctl->peri_reset.ai_reset = rst_value;
-            break;
-        case SYSCTL_RESET_DVP:
-            sysctl->peri_reset.dvp_reset = rst_value;
-            break;
-        case SYSCTL_RESET_FFT:
-            sysctl->peri_reset.fft_reset = rst_value;
-            break;
-        case SYSCTL_RESET_GPIO:
-            sysctl->peri_reset.gpio_reset = rst_value;
-            break;
-        case SYSCTL_RESET_SPI0:
-            sysctl->peri_reset.spi0_reset = rst_value;
-            break;
-        case SYSCTL_RESET_SPI1:
-            sysctl->peri_reset.spi1_reset = rst_value;
-            break;
-        case SYSCTL_RESET_SPI2:
-            sysctl->peri_reset.spi2_reset = rst_value;
-            break;
-        case SYSCTL_RESET_SPI3:
-            sysctl->peri_reset.spi3_reset = rst_value;
-            break;
-        case SYSCTL_RESET_I2S0:
-            sysctl->peri_reset.i2s0_reset = rst_value;
-            break;
-        case SYSCTL_RESET_I2S1:
-            sysctl->peri_reset.i2s1_reset = rst_value;
-            break;
-        case SYSCTL_RESET_I2S2:
-            sysctl->peri_reset.i2s2_reset = rst_value;
-            break;
-        case SYSCTL_RESET_I2C0:
-            sysctl->peri_reset.i2c0_reset = rst_value;
-            break;
-        case SYSCTL_RESET_I2C1:
-            sysctl->peri_reset.i2c1_reset = rst_value;
-            break;
-        case SYSCTL_RESET_I2C2:
-            sysctl->peri_reset.i2c2_reset = rst_value;
-            break;
-        case SYSCTL_RESET_UART1:
-            sysctl->peri_reset.uart1_reset = rst_value;
-            break;
-        case SYSCTL_RESET_UART2:
-            sysctl->peri_reset.uart2_reset = rst_value;
-            break;
-        case SYSCTL_RESET_UART3:
-            sysctl->peri_reset.uart3_reset = rst_value;
-            break;
-        case SYSCTL_RESET_AES:
-            sysctl->peri_reset.aes_reset = rst_value;
-            break;
-        case SYSCTL_RESET_FPIOA:
-            sysctl->peri_reset.fpioa_reset = rst_value;
-            break;
-        case SYSCTL_RESET_TIMER0:
-            sysctl->peri_reset.timer0_reset = rst_value;
-            break;
-        case SYSCTL_RESET_TIMER1:
-            sysctl->peri_reset.timer1_reset = rst_value;
-            break;
-        case SYSCTL_RESET_TIMER2:
-            sysctl->peri_reset.timer2_reset = rst_value;
-            break;
-        case SYSCTL_RESET_WDT0:
-            sysctl->peri_reset.wdt0_reset = rst_value;
-            break;
-        case SYSCTL_RESET_WDT1:
-            sysctl->peri_reset.wdt1_reset = rst_value;
-            break;
-        case SYSCTL_RESET_SHA:
-            sysctl->peri_reset.sha_reset = rst_value;
-            break;
-        case SYSCTL_RESET_RTC:
-            sysctl->peri_reset.rtc_reset = rst_value;
+
+        case SYSCTL_PLL2:
+            /*
+             * Get input freq accroding select register
+             */
+            select = sysctl->pll2.pll_ckin_sel2;
+            if(select < sizeof(get_source_pll2))
+                freq_in = sysctl_clock_source_get_freq(get_source_pll2[select]);
+            else
+                return 0;
+
+            nr = sysctl->pll2.clkr2 + 1;
+            nf = sysctl->pll2.clkf2 + 1;
+            od = sysctl->pll2.clkod2 + 1;
             break;
 
         default:
             break;
     }
+
+    /*
+     * Get final PLL output freq
+     * FOUT = FIN / NR * NF / OD
+     */
+    freq_out = (uint64)freq_in * 1000 / (uint64)nr * 1000 * (uint64)nf / (uint64)od / 1000000;
+    return freq_out;
 }
 
 
-int sysctl_clock_get_threshold(sysctl_threshold_t which) {
+
+int sysctl_clock_get_threshold(sysctl_threshold_t which)
+{
     int threshold = 0;
 
-    switch (which) {
+    switch(which)
+    {
         /*
          * Select and get threshold value
          */
@@ -1037,56 +655,482 @@ int sysctl_clock_get_threshold(sysctl_threshold_t which) {
 }
 
 
-int sysctl_clock_get_clock_select(sysctl_clock_select_t which) {
-    int clock_select = 0;
+uint32 sysctl_clock_get_freq(sysctl_clock_t clock)
+{
+    uint32 source = 0;
+    uint32 result = 0;
 
-    switch (which) {
+    switch(clock)
+    {
         /*
-         * Select and get clock select value
+         * The clock IN0
          */
-        case SYSCTL_CLOCK_SELECT_PLL0_BYPASS:
-            clock_select = (int)sysctl->pll0.pll_bypass0;
+        case SYSCTL_CLOCK_IN0:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+            result = source;
             break;
-        case SYSCTL_CLOCK_SELECT_PLL1_BYPASS:
-            clock_select = (int)sysctl->pll1.pll_bypass1;
+
+        /*
+         * These clock directly under PLL clock domain
+         * They are using gated divider.
+         */
+        case SYSCTL_CLOCK_PLL0:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
+            result = source;
             break;
-        case SYSCTL_CLOCK_SELECT_PLL2_BYPASS:
-            clock_select = (int)sysctl->pll2.pll_bypass2;
+        case SYSCTL_CLOCK_PLL1:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL1);
+            result = source;
             break;
-        case SYSCTL_CLOCK_SELECT_PLL2:
-            clock_select = (int)sysctl->pll2.pll_ckin_sel2;
+        case SYSCTL_CLOCK_PLL2:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL2);
+            result = source;
             break;
-        case SYSCTL_CLOCK_SELECT_ACLK:
-            clock_select = (int)sysctl->clk_sel0.aclk_sel;
+
+        /*
+         * These clock directly under ACLK clock domain
+         */
+        case SYSCTL_CLOCK_CPU:
+            switch(sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_ACLK))
+            {
+                case 0:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+                    break;
+                case 1:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0) /
+                             (2ULL << sysctl_clock_get_threshold(SYSCTL_THRESHOLD_ACLK));
+                    break;
+                default:
+                    break;
+            }
+            result = source;
             break;
-        case SYSCTL_CLOCK_SELECT_SPI3:
-            clock_select = (int)sysctl->clk_sel0.spi3_clk_sel;
+        case SYSCTL_CLOCK_DMA:
+            switch(sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_ACLK))
+            {
+                case 0:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+                    break;
+                case 1:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0) /
+                             (2ULL << sysctl_clock_get_threshold(SYSCTL_THRESHOLD_ACLK));
+                    break;
+                default:
+                    break;
+            }
+            result = source;
             break;
-        case SYSCTL_CLOCK_SELECT_TIMER0:
-            clock_select = (int)sysctl->clk_sel0.timer0_clk_sel;
+        case SYSCTL_CLOCK_FFT:
+            switch(sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_ACLK))
+            {
+                case 0:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+                    break;
+                case 1:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0) /
+                             (2ULL << sysctl_clock_get_threshold(SYSCTL_THRESHOLD_ACLK));
+                    break;
+                default:
+                    break;
+            }
+            result = source;
             break;
-        case SYSCTL_CLOCK_SELECT_TIMER1:
-            clock_select = (int)sysctl->clk_sel0.timer1_clk_sel;
+        case SYSCTL_CLOCK_ACLK:
+            switch(sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_ACLK))
+            {
+                case 0:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+                    break;
+                case 1:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0) /
+                             (2ULL << sysctl_clock_get_threshold(SYSCTL_THRESHOLD_ACLK));
+                    break;
+                default:
+                    break;
+            }
+            result = source;
             break;
-        case SYSCTL_CLOCK_SELECT_TIMER2:
-            clock_select = (int)sysctl->clk_sel0.timer2_clk_sel;
+        case SYSCTL_CLOCK_HCLK:
+            switch(sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_ACLK))
+            {
+                case 0:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+                    break;
+                case 1:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0) /
+                             (2ULL << sysctl_clock_get_threshold(SYSCTL_THRESHOLD_ACLK));
+                    break;
+                default:
+                    break;
+            }
+            result = source;
             break;
-        case SYSCTL_CLOCK_SELECT_SPI3_SAMPLE:
-            clock_select = (int)sysctl->clk_sel1.spi3_sample_clk_sel;
+
+        /*
+         * These clock under ACLK clock domain.
+         * They are using gated divider.
+         */
+        case SYSCTL_CLOCK_SRAM0:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_ACLK);
+            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_SRAM0) + 1);
+            break;
+        case SYSCTL_CLOCK_SRAM1:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_ACLK);
+            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_SRAM1) + 1);
+            break;
+        case SYSCTL_CLOCK_ROM:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_ACLK);
+            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_ROM) + 1);
+            break;
+        case SYSCTL_CLOCK_DVP:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_ACLK);
+            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_DVP) + 1);
+            break;
+
+        /*
+         * These clock under ACLK clock domain.
+         * They are using even divider.
+         */
+        case SYSCTL_CLOCK_APB0:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_ACLK);
+            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_APB0) + 1);
+            break;
+        case SYSCTL_CLOCK_APB1:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_ACLK);
+            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_APB1) + 1);
+            break;
+        case SYSCTL_CLOCK_APB2:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_ACLK);
+            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_APB2) + 1);
+            break;
+
+        /*
+         * These clock under AI clock domain.
+         * They are using gated divider.
+         */
+        case SYSCTL_CLOCK_AI:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL1);
+            result = source / (sysctl_clock_get_threshold(SYSCTL_THRESHOLD_AI) + 1);
+            break;
+
+        /*
+         * These clock under I2S clock domain.
+         * They are using even divider.
+         */
+        case SYSCTL_CLOCK_I2S0:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL2);
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_I2S0) + 1) * 2);
+            break;
+        case SYSCTL_CLOCK_I2S1:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL2);
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_I2S1) + 1) * 2);
+            break;
+        case SYSCTL_CLOCK_I2S2:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL2);
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_I2S2) + 1) * 2);
+            break;
+
+        /*
+         * These clock under WDT clock domain.
+         * They are using even divider.
+         */
+        case SYSCTL_CLOCK_WDT0:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_WDT0) + 1) * 2);
+            break;
+        case SYSCTL_CLOCK_WDT1:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_WDT1) + 1) * 2);
+            break;
+
+        /*
+         * These clock under PLL0 clock domain.
+         * They are using even divider.
+         */
+        case SYSCTL_CLOCK_SPI0:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_SPI0) + 1) * 2);
+            break;
+        case SYSCTL_CLOCK_SPI1:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_SPI1) + 1) * 2);
+            break;
+        case SYSCTL_CLOCK_SPI2:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_SPI2) + 1) * 2);
+            break;
+        case SYSCTL_CLOCK_I2C0:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_I2C0) + 1) * 2);
+            break;
+        case SYSCTL_CLOCK_I2C1:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_I2C1) + 1) * 2);
+            break;
+        case SYSCTL_CLOCK_I2C2:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_I2C2) + 1) * 2);
+            break;
+
+        /*
+         * These clock under PLL0_SEL clock domain.
+         * They are using even divider.
+         */
+        case SYSCTL_CLOCK_SPI3:
+            switch(sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_SPI3))
+            {
+                case 0:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+                    break;
+                case 1:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
+                    break;
+                default:
+                    break;
+            }
+
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_SPI3) + 1) * 2);
+            break;
+        case SYSCTL_CLOCK_TIMER0:
+            switch(sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_TIMER0))
+            {
+                case 0:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+                    break;
+                case 1:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
+                    break;
+                default:
+                    break;
+            }
+
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_TIMER0) + 1) * 2);
+            break;
+        case SYSCTL_CLOCK_TIMER1:
+            switch(sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_TIMER1))
+            {
+                case 0:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+                    break;
+                case 1:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
+                    break;
+                default:
+                    break;
+            }
+
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_TIMER1) + 1) * 2);
+            break;
+        case SYSCTL_CLOCK_TIMER2:
+            switch(sysctl_clock_get_clock_select(SYSCTL_CLOCK_SELECT_TIMER2))
+            {
+                case 0:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+                    break;
+                case 1:
+                    source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_PLL0);
+                    break;
+                default:
+                    break;
+            }
+
+            result = source / ((sysctl_clock_get_threshold(SYSCTL_THRESHOLD_TIMER2) + 1) * 2);
+            break;
+
+        /*
+         * These clock under MISC clock domain.
+         * They are using even divider.
+         */
+
+        /*
+         * These clock under APB0 clock domain.
+         * They are using even divider.
+         */
+        case SYSCTL_CLOCK_GPIO:
+            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB0);
+            result = source;
+            break;
+        case SYSCTL_CLOCK_UART1:
+            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB0);
+            result = source;
+            break;
+        case SYSCTL_CLOCK_UART2:
+            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB0);
+            result = source;
+            break;
+        case SYSCTL_CLOCK_UART3:
+            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB0);
+            result = source;
+            break;
+        case SYSCTL_CLOCK_FPIOA:
+            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB0);
+            result = source;
+            break;
+        case SYSCTL_CLOCK_SHA:
+            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB0);
+            result = source;
+            break;
+
+        /*
+         * These clock under APB1 clock domain.
+         * They are using even divider.
+         */
+        case SYSCTL_CLOCK_AES:
+            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB1);
+            result = source;
+            break;
+        case SYSCTL_CLOCK_OTP:
+            source = sysctl_clock_get_freq(SYSCTL_CLOCK_APB1);
+            result = source;
+            break;
+        case SYSCTL_CLOCK_RTC:
+            source = sysctl_clock_source_get_freq(SYSCTL_SOURCE_IN0);
+            result = source;
+            break;
+
+        /*
+         * These clock under APB2 clock domain.
+         * They are using even divider.
+         */
+        /*
+         * Do nothing.
+         */
+        default:
+            break;
+    }
+    return result;
+}
+
+static void sysctl_reset_ctl(sysctl_reset_t reset, uint8 rst_value)
+{
+    switch(reset)
+    {
+        case SYSCTL_RESET_SOC:
+            sysctl->soft_reset.soft_reset = rst_value;
+            break;
+        case SYSCTL_RESET_ROM:
+            sysctl->peri_reset.rom_reset = rst_value;
+            break;
+        case SYSCTL_RESET_DMA:
+            sysctl->peri_reset.dma_reset = rst_value;
+            break;
+        case SYSCTL_RESET_AI:
+            sysctl->peri_reset.ai_reset = rst_value;
+            break;
+        case SYSCTL_RESET_DVP:
+            sysctl->peri_reset.dvp_reset = rst_value;
+            break;
+        case SYSCTL_RESET_FFT:
+            sysctl->peri_reset.fft_reset = rst_value;
+            break;
+        case SYSCTL_RESET_GPIO:
+            sysctl->peri_reset.gpio_reset = rst_value;
+            break;
+        case SYSCTL_RESET_SPI0:
+            sysctl->peri_reset.spi0_reset = rst_value;
+            break;
+        case SYSCTL_RESET_SPI1:
+            sysctl->peri_reset.spi1_reset = rst_value;
+            break;
+        case SYSCTL_RESET_SPI2:
+            sysctl->peri_reset.spi2_reset = rst_value;
+            break;
+        case SYSCTL_RESET_SPI3:
+            sysctl->peri_reset.spi3_reset = rst_value;
+            break;
+        case SYSCTL_RESET_I2S0:
+            sysctl->peri_reset.i2s0_reset = rst_value;
+            break;
+        case SYSCTL_RESET_I2S1:
+            sysctl->peri_reset.i2s1_reset = rst_value;
+            break;
+        case SYSCTL_RESET_I2S2:
+            sysctl->peri_reset.i2s2_reset = rst_value;
+            break;
+        case SYSCTL_RESET_I2C0:
+            sysctl->peri_reset.i2c0_reset = rst_value;
+            break;
+        case SYSCTL_RESET_I2C1:
+            sysctl->peri_reset.i2c1_reset = rst_value;
+            break;
+        case SYSCTL_RESET_I2C2:
+            sysctl->peri_reset.i2c2_reset = rst_value;
+            break;
+        case SYSCTL_RESET_UART1:
+            sysctl->peri_reset.uart1_reset = rst_value;
+            break;
+        case SYSCTL_RESET_UART2:
+            sysctl->peri_reset.uart2_reset = rst_value;
+            break;
+        case SYSCTL_RESET_UART3:
+            sysctl->peri_reset.uart3_reset = rst_value;
+            break;
+        case SYSCTL_RESET_AES:
+            sysctl->peri_reset.aes_reset = rst_value;
+            break;
+        case SYSCTL_RESET_FPIOA:
+            sysctl->peri_reset.fpioa_reset = rst_value;
+            break;
+        case SYSCTL_RESET_TIMER0:
+            sysctl->peri_reset.timer0_reset = rst_value;
+            break;
+        case SYSCTL_RESET_TIMER1:
+            sysctl->peri_reset.timer1_reset = rst_value;
+            break;
+        case SYSCTL_RESET_TIMER2:
+            sysctl->peri_reset.timer2_reset = rst_value;
+            break;
+        case SYSCTL_RESET_WDT0:
+            sysctl->peri_reset.wdt0_reset = rst_value;
+            break;
+        case SYSCTL_RESET_WDT1:
+            sysctl->peri_reset.wdt1_reset = rst_value;
+            break;
+        case SYSCTL_RESET_SHA:
+            sysctl->peri_reset.sha_reset = rst_value;
+            break;
+        case SYSCTL_RESET_RTC:
+            sysctl->peri_reset.rtc_reset = rst_value;
             break;
 
         default:
             break;
     }
-
-    return clock_select;
 }
 
-int usleep(uint64_t usec) {
-//   uint64_t cycle = read_cycle();
-    uint64_t nop_all = usec * sysctl_clock_get_freq(SYSCTL_CLOCK_CPU) / 1000000UL;
-    while (nop_all--) {
-        continue;
-    }
-    return 0;
+void sysctl_reset(sysctl_reset_t reset)
+{
+    sysctl_reset_ctl(reset, 1);
+    usleep(10);
+    sysctl_reset_ctl(reset, 0);
+}
+
+#define MSTATUS_MIE 0x00000008U
+#define MIP_MEIP (1U << IRQ_M_EXT)
+#define IRQ_M_EXT 11
+
+#define set_csr(reg, bit) ({ unsigned long __tmp; \
+  if (__builtin_constant_p(bit) && (unsigned long)(bit) < 32) \
+    asm volatile ("csrrs %0, " #reg ", %1" : "=r"(__tmp) : "i"(bit)); \
+  else \
+    asm volatile ("csrrs %0, " #reg ", %1" : "=r"(__tmp) : "r"(bit)); \
+  __tmp; })
+
+#define clear_csr(reg, bit) ({ unsigned long __tmp; \
+  if (__builtin_constant_p(bit) && (unsigned long)(bit) < 32) \
+    asm volatile ("csrrc %0, " #reg ", %1" : "=r"(__tmp) : "i"(bit)); \
+  else \
+    asm volatile ("csrrc %0, " #reg ", %1" : "=r"(__tmp) : "r"(bit)); \
+  __tmp; })
+
+void sysctl_enable_irq(void)
+{
+    set_csr(mie, MIP_MEIP);
+    set_csr(mstatus, MSTATUS_MIE);
+}
+
+void sysctl_disable_irq(void)
+{
+    clear_csr(mie, MIP_MEIP);
+    clear_csr(mstatus, MSTATUS_MIE);
 }
