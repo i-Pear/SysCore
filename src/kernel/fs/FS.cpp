@@ -95,12 +95,12 @@ int FS::close(const char *path) {
 
 int FS::write(const char *path, char *buf, int count) {
     // why qemu boom after delete this code?
-    if (strcmp(path, "/dev/console") == 0) {
-        for (int i = 0; i < count; i++) {
-            putchar(buf[i]);
-        }
-        return count;
-    }
+//    if (strcmp(path, "/dev/console") == 0) {
+//        for (int i = 0; i < count; i++) {
+//            putchar(buf[i]);
+//        }
+//        return count;
+//    }
     auto &el = path_to_fs_el.get(path);
     unsigned int result = 0;
     int fr = f_write(&el.data.fil, buf, count, &result);

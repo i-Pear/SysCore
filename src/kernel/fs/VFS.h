@@ -233,7 +233,11 @@ public:
                 panic("cannot create root dir!")
             }
             if(list.length() == 1){
-                return root->fs->open(path, flag);
+                int fr = root->fs->open(path, flag);
+                if(fr == FR_OK){
+                    root->appendChild(new File(list.start->data, root->fs));
+                }
+                return fr;
             }
             auto new_list = List<String>();
             auto *p = list.start;
@@ -245,7 +249,11 @@ public:
             auto father_str = PathUtil::joinAbsolutePath(new_list);
             auto* father_file = root->first_child->search(father_str);
             if(father_file == nullptr)return -1;
-            return father_file->fs->open(path, flag);
+            int fr = father_file->fs->open(path, flag);
+            if(fr == FR_OK){
+                father_file->appendChild(new File(new_list.end->data, father_file->fs));
+            }
+            return fr;
         }
         VFS_ADAPTER(open(path, flag))
     }
@@ -256,7 +264,11 @@ public:
     }
 
     int write(const char *path, char buf[], int count) {
-        VFS_ADAPTER(write(path, buf, count))
+        auto* file = search(root, path);
+        if(file == nullptr){
+        return -1;
+        }
+        return file->fs->write(path, buf, count);
     }
 
     int close(const char *path) {
