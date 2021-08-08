@@ -158,7 +158,7 @@ void init_thread() {
     interrupt_timer_init();
     printf("[OS] init scheduler.\n");
     init_scheduler();
-    init_file_describer();
+    FD::InitializeFileDescriber();
     init_self_tests();
 
 //    simple_test();

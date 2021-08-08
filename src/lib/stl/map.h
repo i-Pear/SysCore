@@ -36,7 +36,7 @@ struct Map{
     }
 
     void erase(Key key){
-        // TODO: erase in map
+        // TODO erase key
     }
 
     bool is_empty()const{

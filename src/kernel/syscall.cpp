@@ -32,7 +32,6 @@ int sysGetRealFd(int fd) {
     if (file_describer_exists(fd)) {
         fd = (int) file_describer_convert(fd);
     }
-    fd = fd_get_origin_fd(fd);
     return fd;
 }
 
@@ -194,9 +193,9 @@ char *atFdCWD(int dir_fd, char *path) {
         }
     } else {
         if(path != NULL){
-            strcpy(buff, getAbsolutePath(path, File_Describer_Get_Path(dir_fd)));
+            strcpy(buff, getAbsolutePath(path, FD::GetFile(dir_fd)->GetCStylePath()));
         }else{
-            strcpy(buff, File_Describer_Get_Path(dir_fd));
+            strcpy(buff, FD::GetFile(dir_fd)->GetCStylePath());
         }
     }
     return buff;
@@ -217,7 +216,7 @@ size_t sys_write(Context *context) {
     int fd = sysGetRealFd((int) context->a0);
     char *buf = (char *) get_actual_page(context->a1);
     int count = (int) context->a2;
-    int write_bytes = fs->write(File_Describer_Get_Path(fd), buf, count);
+    int write_bytes = fs->write(FD::GetFile(fd)->GetCStylePath(), buf, count);
     return write_bytes;
 }
 
@@ -256,17 +255,13 @@ size_t sys_openat(Context *context) {
     int dir_fd = sysGetRealFd(context->a0);
     char *filename = (char *) get_actual_page(context->a1);
     int flag = context->a2;
-    int fd = fd_search_a_empty_file_describer();
+    int fd = FD::FindUnUsedFd();
     char* path = atFdCWD(dir_fd, filename);
-    int fr = fs->open(path, flag);
-    if(fr == 0){
-        File_Describer_Data fakeData = {.redirect_fd = 0};
-        char* fd_path = (char*)k_malloc(strlen(path) + 1);
-        strcpy(fd_path, path);
-        File_Describer_Create(fd, FILE_DESCRIBER_REGULAR, FILE_ACCESS_RW, fakeData, fd_path);
-        return fd;
+    int fr = FD::OpenNewFile(path, flag, fd);
+    if(fr != 0){
+        return -1;
     }
-    return -1;
+    return fd;
 }
 
 size_t sys_read(Context *context) {
@@ -276,7 +271,7 @@ size_t sys_read(Context *context) {
     int fd = sysGetRealFd(context->a0);
     char *buf = (char *) get_actual_page(context->a1);
     int count = (int)context->a2;
-    return fs->read(File_Describer_Get_Path(fd), buf, count);
+    return fs->read(FD::GetFile(fd)->GetCStylePath(), buf, count);
 }
 
 size_t sys_close(Context *context) {
@@ -284,7 +279,7 @@ size_t sys_close(Context *context) {
     // int ret = close(fd);
     // 返回值：成功执行，返回0。失败，返回-1。
     int fd = sysGetRealFd(context->a0);
-    File_Describer_Reduce((int) fd);
+    FD::TryCloseFile(fd);
     return (0);
 }
 
@@ -314,11 +309,9 @@ size_t sys_dup(Context *context) {
     // int ret = dup(fd);
     // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
     int fd = sysGetRealFd(context->a0);
-    int new_fd = fd_search_a_empty_file_describer();
+    int new_fd = FD::FindUnUsedFd();
     file_describer_bind(new_fd, new_fd);
-    File_Describer_Plus(fd);
-    File_Describer_Data data = {.redirect_fd = fd};
-    File_Describer_Create(new_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_READ, data, "\0");
+    FD::CopyFd(fd, new_fd);
     return (new_fd);
 }
 
@@ -335,12 +328,8 @@ size_t sys_dup3(Context *context) {
     if (old_fd == new_fd) {
         return (-1);
     }
-    int actual_fd = fd_search_a_empty_file_describer();
 
-    File_Describer_Data data = {.redirect_fd = (int) old_fd};
-    File_Describer_Create(actual_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_WRITE, data, "\0");
-    File_Describer_Plus((int) old_fd);
-    file_describer_bind(new_fd, actual_fd);
+    FD::CopyFd(old_fd, new_fd);
 
     return (int) (new_fd);
 }
@@ -368,7 +357,7 @@ size_t sys_getdents64(Context *context) {
     size_t fd = sysGetRealFd(context->a0);
     char *buf = (char *) get_actual_page(context->a1);
     size_t len = context->a2;
-    return fs->read_dir(file_describer_array[fd].path, buf, len);
+    return fs->read_dir(FD::GetFile(fd)->GetCStylePath(), buf, len);
 }
 
 size_t sys_mkdirat(Context *context) {
@@ -464,7 +453,7 @@ size_t sys_fstat(Context* context){
     // 返回值：成功返回0，失败返回-1；
     int fd = sysGetRealFd(context->a0);
     auto* stat = (struct kstat*) get_actual_page(context->a1);
-    return fs->fstat(file_describer_array[fd].path, stat);
+    return fs->fstat(FD::GetFile(fd)->GetCStylePath(), stat);
 }
 
 size_t sys_fstatat(Context* context) {
@@ -483,7 +472,7 @@ size_t sys_lseek(Context* context){
     // size_t res = lseek(fd, offset, whence)
     // Upon successful completion, lseek() returns the resulting offset location as measured in bytes from the beginning of the file.  On error, the value (off_t) -1 is returned and errno is set to indicate the error
     int fd = sysGetRealFd(context->a0);
-    return fs->lseek(file_describer_array[fd].path, context->a1, context->a2);
+    return fs->lseek(FD::GetFile(fd)->GetCStylePath(), context->a1, context->a2);
 }
 
 size_t sys_exit_group(Context* context){
@@ -499,7 +488,7 @@ size_t sys_readv(Context* context){
     int res;
     for(auto i = 0;i < iovcnt; i++){
         auto& bio = iov[i];
-        res = fs->read(File_Describer_Get_Path(fd), (char *)get_actual_page((size_t)bio.iov_base), bio.iov_len);
+        res = fs->read(FD::GetFile(fd)->GetCStylePath(), (char *)get_actual_page((size_t)bio.iov_base), bio.iov_len);
         if(res != FR_OK)return -1;
         read_bytes += res;
     }
@@ -516,7 +505,7 @@ size_t sys_writev(Context* context){
     for(auto i = 0;i < iovcnt; i++){
         printf("[writev debug] %s\n",(char *)get_actual_page((size_t)iov[i].iov_base));
         auto& bio = iov[i];
-        res = fs->write(File_Describer_Get_Path(fd), (char *)get_actual_page((size_t)bio.iov_base), bio.iov_len);
+        res = fs->write(FD::GetFile(fd)->GetCStylePath(), (char *)get_actual_page((size_t)bio.iov_base), bio.iov_len);
         if(res != FR_OK)return -1;
         write_bytes += res;
     }
@@ -673,11 +662,9 @@ size_t sys_fcntl(Context* context){
     int old_fd = sysGetRealFd((int) context->a0);
     size_t flag = context->a1;
     int new_fd = sysGetRealFd((int) context->a2);
-    int actual_fd = fd_search_a_empty_file_describer_bigger_or_equal_than_arg(new_fd);
+    int actual_fd = FD::FindUnusedFdBiggerOrEqual(new_fd);
 
-    File_Describer_Data data = {.redirect_fd = (int) old_fd};
-    File_Describer_Create(actual_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_WRITE, data, "\0");
-    File_Describer_Plus((int) old_fd);
+    FD::CopyFd(old_fd, actual_fd);
 
     return actual_fd;
 }
