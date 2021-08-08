@@ -106,26 +106,26 @@ void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_
             }
 
             if(phdr[i].p_flags&PF_W){
-                elf_control->bind_data_page(p, size_t(buf));
+                elf_control->bind_data_page(0x100000000+p, size_t(buf));
             }else{
-                elf_control->bind_text_page(p, size_t(buf));
+                elf_control->bind_text_page(0x100000000+p, size_t(buf));
             }
         }
     }
 
-//    PageTableUtil::FlushCurrentPageTable();
-//
-//    long long res=0;
-//    for(char* p= (char*)(0x100000000+0x10000); p < (char*)(0x100000000+0x10000 + 0x19601e); p++){
-//        res=(res*10007+*p)%1000000007;
-//    }
-//    printf("hash: 0x%x\n",res);
-//
-//    res=0;
-//    for(char* p= (char*)(0x100000000+0x1a70a0); p < (char*)(0x100000000+0x1a70a0 + 0xbad8); p++){
-//        res=(res*10007+*p)%1000000007;
-//    }
-//    printf("hash: 0x%x\n",res);
+    PageTableUtil::FlushCurrentPageTable();
+
+    long long res=0;
+    for(char* p= (char*)(0x100000000+0x10000); p < (char*)(0x100000000+0x10000 + 0x19601e); p++){
+        res=(res*10007+*p)%1000000007;
+    }
+    printf("hash: 0x%x\n",res);
+
+    res=0;
+    for(char* p= (char*)(0x100000000+0x1a70a0); p < (char*)(0x100000000+0x1a70a0 + 0xbad8); p++){
+        res=(res*10007+*p)%1000000007;
+    }
+    printf("hash: 0x%x\n",res);
 
     *entry=Ehdr->e_entry;
 
