@@ -90,8 +90,8 @@ void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_
             if(p - target_start + phdr[i].p_offset + 4096 <= phdr[i].p_offset){
                 // skip copying
             }else{
-                size_t copy_start=p-target_start+phdr[i].p_offset;
-                size_t copy_end= min(p-target_start+phdr[i].p_offset+4096,phdr[i].p_offset+phdr[i].p_filesz);
+                size_t copy_start=p-phdr[i].p_vaddr+phdr[i].p_offset;
+                size_t copy_end= min(p-phdr[i].p_vaddr+phdr[i].p_offset+4096,phdr[i].p_offset+phdr[i].p_filesz);
                 f_lseek(elf_file,copy_start);
                 f_read(elf_file,buf,copy_end-copy_start,&read_bytes);
             }
