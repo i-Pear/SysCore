@@ -676,9 +676,9 @@ void syscall_distribute(int syscall_id, Context *context) {
     }
 
 //    printf("[syscall] %d",syscall_id);
-//    if(syscall_name_list[syscall_id] != nullptr){
-//        printf(", %s", syscall_name_list[syscall_id]);
-//    }
+    if(syscall_name_list[syscall_id] != nullptr){
+        printf("[syscall] %s\n", syscall_name_list[syscall_id]);
+    }
 //    printf("\n");
 
     assert(syscall_id >= 0 && syscall_id < SYSCALL_LIST_LENGTH);
