@@ -96,16 +96,19 @@ void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_
             }
             if(phdr[i].p_flags&PF_W){
                 elf_control->bind_data_page(p, size_t(buf));
-                // check sum
-                size_t res=0;
-                for(char* c=(char*)buf;c<(char*)(buf+4096);c++){
-                    res=(res*10007+*c)%1000000007;
-                }
-//                printf("vaddr=0x%x - 0x%x   checksum: 0x%x\n",p,p+4096,res);
             }else{
                 elf_control->bind_text_page(p, size_t(buf));
             }
         }
+    }
+
+    for(size_t j=(size_t)0x1a7000;j<(size_t)0x1a7000+0xbad8;j+=4096){
+        // check sum
+        size_t res=0;
+        for(char* c=(char*)(j);c<(char*)(j+4096);c++){
+            res=(res*10007+*c)%1000000007;
+        }
+        printf("vaddr pos=0x%x - 0x%x   checksum: 0x%x\n",j,j+4096,res);
     }
 
     *entry=Ehdr->e_entry;
