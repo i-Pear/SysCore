@@ -669,6 +669,20 @@ size_t sys_fcntl(Context* context){
     return actual_fd;
 }
 
+size_t sys_sendfile(Context* context){
+    int out_fd = context->a0;
+    int in_fd = context->a1;
+    auto* offset = (off_t*) context->a2;
+    if(offset != nullptr){
+        panic("unsupported sendfile arg")
+    }
+    size_t count = context->a3;
+    char buff[count + 1];
+    int read_bytes = fs->read(FD::GetFile(in_fd)->GetCStylePath(), buff, count);
+    int write_bytes = fs->write(FD::GetFile(out_fd)->GetCStylePath(), buff, read_bytes);
+    return write_bytes;
+}
+
 /// syscall int & register & distribute
 
 void syscall_init() {
@@ -762,5 +776,6 @@ void syscall_register() {
     REGISTER(clock_gettime);
     REGISTER(utimensat);
     REGISTER(fcntl);
+    REGISTER(sendfile);
 #undef REGISTER
 }
