@@ -311,7 +311,7 @@ void create_process(const char *elf_path, const char *argv[]) {
     size_t entry, ph_off;
     Elf64_Phdr *kernel_phdr;
     int ph_num;
-    RefCountPtr<Elf_Control> elf_control(new Elf_Control(register_read_satp()<<12));
+    RefCountPtr<Elf_Control> elf_control(new Elf_Control(page_table_base));
     load_elf(&elf_file, elf_control.getPtr(), &entry, &ph_off, &ph_num, &kernel_phdr);
     f_close(&elf_file);
 
