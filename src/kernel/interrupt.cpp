@@ -196,6 +196,10 @@ Context *page_fault(Context* context, size_t stval){
     }
     printf("checksum: 0x%x\n",res);
 
+    for(char* c=(char*)(0x1a70a0);c<(char*)(0x1a70a0+0x20);c++){
+        printf("%d\n",*c);
+    }
+
     PageTableUtil::CreateMapping(table_base, vir_addr, 0xe0000000, PAGE_TABLE_LEVEL::SMALL, PRIVILEGE_LEVEL::USER);
 
 //    printf("page fault >> 0x%x\n",vir);
