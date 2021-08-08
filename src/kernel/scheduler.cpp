@@ -366,8 +366,6 @@ void create_process(const char *elf_path, const char *argv[]) {
             }
         }
     }
-    copy_to_stack(reinterpret_cast<char *&>(sp), "ELF", strlen("ELF") + 1);
-    size_t elf_str_addr = sp;
     sp -= sp % 16; //align
     // aux environments
 
@@ -434,7 +432,7 @@ void create_process(const char *elf_path, const char *argv[]) {
     // argc
     put_envp((size_t **) &sp, argv_strings.length() + 1);
 
-//    check_stack_preparation(sp);
+    check_stack_preparation(sp);
 
     thread_context->sp = reinterpret_cast<size_t>(sp);
 //    thread_context->a0=1;

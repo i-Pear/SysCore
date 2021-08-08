@@ -56,15 +56,6 @@ void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_
     f_read(elf_file,*kernel_phdr, sizeof(Elf64_Phdr)*Ehdr->e_phnum,&read_bytes);
 
     Elf64_Phdr *phdr = *kernel_phdr;
-    int load_segment_count=0;
-    size_t need_alloc_page=0;
-    for (int i = 0; i < Ehdr->e_phnum; i++) {
-        if (phdr[i].p_type != PT_LOAD)continue;
-        if (phdr[i].p_filesz == 0)continue;
-        load_segment_count++;
-        need_alloc_page= max(need_alloc_page,phdr[i].p_vaddr+phdr[i].p_filesz);
-    }
-    // printf("elf segment count = %d \n",load_segment_count);
 
     elf_control->init_segments();
     for (int i = 0; i < Ehdr->e_phnum; i++) {

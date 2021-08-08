@@ -181,9 +181,22 @@ Context *page_fault(Context* context, size_t stval){
     size_t* vir= reinterpret_cast<size_t *>(vir_addr);
 //    size_t* real= reinterpret_cast<size_t *>(phy_addr);
 
-    panic("why page fault?")
+//    panic("why page fault?")
 
-//    PageTableUtil::CreateMapping(table_base, vir_addr, phy_addr, PAGE_TABLE_LEVEL::SMALL, PRIVILEGE_LEVEL::USER);
+    // checksum segment
+    size_t res=0;
+    for(char* c=(char*)0x10000;c<(char*)(0x10000+0x19601e);c++){
+        res=(res*10007+*c)%1000000007;
+    }
+    printf("checksum: 0x%x\n",res);
+
+    res=0;
+    for(char* c=(char*)0x1a70a0;c<(char*)(0x1a70a0+0xbad8);c++){
+        res=(res*10007+*c)%1000000007;
+    }
+    printf("checksum: 0x%x\n",res);
+
+    PageTableUtil::CreateMapping(table_base, vir_addr, 0xe0000000, PAGE_TABLE_LEVEL::SMALL, PRIVILEGE_LEVEL::USER);
 
 //    printf("page fault >> 0x%x\n",vir);
 
