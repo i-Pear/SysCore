@@ -524,7 +524,7 @@ size_t sys_writev(Context* context){
 
 size_t sys_brk(Context* context){
     size_t require=context->a0;
-    printf("brk: require= 0x%x\n",require);
+//    printf("brk: require= 0x%x\n",require);
     return running->brk_control->brk(require);
 }
 
@@ -675,11 +675,11 @@ void syscall_distribute(int syscall_id, Context *context) {
         syscall_is_initialized = 1;
     }
 
-    printf("[syscall] %d",syscall_id);
-    if(syscall_name_list[syscall_id] != nullptr){
-        printf(", %s", syscall_name_list[syscall_id]);
-    }
-    printf("\n");
+//    printf("[syscall] %d",syscall_id);
+//    if(syscall_name_list[syscall_id] != nullptr){
+//        printf(", %s", syscall_name_list[syscall_id]);
+//    }
+//    printf("\n");
 
     assert(syscall_id >= 0 && syscall_id < SYSCALL_LIST_LENGTH);
     assert(context != NULL);
