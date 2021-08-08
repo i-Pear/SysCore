@@ -35,6 +35,14 @@ public:
                                      PRIVILEGE_LEVEL::USER);
         pages.push_back({target_v_addr,page});
 
+        if(chh)
+        {
+            size_t res=0;
+            for(char* c=(char*)page;c<(char*)(page+4096);c++){
+                res=(res*10007+*c)%1000000007;
+            }
+            printf("vaddr pos=0x%x - 0x%x   checksum: 0x%x\n",target_v_addr,target_v_addr+4096,res);
+        }
     }
 
     bool is_text() const{
