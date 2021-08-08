@@ -75,24 +75,49 @@ void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_
             memset(buf,0,4096);
             /**
              * target page range: [ p , p+4096 )
-             * source page range: [ p-target_start+phdr[i].p_offset , p-target_start+phdr[i].p_offset+4096 )
+             * source page range: [ p-phdr[i].p_vaddr+phdr[i].p_offset , p-phdr[i].p_vaddr+phdr[i].p_offset+4096 )
              * available total source range: [ phdr[i].p_offset , phdr[i].p_offset+phdr[i].p_filesz )
              */
-            if(p - target_start + phdr[i].p_offset + 4096 <= phdr[i].p_offset){
-                // skip copying
-            }else{
-                size_t copy_start=p-phdr[i].p_vaddr+phdr[i].p_offset;
-                size_t copy_end= min(p-phdr[i].p_vaddr+phdr[i].p_offset+4096,phdr[i].p_offset+phdr[i].p_filesz);
+
+            size_t copy_start=max(
+                    p-phdr[i].p_vaddr+phdr[i].p_offset,
+                    phdr[i].p_offset
+                    );
+            size_t copy_end= min(
+                    p-phdr[i].p_vaddr+phdr[i].p_offset+4096,
+                    phdr[i].p_offset+phdr[i].p_filesz
+                    );
+            if(copy_start<copy_end){
                 f_lseek(elf_file,copy_start);
-                f_read(elf_file,buf,copy_end-copy_start,&read_bytes);
+                f_read(
+                        elf_file,
+                       buf+copy_start-(p-phdr[i].p_vaddr+phdr[i].p_offset),
+                       copy_end-copy_start,&read_bytes
+                       );
             }
+
             if(phdr[i].p_flags&PF_W){
-                elf_control->bind_data_page(0x100000000+p, size_t(buf));
+                elf_control->bind_data_page(p, size_t(buf));
             }else{
-                elf_control->bind_text_page(0x100000000+p, size_t(buf));
+                elf_control->bind_text_page(p, size_t(buf));
             }
         }
     }
+
+//    PageTableUtil::FlushCurrentPageTable();
+//
+//    long long res=0;
+//    for(char* p= (char*)(0x100000000+0x10000); p < (char*)(0x100000000+0x10000 + 0x19601e); p++){
+//        res=(res*10007+*p)%1000000007;
+//    }
+//    printf("hash: 0x%x\n",res);
+//
+//    res=0;
+//    for(char* p= (char*)(0x100000000+0x1a70a0); p < (char*)(0x100000000+0x1a70a0 + 0xbad8); p++){
+//        res=(res*10007+*p)%1000000007;
+//    }
+//    printf("hash: 0x%x\n",res);
+
 
     *entry=Ehdr->e_entry;
 
