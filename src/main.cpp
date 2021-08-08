@@ -102,6 +102,7 @@ void busybox_test(){
 //    add_test("busybox_new hwclock");    // need /etc/localtime
 
     // passed fs tests
+    add_test("busybox_new sh -c \"echo ccccccc > test.txt \"");
 //    add_test("busybox_new touch test.txt");
 //    add_test("busybox_new cat test.txt");
 //    add_test("busybox_new cut -c 3 test.txt");
@@ -109,9 +110,8 @@ void busybox_test(){
     // TODO: file system tests
 //    add_test("busybox_new which ls");
 //    add_test("busybox_new ls");
-    add_test("busybox_new sh -c \"echo ccccccc > test.txt \"");
 
-//    add_test("busybox_new od test.txt");
+    add_test("busybox_new od test.txt");
 //    add_test("busybox_new head test.txt");
 //    add_test("busybox_new tail test.txt");
 //    add_test("busybox_new hexdump -C test.txt");
