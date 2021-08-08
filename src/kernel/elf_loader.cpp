@@ -85,9 +85,23 @@ void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_
                 size_t copy_end= min(p-target_start+phdr[i].p_offset+4096,phdr[i].p_offset+phdr[i].p_filesz);
                 f_lseek(elf_file,copy_start);
                 f_read(elf_file,buf,copy_end-copy_start,&read_bytes);
+                if(phdr[i].p_flags&PF_W){
+                    // check sum
+                    size_t res=0;
+                    for(char* c=(char*)buf;c<(char*)(buf+4096);c++){
+                        res=(res*10007+*c)%1000000007;
+                    }
+                    printf("file pos=0x%x - 0x%x   checksum: 0x%x\n",copy_start,copy_end,res);
+                }
             }
             if(phdr[i].p_flags&PF_W){
                 elf_control->bind_data_page(p, size_t(buf));
+                // check sum
+                size_t res=0;
+                for(char* c=(char*)buf;c<(char*)(buf+4096);c++){
+                    res=(res*10007+*c)%1000000007;
+                }
+//                printf("vaddr=0x%x - 0x%x   checksum: 0x%x\n",p,p+4096,res);
             }else{
                 elf_control->bind_text_page(p, size_t(buf));
             }
