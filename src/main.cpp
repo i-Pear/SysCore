@@ -78,12 +78,12 @@ void simple_test(){
 void busybox_test(){
 
     // tested
-    add_test("busybox_new ash -c exit");
-    add_test("busybox_new sh -c exit");
-    add_test("busybox_new du");
-//    add_test("busybox_new expr 1 + 1");
-//    add_test("busybox_new false");
-//    add_test("busybox_new true");
+//    add_test("busybox_new ash -c exit");
+//    add_test("busybox_new sh -c exit");
+//    add_test("busybox_new du");
+    add_test("busybox_new expr 1 + 1");
+    add_test("busybox_new false");
+    add_test("busybox_new true");
 //    add_test("busybox_new clear");
 //    add_test("busybox_new uname");
 //    add_test("busybox_new printf abc\n");
