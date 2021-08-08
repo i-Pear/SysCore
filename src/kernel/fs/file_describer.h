@@ -79,4 +79,6 @@ int fd_get_origin_fd(int fd);
 
 int fd_search_a_empty_file_describer();
 
+int fd_search_a_empty_file_describer_bigger_or_equal_than_arg(int arg);
+
 #endif //OS_RISC_V_FILE_DESCRIBER_H

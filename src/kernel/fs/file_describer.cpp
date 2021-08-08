@@ -77,6 +77,16 @@ int fd_search_a_empty_file_describer() {
     return -1;
 }
 
+int fd_search_a_empty_file_describer_bigger_or_equal_than_arg(int arg) {
+    for (int i = arg; i < FILE_DESCRIBER_ARRAY_LENGTH; i++) {
+        if (file_describer_array_occupied[i] == 0) {
+            return i;
+        }
+    }
+    panic("no empty file describer");
+    return -1;
+}
+
 char *File_Describer_Get_Path(int fd) {
     assert(fd >= 0 && fd < FILE_DESCRIBER_ARRAY_LENGTH);
     return file_describer_array[fd].path;

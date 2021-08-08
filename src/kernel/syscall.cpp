@@ -328,7 +328,7 @@ size_t sys_dup3(Context *context) {
     // int ret = dup3(old, new, 0);
     // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
     size_t old_fd = sysGetRealFd(context->a0);
-    size_t new_fd = context->a1;
+    size_t new_fd = sysGetRealFd(context->a1);
     // TODO: dup3暂不支持flag参数
     size_t flags = context->a2;
 
@@ -669,6 +669,19 @@ size_t sys_utimensat(Context* context){
     return 0;
 }
 
+size_t sys_fcntl(Context* context){
+    int old_fd = sysGetRealFd((int) context->a0);
+    size_t flag = context->a1;
+    int new_fd = sysGetRealFd((int) context->a2);
+    int actual_fd = fd_search_a_empty_file_describer_bigger_or_equal_than_arg(new_fd);
+
+    File_Describer_Data data = {.redirect_fd = (int) old_fd};
+    File_Describer_Create(actual_fd, FILE_DESCRIBER_REDIRECT, FILE_ACCESS_WRITE, data, "\0");
+    File_Describer_Plus((int) old_fd);
+
+    return actual_fd;
+}
+
 /// syscall int & register & distribute
 
 void syscall_init() {
@@ -761,5 +774,6 @@ void syscall_register() {
     REGISTER(rt_sigaction);
     REGISTER(clock_gettime);
     REGISTER(utimensat);
+    REGISTER(fcntl);
 #undef REGISTER
 }
