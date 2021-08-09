@@ -528,6 +528,20 @@ void schedule() {
             // sync with running_context
             *running_context = *running->thread_context;
 
+                PageTableUtil::FlushCurrentPageTable();
+
+                long long res=0;
+                for(char* p= (char*)(0x100000000+0x10000); p < (char*)(0x100000000+0x10000 + 0x19601e); p++){
+                    res=(res*10007+*p)%1000000007;
+                }
+                printf("hash: 0x%x\n",res);
+
+                res=0;
+                for(char* p= (char*)(0x100000000+0x1a70a0); p < (char*)(0x100000000+0x1a70a0 + 0xbad8); p++){
+                    res=(res*10007+*p)%1000000007;
+                }
+                printf("hash: 0x%x\n",res);
+
             __restore();
         } else if (!blocked.is_empty()) {
             // search one to unfreeze
