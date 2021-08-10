@@ -91,7 +91,7 @@ void init_scheduler() {
 
 void clone(int flags, size_t stack, int ptid) {
     if (flags != 17) {
-        printf("flag=%d\n", flags);
+        printf("flag=0x%x\n", flags);
         panic("clone flags is not SIGCHLD, unknown todo.\n");
     }
 

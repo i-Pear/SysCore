@@ -226,7 +226,11 @@ size_t sys_execve(Context *context) {
 }
 
 size_t sys_gettimeofday(Context *context) {
-//    spec((TimeVal*)get_actual_page(context->a0));
+    auto timeVal=(TimeVal*)context->a0;
+    uint64 usec=timer();
+    timeVal->sec=usec/1000000;
+    timeVal->usec=usec%1000000;
+
     return 0;
 }
 
@@ -532,7 +536,9 @@ size_t sys_clock_gettime(Context* context){
     int clock_id=context->a0;
     auto *timespec= reinterpret_cast<struct timespec *>(context->a1);
 
-    CurrentTimeSpec(timespec);
+    uint64 usec=timer();
+    timespec->tv_sec=usec/1000000;
+    timespec->tv_nsec=usec%1000000*1000;
 
     return 0;
 }
@@ -605,12 +611,13 @@ size_t sys_getrusage(Context* context){
 
     memset(usage,0,sizeof (rusage));
 
+    uint64 usec=timer();
 
-    usage->ru_stime.tv_sec=0;
-    usage->ru_stime.tv_usec=0;
+    usage->ru_stime.tv_sec=usec/1000000;
+    usage->ru_stime.tv_usec=usec%1000000;
 
-    usage->ru_utime.tv_sec=0;
-    usage->ru_utime.tv_usec=0;
+    usage->ru_utime.tv_sec=usec/1000000;
+    usage->ru_utime.tv_usec=usec%1000000;
 
     return 0;
 }
@@ -676,9 +683,9 @@ void syscall_distribute(int syscall_id, Context *context) {
     }
 
 //    printf("[syscall] %d",syscall_id);
-//    if(syscall_name_list[syscall_id] != nullptr){
-//        printf("[syscall] %s\n", syscall_name_list[syscall_id]);
-//    }
+    if(syscall_name_list[syscall_id] != nullptr){
+        printf("[syscall] %s\n", syscall_name_list[syscall_id]);
+    }
 //    printf("\n");
 
     assert(syscall_id >= 0 && syscall_id < SYSCALL_LIST_LENGTH);
@@ -702,7 +709,6 @@ void syscall_register() {
     REGISTER(getchar);
     REGISTER(write);
     REGISTER(execve);
-    REGISTER(gettimeofday);
     REGISTER(exit);
     REGISTER(getppid);
     REGISTER(getpid);
@@ -740,11 +746,13 @@ void syscall_register() {
     REGISTER(exit_group);
     REGISTER(kill);
     REGISTER(sysinfo);
-    REGISTER(getrusage);
     REGISTER(mmap);
     REGISTER(readlinkat);
     REGISTER(ioctl);
     REGISTER(rt_sigaction);
+
+    REGISTER(getrusage);
+    REGISTER(gettimeofday);
     REGISTER(clock_gettime);
 #undef REGISTER
 }

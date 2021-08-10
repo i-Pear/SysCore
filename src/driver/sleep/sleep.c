@@ -44,7 +44,7 @@ int usleep(uint64 usec)
 
 int msleep(uint64 msec)
 {
-    return (unsigned int)usleep(msec * 1000);
+    return usleep(msec * 1000);
 }
 
 unsigned int sleep(unsigned int seconds)
