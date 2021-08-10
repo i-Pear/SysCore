@@ -234,9 +234,6 @@ void vfs_init() {
     assert(exe != nullptr);
 }
 
-
-
-
 int main() {
     printf("   _____            _____               \n"
            "  / ____|          / ____|              \n"
@@ -257,7 +254,7 @@ int main() {
     kernelContext.kernel_handle_interrupt = (size_t) handle_interrupt;
     kernelContext.kernel_restore = (size_t) __restore;
 
-    // init_thread();
+    init_thread();
     uint64 start = timer();
     uint64 end = timer();
     while (1) {

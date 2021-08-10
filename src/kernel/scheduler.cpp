@@ -9,7 +9,6 @@ extern "C" {
 #include "../driver/fatfs/ff.h"
 }
 
-
 int global_pid = 1;
 
 // Warning: when do sth with running, sync with latest running_context first
@@ -325,7 +324,6 @@ void create_process(const char *elf_path, const char *argv[]) {
     memset(reinterpret_cast<void *>(stack_page), 0, 4096 * 5);
     thread_context->sp = stack_page + __page_size * 5 - 10 * 8;
 
-
     const char *env[] = {
             "SHELL=ash",
             "PWD=/",
@@ -435,8 +433,6 @@ void create_process(const char *elf_path, const char *argv[]) {
 //    check_stack_preparation(sp);
 
     thread_context->sp = reinterpret_cast<size_t>(sp);
-//    thread_context->a0=1;
-//    thread_context->a1=argv_start;
 
     /**
      * 此处spp应为0,表示user-mode
