@@ -303,7 +303,7 @@ void create_process(const char *elf_path, const char *argv[]) {
                                  PRIVILEGE_LEVEL::USER);
 
     FIL elf_file;
-    printf("elf %s\n", elf_path);
+//    printf("elf %s\n", elf_path);
     int res = f_open(&elf_file, elf_path, FA_READ);
     if (res != FR_OK) {
         panic("read error")
@@ -311,7 +311,7 @@ void create_process(const char *elf_path, const char *argv[]) {
     size_t entry, ph_off;
     Elf64_Phdr *kernel_phdr;
     int ph_num;
-    RefCountPtr<Elf_Control> elf_control(new Elf_Control(register_read_satp()<<12));
+    RefCountPtr<Elf_Control> elf_control(new Elf_Control(page_table_base));
     load_elf(&elf_file, elf_control.getPtr(), &entry, &ph_off, &ph_num, &kernel_phdr);
     f_close(&elf_file);
 
@@ -527,20 +527,6 @@ void schedule() {
 
             // sync with running_context
             *running_context = *running->thread_context;
-
-                PageTableUtil::FlushCurrentPageTable();
-
-                long long res=0;
-                for(char* p= (char*)(0x100000000+0x10000); p < (char*)(0x100000000+0x10000 + 0x19601e); p++){
-                    res=(res*10007+*p)%1000000007;
-                }
-                printf("hash: 0x%x\n",res);
-
-                res=0;
-                for(char* p= (char*)(0x100000000+0x1a70a0); p < (char*)(0x100000000+0x1a70a0 + 0xbad8); p++){
-                    res=(res*10007+*p)%1000000007;
-                }
-                printf("hash: 0x%x\n",res);
 
             __restore();
         } else if (!blocked.is_empty()) {

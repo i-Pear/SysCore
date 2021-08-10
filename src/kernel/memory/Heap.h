@@ -1,7 +1,7 @@
 #ifndef OS_RISC_V_HEAP_H
 #define OS_RISC_V_HEAP_H
 
-#define KERNEL_HEAP_PAGE_NUM (40)
+#define KERNEL_HEAP_PAGE_NUM (50)
 #define KERNEL_HEAP_BIT_MAP_SIZE (KERNEL_HEAP_PAGE_NUM * 512 / 64)
 
 #include "../stddef.h"

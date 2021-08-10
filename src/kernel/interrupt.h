@@ -43,43 +43,43 @@
  * x31/t6 Temporary
  */
 struct Context{
-    size_t zero;  // Hard-wired zero
-    size_t ra;    // Return address
-    size_t sp;    // Stack pointer
-    size_t gp;    // Global pointer
-    size_t tp;    // Thread pointer
-    size_t t0;    // Temporary
-    size_t t1;    // Temporary
-    size_t t2;    // Temporary
-    size_t s0;    // Saved register/frame pointer
-    size_t s1;    // Saved register
-    size_t a0;    // Function argument/return value
-    size_t a1;    // Function argument/return value
-    size_t a2;    // Function argument
-    size_t a3;    // Function argument
-    size_t a4;    // Function argument
-    size_t a5;    // Function argument
-    size_t a6;    // Function argument
-    size_t a7;    // Function argument
-    size_t s2;    // Saved register
-    size_t s3;    // Saved register
-    size_t s4;    // Saved register
-    size_t s5;    // Saved register
-    size_t s6;    // Saved register
-    size_t s7;    // Saved register
-    size_t s8;    // Saved register
-    size_t s9;    // Saved register
-    size_t s10;   // Saved register
-    size_t s11;   // Saved register
-    size_t t3;    // Temporary
-    size_t t4;    // Temporary
-    size_t t5;    // Temporary
-    size_t t6;    // Temporary
-    size_t sstatus;
-    size_t sepc;
-    size_t stval;
-    size_t scause;
-    size_t satp;
+    size_t zero=0;  // Hard-wired zero
+    size_t ra=0;    // Return address
+    size_t sp=0;    // Stack pointer
+    size_t gp=0;    // Global pointer
+    size_t tp=0;    // Thread pointer
+    size_t t0=0;    // Temporary
+    size_t t1=0;    // Temporary
+    size_t t2=0;    // Temporary
+    size_t s0=0;    // Saved register/frame pointer
+    size_t s1=0;    // Saved register
+    size_t a0=0;    // Function argument/return value
+    size_t a1=0;    // Function argument/return value
+    size_t a2=0;    // Function argument
+    size_t a3=0;    // Function argument
+    size_t a4=0;    // Function argument
+    size_t a5=0;    // Function argument
+    size_t a6=0;    // Function argument
+    size_t a7=0;    // Function argument
+    size_t s2=0;    // Saved register
+    size_t s3=0;    // Saved register
+    size_t s4=0;    // Saved register
+    size_t s5=0;    // Saved register
+    size_t s6=0;    // Saved register
+    size_t s7=0;    // Saved register
+    size_t s8=0;    // Saved register
+    size_t s9=0;    // Saved register
+    size_t s10=0;   // Saved register
+    size_t s11=0;   // Saved register
+    size_t t3=0;    // Temporary
+    size_t t4=0;    // Temporary
+    size_t t5=0;    // Temporary
+    size_t t6=0;    // Temporary
+    size_t sstatus=0;
+    size_t sepc=0;
+    size_t stval=0;
+    size_t scause=0;
+    size_t satp=0;
 };
 
 struct KernelContext{
