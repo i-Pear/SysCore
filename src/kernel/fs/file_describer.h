@@ -148,6 +148,7 @@ public:
         auto write_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++fd_pipe_count);
         fs->open(read_path.c_str(), O_CREATE | O_RDONLY);
         fs->open(write_path.c_str(), O_CREATE | O_WRONLY);
+        fs->pipe(read_path.c_str(), write_path.c_str(), flag, 0);
         RefCountPtr<OpenedFile> write_file(new OpenedFile(write_path));
         RefCountPtr<OpenedFile> read_file(new OpenedFile(read_path));
         fd_array[read_fd] = new FileDescriber(read_file, FILE_ACCESS_TYPE::READ, 2);

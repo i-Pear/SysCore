@@ -251,7 +251,7 @@ public:
             if(father_file == nullptr)return -1;
             int fr = father_file->fs->open(path, flag);
             if(fr == FR_OK){
-                father_file->appendChild(new File(new_list.end->data, father_file->fs));
+                father_file->appendChild(new File(list.end->data, father_file->fs));
             }
             return fr;
         }
@@ -260,7 +260,11 @@ public:
 
     int read(const char *path, char buf[], int count) {
         if (path == nullptr)return -1;
-        VFS_ADAPTER(read(path, buf, count))
+        auto* file = search(root, path);
+        if(file == nullptr){
+        return -1;
+        }
+        return file->fs->read(path, buf, count);
     }
 
     int write(const char *path, char buf[], int count) {
@@ -311,6 +315,15 @@ public:
         //TODO implement
         return 0;
     };
+
+    int pipe(const char *read_path, const char *write_path, int flags, int unused_param) {
+        if (read_path == nullptr)return -1;
+        auto* file = search(root, read_path);
+        if(file == nullptr){
+            return -1;
+        }
+        return file->fs->pipe(read_path, write_path, flags, unused_param);
+    }
 };
 
 class TestFile {
