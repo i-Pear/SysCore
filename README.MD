@@ -122,6 +122,11 @@ sudo umount /mnt/sd
 xxd -i fs.img img.h
 ```
 
+# 加载符号
+```gdb
+readelf -WS <elf> | grep .text | awk '{ print"0x"$5 }'
+add-symbol-file <elf> <address>
+```
 
 ## 以下是一些有用的网站
 

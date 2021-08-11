@@ -7,6 +7,7 @@
 #include "FSMacro.h"
 #include "../../lib/stl/string.h"
 #include "../posix/posix_structs.h"
+#include "../scheduler.h"
 
 #define NOT_IMPLEMENT printf("%s not implement!\n", __FUNCTION__); panic("")
 
@@ -164,7 +165,9 @@ public:
                 read_buff->pop_front();
             } else {
                 // TODO: 此处直接实现为非阻塞，如果没有足够的数据会直接返回
-                return cur;
+//                return cur;
+                // 先调度其他进程，相当于阻塞住自己
+                __yield();
             }
         }
         return cur;
