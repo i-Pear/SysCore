@@ -677,6 +677,26 @@ size_t sys_fcntl(Context* context){
     return actual_fd;
 }
 
+size_t sys_sendfile(Context* context){
+    int out_fd = context->a0;
+    int in_fd = context->a1;
+    auto* offset = (off_t*) context->a2;
+    if(offset != nullptr){
+        panic("unsupported sendfile arg")
+    }
+    size_t count = context->a3;
+    char buff[count + 1];
+    int read_bytes = fs->read(FD::GetFile(in_fd)->GetCStylePath(), buff, count);
+    int write_bytes = fs->write(FD::GetFile(out_fd)->GetCStylePath(), buff, read_bytes);
+    return write_bytes;
+}
+
+size_t sys_pipe2(Context* context){
+    int* pipefd = reinterpret_cast<int*>(context->a0);
+    int flags = context->a1;
+    return FD::CreatePipe(pipefd, flags);
+}
+
 /// syscall int & register & distribute
 
 void syscall_init() {
@@ -772,5 +792,7 @@ void syscall_register() {
 
     REGISTER(times);
     REGISTER(gettimeofday);
+    REGISTER(sendfile);
+    REGISTER(pipe2);
 #undef REGISTER
 }

@@ -44,35 +44,35 @@ void test_lib() {
 }
 
 void simple_test(){
-    add_test("/brk");
-    add_test("/yield");
-    add_test("/fork");
-    add_test("/clone");
-    add_test("/write");
-    add_test("/uname");
-    add_test("/times");
-    add_test("/getpid");
-    add_test("/getppid");
-    add_test("/open");
-    add_test("/read");
-    add_test("/close");
-    add_test("/openat");
-    add_test("/getcwd");
-    add_test("/dup");
-    add_test("/getdents");
-    add_test("/dup2");
-    add_test("/wait");
-    add_test("/exit");
-    add_test("/execve");
-    add_test("/gettimeofday");
-    add_test("/mkdir_");
-    add_test("/chdir");
-    add_test("/waitpid");
-    add_test("/sleep");
-    add_test("/unlink");
-    add_test("/mount");
-    add_test("/umount");
-    add_test("/fstat");
+//    add_test("/yield");
+//    add_test("/fork");
+//    add_test("/clone");
+//    add_test("/write");
+//    add_test("/uname");
+//    add_test("/times");
+//    add_test("/getpid");
+//    add_test("/getppid");
+//    add_test("/open");
+//    add_test("/read");
+//    add_test("/close");
+//    add_test("/openat");
+//    add_test("/getcwd");
+//    add_test("/dup");
+//    add_test("/getdents");
+//    add_test("/dup2");
+//    add_test("/wait");
+//    add_test("/exit");
+//    add_test("/execve");
+//    add_test("/gettimeofday");
+//    add_test("/mkdir_");
+//    add_test("/chdir");
+//    add_test("/waitpid");
+//    add_test("/sleep");
+//    add_test("/unlink");
+//    add_test("/mount");
+//    add_test("/umount");
+//    add_test("/fstat");
+//    add_test("/pipe");
 }
 
 void busybox_test(){
@@ -107,7 +107,10 @@ void busybox_test(){
 //    add_test("busybox_new hwclock");    // need /etc/localtime
 
     // passed fs tests
+    add_test("busybox_new sh -c \"echo ccccccc > test.txt \"");
 //    add_test("busybox_new touch test.txt");
+//    add_test("busybox_new cat test.txt");
+//    add_test("busybox_new cut -c 3 test.txt");
 
     // TODO: file system tests
 //    add_test("busybox_new which ls");
@@ -257,7 +260,6 @@ int main() {
     kernelContext.kernel_restore = (size_t) __restore;
 
     init_thread();
-
     // unreachable
     panic("Unreachable code!");
     return 0;

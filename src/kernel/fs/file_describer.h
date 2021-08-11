@@ -9,7 +9,6 @@
 #include "../../lib/stl/map.h"
 
 #define FILE_DESCRIBER_ARRAY_LENGTH 120
-#define FILE_DESCRIBER_RESERVED_FD_COUNT 3
 
 class OpenedFile{
 public:
@@ -51,6 +50,7 @@ private:
 };
 
 extern FileDescriber* fd_array[FILE_DESCRIBER_ARRAY_LENGTH];
+extern int fd_pipe_count;
 
 class FD{
 public:
@@ -63,6 +63,8 @@ public:
         fd_array[0] = new FileDescriber(stdin, FILE_ACCESS_TYPE::READ);
         fd_array[1] = new FileDescriber(stdout, FILE_ACCESS_TYPE::WRITE);
         fd_array[2] = new FileDescriber(stdout, FILE_ACCESS_TYPE::WRITE);
+
+        fd_pipe_count = 0;
     }
 
     static int OpenNewFile(const char* path, int flag, int fd){
@@ -119,6 +121,23 @@ public:
         panic("can't find unused fd");
         return -1;
     }
+
+    static int CreatePipe(int pipefd[2], int flag){
+        // TODO: flag
+        int read_fd = FindUnUsedFd();
+        int write_fd = FindUnUsedFd();
+        auto read_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++fd_pipe_count);
+        auto write_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++fd_pipe_count);
+        fs->open(read_path.c_str(), O_CREATE | O_RDONLY);
+        fs->open(write_path.c_str(), O_CREATE | O_WRONLY);
+        RefCountPtr<OpenedFile> write_file(new OpenedFile(write_path));
+        RefCountPtr<OpenedFile> read_file(new OpenedFile(read_path));
+        fd_array[read_fd] = new FileDescriber(read_file, FILE_ACCESS_TYPE::READ);
+        fd_array[write_fd] = new FileDescriber(write_file, FILE_ACCESS_TYPE::WRITE);
+        pipefd[0] = read_fd;
+        pipefd[1] = write_fd;
+        return 0;
+    }
 private:
     static void Check(int fd){
         if(fd_array[fd] != nullptr){
@@ -136,81 +155,5 @@ private:
         fd_array[fd] = nullptr;
     }
 };
-
-//enum File_Describer_Type {
-//    FILE_DESCRIBER_REGULAR,
-//    FILE_DESCRIBER_REDIRECT
-//};
-//
-//enum File_Access_Type {
-//    FILE_ACCESS_READ = 1,
-//    FILE_ACCESS_WRITE = 2,
-//    FILE_ACCESS_RW = 3
-//};
-//
-//typedef union {
-//    int redirect_fd;
-//} File_Describer_Data;
-//
-//typedef struct {
-//    enum File_Describer_Type fileDescriberType;
-//    enum File_Access_Type fileAccessType;
-//    File_Describer_Data data;
-//    char *path;
-//} File_Describer;
-
-//// 最大文件描述符个数
-//#define FILE_DESCRIBER_ARRAY_LENGTH 120
-//
-//extern File_Describer file_describer_array[];
-//extern int file_describer_array_occupied[];
-//
-///**
-// * 初始化VFS
-// */
-//void init_file_describer();
-//
-///**
-// * 在fd处初始化一个文件描述符
-// * @param fd
-// * @param fileDescriberType：文件描述符类型
-// * @param fileAccessType：文件访问权限
-// * @param data：数据
-// * @param extraData：额外数据
-// */
-//void File_Describer_Create(
-//        int fd,
-//        enum File_Describer_Type fileDescriberType,
-//        enum File_Access_Type fileAccessType,
-//        File_Describer_Data data,
-//        char *path);
-//
-///**
-// * fd引用计数加一
-// * @param fd
-// */
-//void File_Describer_Plus(int fd);
-//
-///**
-// * fd引用计数减一
-// * 如果fd是重定向文件描述符，那么包括此fd在内一直到源文件描述符的引用计数都会减一
-// * 如果引用计数为0则释放该文件描述符
-// * @param fd
-// */
-//void File_Describer_Reduce(int fd);
-//
-//char *File_Describer_Get_Path(int fd);
-//
-///*
-// *  私有接口
-// */
-//
-//int fd_write_to_file(int fd, char *buf, int count);
-//
-//int fd_get_origin_fd(int fd);
-//
-//int fd_search_a_empty_file_describer();
-//
-//int fd_search_a_empty_file_describer_bigger_or_equal_than_arg(int arg);
 
 #endif //OS_RISC_V_FILE_DESCRIBER_H

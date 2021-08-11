@@ -179,7 +179,12 @@ public:
         return count;
     }
 
+    int open(const char *path, int flag) override {
+        return 0;
+    }
+
     int close(const char *path) override {
+        // TODO(waitti) Remove file object form tree when pipe close
         if (read_pair.exists(String(path))) {
             auto *buff_list = read_pair.get(String(path));
             delete buff_list;
