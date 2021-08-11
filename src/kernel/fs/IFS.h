@@ -185,16 +185,17 @@ public:
 
     int close(const char *path) override {
         // TODO(waitti) Remove file object form tree when pipe close
-        if (read_pair.exists(String(path))) {
-            auto *buff_list = read_pair.get(String(path));
-            delete buff_list;
-            read_pair.erase(String(path));
-        }
-        if (write_pair.exists(String(path))) {
-            auto *buff_list = write_pair.get((String(path)));
-            delete buff_list;
-            write_pair.erase(String(path));
-        }
+        // TODO(waitti) double close question
+//        if (read_pair.exists(String(path))) {
+//            auto *buff_list = read_pair.get(String(path));
+//            delete buff_list;
+//            read_pair.erase(String(path));
+//        }
+//        if (write_pair.exists(String(path))) {
+//            auto *buff_list = write_pair.get((String(path)));
+//            delete buff_list;
+//            write_pair.erase(String(path));
+//        }
         return 0;
     }
 
