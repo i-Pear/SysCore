@@ -39,7 +39,7 @@ public:
     RefCountPtr<List<size_t>> occupied_kernel_heap;
     List<size_t> occupied_pages;
 
-    // wait related
+    // thread local
     List<pair<int,int>> signal_list;
     int* wstatus;
     size_t wait_pid;
@@ -85,7 +85,7 @@ void create_process(const char *elf_path);
 
 void create_process(const char *elf_path,const char* []);
 
-void clone(int flags,size_t stack,int ptid);
+void clone(int flags,size_t stack,int* parent_tid, size_t tls,int* child_tid);
 
 void __yield();
 

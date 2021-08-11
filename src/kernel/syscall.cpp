@@ -427,7 +427,7 @@ size_t sys_clock_nanosleep(Context *context) {
 }
 
 size_t sys_clone(Context *context) {
-    clone(context->a0, context->a1, context->a2);
+    clone(context->a0, context->a1, (int*)context->a2, context->a3,(int*)context->a4);
     return context->a0;
 }
 

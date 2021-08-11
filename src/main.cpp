@@ -44,7 +44,7 @@ void test_lib() {
 }
 
 void simple_test(){
-    add_test("/yield");
+//    add_test("/yield");
 //    add_test("/fork");
 //    add_test("/clone");
 //    add_test("/write");
@@ -172,7 +172,7 @@ void init_thread() {
     simple_test();
 //    busybox_test();
 
-//    add_test("/lmbench_new bw_pipe -P 1");
+    add_test("/lmbench_new bw_pipe -P 1");
 
     schedule();
 }

@@ -89,12 +89,9 @@ void init_scheduler() {
     running = nullptr;
 }
 
-void clone(int flags, size_t stack, int ptid) {
-    if (flags != 17) {
+void clone(int flags, size_t stack,int* parent_tid, size_t tls,int* child_tid) {
 
-        printf("flag=0x%x\n", flags);
-        panic("clone flags is not SIGCHLD, unknown todo.\n");
-    }
+    printf("[clone ]flag=0x%x\n", flags);
 
     // sync with running_context
     *running->thread_context = *running_context;
@@ -108,11 +105,8 @@ void clone(int flags, size_t stack, int ptid) {
     *child_pcb = *running;
     child_pcb->thread_context = child_context;
 
-    if (stack != 0 && ptid != 0) {
-        child_pcb->ppid = ptid;
-    } else {
-        child_pcb->ppid = running->pid;
-    }
+    // set pid and ppid
+    child_pcb->ppid = running->pid;
     child_pcb->pid = get_new_pid();
 
     // set syscall return value
@@ -144,7 +138,7 @@ void clone(int flags, size_t stack, int ptid) {
 
         size_t page_table = alloc_page(4096);
         memset(reinterpret_cast<void *>(page_table), 0, 4096);
-        *((size_t *) page_table + 2) = (0x80000 << 10) | 0xdf;
+        PageTableUtil::init_pageTable(page_table);
         child_context->satp = (page_table >> 12) | (8LL << 60);
         child_context->sepc += 4;
 
@@ -277,6 +271,8 @@ void CreateSoftLink(const char *elf_path) {
 
 size_t rrr = 12345678;
 
+
+
 void create_process(const char *elf_path, const char *argv[]) {
     /**
      * 页表处理
@@ -284,24 +280,7 @@ void create_process(const char *elf_path, const char *argv[]) {
      * 2. 未使用的页表项应该置0
      */
     size_t page_table_base = PageTableUtil::GetClearPage();
-    // 0x3800_1000 -> 0x3800_1000 (4K)
-    PageTableUtil::CreateMapping(page_table_base,
-                                 0x38001000,
-                                 0x38001000,
-                                 PAGE_TABLE_LEVEL::SMALL,
-                                 PRIVILEGE_LEVEL::SUPERVISOR);
-    // 0x4000_0000 -> 0c4000_0000 (1G)
-    PageTableUtil::CreateMapping(page_table_base,
-                                 0x40000000,
-                                 0x40000000,
-                                 PAGE_TABLE_LEVEL::LARGE,
-                                 PRIVILEGE_LEVEL::SUPERVISOR);
-    // 0x8000_0000 -> 0x8000_0000 (1G)
-    PageTableUtil::CreateMapping(page_table_base,
-                                 0x80000000,
-                                 0x80000000,
-                                 PAGE_TABLE_LEVEL::LARGE,
-                                 PRIVILEGE_LEVEL::USER);
+    PageTableUtil::init_pageTable(page_table_base);
 
     FIL elf_file;
 //    printf("elf %s\n", elf_path);
