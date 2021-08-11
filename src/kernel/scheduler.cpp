@@ -91,6 +91,7 @@ void init_scheduler() {
 
 void clone(int flags, size_t stack, int ptid) {
     if (flags != 17) {
+
         printf("flag=0x%x\n", flags);
         panic("clone flags is not SIGCHLD, unknown todo.\n");
     }
@@ -99,11 +100,11 @@ void clone(int flags, size_t stack, int ptid) {
     *running->thread_context = *running_context;
 
     // copy context
-    Context *child_context = new(Context);
+    Context *child_context = new Context();
     *child_context = *running->thread_context;
 
     // copy PCB
-    PCB *child_pcb = new(PCB);
+    PCB *child_pcb = new PCB();
     *child_pcb = *running;
     child_pcb->thread_context = child_context;
 
@@ -153,6 +154,7 @@ void clone(int flags, size_t stack, int ptid) {
         child_pcb->page_table = RefCountPtr<size_t>((size_t *) page_table);
         child_pcb->kernel_phdr = running->kernel_phdr;
 
+        child_pcb->elf_control= RefCountPtr<Elf_Control>(new Elf_Control(*running->elf_control, page_table));
         child_pcb->brk_control = RefCountPtr<BrkControl>(new BrkControl(*running->brk_control, page_table));
 
         runnable.push_back(child_pcb);
@@ -452,7 +454,7 @@ void create_process(const char *elf_path, const char *argv[]) {
     thread_context->satp = (page_table_base >> 12) | (8LL << 60);
 
     // push into runnable list
-    PCB *new_pcb = new PCB;
+    PCB *new_pcb = new PCB();
     new_pcb->pid = get_new_pid();
     new_pcb->ppid = 1;
     new_pcb->stack = stack_page;
@@ -464,7 +466,7 @@ void create_process(const char *elf_path, const char *argv[]) {
     // TODO: 初始化工作目录为/，这不合理
     memset(new_pcb->cwd, 0, sizeof(new_pcb->cwd));
     new_pcb->cwd[0] = '/';
-    new_pcb->stack_size = 4096;
+    new_pcb->stack_size = 4096*5;
 
     runnable.push_back(new_pcb);
 }
