@@ -169,7 +169,7 @@ void init_thread() {
 //    simple_test();
     busybox_test();
 
-//    add_test("/lmbench_new bw_pipe -P 1");
+    add_test("/lmbench_new bw_pipe -P 1");
 
     schedule();
 }
@@ -236,9 +236,6 @@ void vfs_init() {
     assert(exe != nullptr);
 }
 
-
-
-
 int main() {
     printf("   _____            _____               \n"
            "  / ____|          / ____|              \n"
@@ -259,14 +256,8 @@ int main() {
     kernelContext.kernel_handle_interrupt = (size_t) handle_interrupt;
     kernelContext.kernel_restore = (size_t) __restore;
 
-    // init_thread();
-    uint64 start = timer();
-    uint64 end = timer();
-    while (1) {
-        sleep(1);
-        end = timer();
-        printf("%d\n",end-start);
-    }
+    init_thread();
+
     // unreachable
     panic("Unreachable code!");
     return 0;

@@ -75,25 +75,27 @@ void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_
             memset(buf,0,4096);
             /**
              * target page range: [ p , p+4096 )
-             * source page range: [ p-target_start+phdr[i].p_offset , p-target_start+phdr[i].p_offset+4096 )
+             * source page range: [ p-phdr[i].p_vaddr+phdr[i].p_offset , p-phdr[i].p_vaddr+phdr[i].p_offset+4096 )
              * available total source range: [ phdr[i].p_offset , phdr[i].p_offset+phdr[i].p_filesz )
              */
-            if(p - target_start + phdr[i].p_offset + 4096 <= phdr[i].p_offset){
-                // skip copying
-            }else{
-                size_t copy_start=p-target_start+phdr[i].p_offset;
-                size_t copy_end= min(p-target_start+phdr[i].p_offset+4096,phdr[i].p_offset+phdr[i].p_filesz);
+
+            size_t copy_start=max(
+                    p-phdr[i].p_vaddr+phdr[i].p_offset,
+                    phdr[i].p_offset
+                    );
+            size_t copy_end= min(
+                    p-phdr[i].p_vaddr+phdr[i].p_offset+4096,
+                    phdr[i].p_offset+phdr[i].p_filesz
+                    );
+            if(copy_start<copy_end){
                 f_lseek(elf_file,copy_start);
-                f_read(elf_file,buf,copy_end-copy_start,&read_bytes);
-                if(phdr[i].p_flags&PF_W){
-                    // check sum
-                    size_t res=0;
-                    for(char* c=(char*)buf;c<(char*)(buf+4096);c++){
-                        res=(res*10007+*c)%1000000007;
-                    }
-                    printf("file pos=0x%x - 0x%x   checksum: 0x%x\n",copy_start,copy_end,res);
-                }
+                f_read(
+                        elf_file,
+                       buf+copy_start-(p-phdr[i].p_vaddr+phdr[i].p_offset),
+                       copy_end-copy_start,&read_bytes
+                       );
             }
+
             if(phdr[i].p_flags&PF_W){
                 elf_control->bind_data_page(p, size_t(buf));
             }else{
@@ -102,14 +104,6 @@ void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_
         }
     }
 
-    for(size_t j=(size_t)0x1a7000;j<(size_t)0x1a7000+0xbad8;j+=4096){
-        // check sum
-        size_t res=0;
-        for(char* c=(char*)(j);c<(char*)(j+4096);c++){
-            res=(res*10007+*c)%1000000007;
-        }
-        printf("vaddr pos=0x%x - 0x%x   checksum: 0x%x\n",j,j+4096,res);
-    }
 
     *entry=Ehdr->e_entry;
 

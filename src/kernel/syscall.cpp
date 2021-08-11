@@ -226,7 +226,11 @@ size_t sys_execve(Context *context) {
 }
 
 size_t sys_gettimeofday(Context *context) {
-//    spec((TimeVal*)get_actual_page(context->a0));
+    auto timeVal=(TimeVal*)context->a0;
+    uint64 usec=timer();
+    timeVal->sec=usec/1000000;
+    timeVal->usec=usec%1000000;
+
     return 0;
 }
 
@@ -514,17 +518,8 @@ size_t sys_writev(Context* context){
 
 size_t sys_brk(Context* context){
     size_t require=context->a0;
-    printf("brk: require= 0x%x\n",require);
+//    printf("brk: require= 0x%x\n",require);
     return running->brk_control->brk(require);
-}
-
-size_t sys_clock_gettime(Context* context){
-    int clock_id=context->a0;
-    auto *timespec= reinterpret_cast<struct timespec *>(context->a1);
-
-    CurrentTimeSpec(timespec);
-
-    return 0;
 }
 
 size_t sys_getuid(Context* context){
@@ -589,22 +584,6 @@ size_t sys_rt_sigaction(Context* context){
     return 0;
 }
 
-size_t sys_getrusage(Context* context){
-    int who=context->a0;
-    struct rusage *usage= reinterpret_cast<struct rusage *>(context->a1);
-
-    memset(usage,0,sizeof (rusage));
-
-
-    usage->ru_stime.tv_sec=0;
-    usage->ru_stime.tv_usec=0;
-
-    usage->ru_utime.tv_sec=0;
-    usage->ru_utime.tv_usec=0;
-
-    return 0;
-}
-
 size_t sys_kill(Context* context){
     int pid=context->a0;
     int signal=context->a1;
@@ -640,6 +619,35 @@ size_t sys_sysinfo(Context* context){
     info->totalswap=114514;
     info->freeswap=114514;
     info->procs=100;
+    return 0;
+}
+
+size_t sys_clock_gettime(Context* context){
+    int clock_id=context->a0;
+    auto *timespec= reinterpret_cast<struct timespec *>(context->a1);
+
+    size_t* pc=reinterpret_cast<size_t*>(context->sepc);
+    uint64 usec=timer();
+    timespec->tv_sec=usec/1000000;
+    timespec->tv_nsec=usec%1000000*1000;
+
+    return 0;
+}
+
+size_t sys_getrusage(Context* context){
+    int who=context->a0;
+    struct rusage *usage= reinterpret_cast<struct rusage *>(context->a1);
+
+    memset(usage,0,sizeof (rusage));
+
+    uint64 usec=timer();
+
+    usage->ru_stime.tv_sec=usec/1000000;
+    usage->ru_stime.tv_usec=usec%1000000;
+
+    usage->ru_utime.tv_sec=usec/1000000;
+    usage->ru_utime.tv_usec=usec%1000000;
+
     return 0;
 }
 
@@ -716,7 +724,6 @@ void syscall_register() {
     REGISTER(getchar);
     REGISTER(write);
     REGISTER(execve);
-    REGISTER(gettimeofday);
     REGISTER(exit);
     REGISTER(getppid);
     REGISTER(getpid);
@@ -730,7 +737,6 @@ void syscall_register() {
     REGISTER(getdents64);
     REGISTER(mkdirat);
     REGISTER(unlinkat);
-    REGISTER(times);
     REGISTER(uname);
     REGISTER(wait4);
     REGISTER(clock_nanosleep);
@@ -754,13 +760,17 @@ void syscall_register() {
     REGISTER(exit_group);
     REGISTER(kill);
     REGISTER(sysinfo);
-    REGISTER(getrusage);
     REGISTER(mmap);
     REGISTER(readlinkat);
     REGISTER(ioctl);
     REGISTER(rt_sigaction);
+
+    REGISTER(getrusage);
     REGISTER(clock_gettime);
     REGISTER(utimensat);
     REGISTER(fcntl);
+
+    REGISTER(times);
+    REGISTER(gettimeofday);
 #undef REGISTER
 }

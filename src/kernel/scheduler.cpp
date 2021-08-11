@@ -9,7 +9,6 @@ extern "C" {
 #include "../driver/fatfs/ff.h"
 }
 
-
 int global_pid = 1;
 
 // Warning: when do sth with running, sync with latest running_context first
@@ -92,7 +91,7 @@ void init_scheduler() {
 
 void clone(int flags, size_t stack, int ptid) {
     if (flags != 17) {
-        printf("flag=%d\n", flags);
+        printf("flag=0x%x\n", flags);
         panic("clone flags is not SIGCHLD, unknown todo.\n");
     }
 
@@ -303,7 +302,7 @@ void create_process(const char *elf_path, const char *argv[]) {
                                  PRIVILEGE_LEVEL::USER);
 
     FIL elf_file;
-    printf("elf %s\n", elf_path);
+//    printf("elf %s\n", elf_path);
     int res = f_open(&elf_file, elf_path, FA_READ);
     if (res != FR_OK) {
         panic("read error")
@@ -311,11 +310,11 @@ void create_process(const char *elf_path, const char *argv[]) {
     size_t entry, ph_off;
     Elf64_Phdr *kernel_phdr;
     int ph_num;
-    RefCountPtr<Elf_Control> elf_control(new Elf_Control(register_read_satp() << 12));
+    RefCountPtr<Elf_Control> elf_control(new Elf_Control(page_table_base));
     load_elf(&elf_file, elf_control.getPtr(), &entry, &ph_off, &ph_num, &kernel_phdr);
     f_close(&elf_file);
 
-    Context *thread_context = new(Context);
+    Context *thread_context = new Context();
     thread_context->sstatus = register_read_sstatus();
     /**
      * 用户栈
@@ -324,7 +323,6 @@ void create_process(const char *elf_path, const char *argv[]) {
     size_t stack_page = (size_t) alloc_page(4096 * 5);
     memset(reinterpret_cast<void *>(stack_page), 0, 4096 * 5);
     thread_context->sp = stack_page + __page_size * 5 - 10 * 8;
-
 
     const char *env[] = {
             "SHELL=ash",
@@ -432,11 +430,9 @@ void create_process(const char *elf_path, const char *argv[]) {
     // argc
     put_envp((size_t **) &sp, argv_strings.length() + 1);
 
-    check_stack_preparation(sp);
+//    check_stack_preparation(sp);
 
     thread_context->sp = reinterpret_cast<size_t>(sp);
-//    thread_context->a0=1;
-//    thread_context->a1=argv_start;
 
     /**
      * 此处spp应为0,表示user-mode
@@ -471,6 +467,15 @@ void create_process(const char *elf_path, const char *argv[]) {
     new_pcb->stack_size = 4096;
 
     runnable.push_back(new_pcb);
+}
+
+void __yield() {
+    // sync with running_context
+    *running->thread_context = *running_context;
+
+    runnable.push_back(running);
+    running = nullptr;
+    schedule();
 }
 
 void yield() {
