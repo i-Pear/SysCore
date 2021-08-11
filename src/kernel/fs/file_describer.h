@@ -33,9 +33,14 @@ enum class FILE_ACCESS_TYPE{
 
 class FileDescriber{
 public:
-    FileDescriber(const RefCountPtr<OpenedFile>& file, FILE_ACCESS_TYPE fileAccessType): file_access_type_(fileAccessType){
+    FileDescriber(const RefCountPtr<OpenedFile>& file, FILE_ACCESS_TYPE fileAccessType): file_access_type_(fileAccessType), fd_ref_count_(1){
         file_ = file;
     }
+
+    FileDescriber(const RefCountPtr<OpenedFile>& file, FILE_ACCESS_TYPE fileAccessType, int fd_ref_count): file_access_type_(fileAccessType), fd_ref_count_(fd_ref_count){
+        file_ = file;
+    }
+
 
     RefCountPtr<OpenedFile>& GetFile(){
         return file_;
@@ -44,9 +49,19 @@ public:
     FILE_ACCESS_TYPE GetAccessType(){
         return file_access_type_;
     }
+
+    // TODO(waitti) ugly code, fix it
+    bool DecreaseCount(){
+        --fd_ref_count_;
+        if(fd_ref_count_ <= 0){
+            return true;
+        }
+        return false;
+    }
 private:
     FILE_ACCESS_TYPE file_access_type_;
     RefCountPtr<OpenedFile> file_;
+    int fd_ref_count_;
 };
 
 extern FileDescriber* fd_array[FILE_DESCRIBER_ARRAY_LENGTH];
@@ -83,11 +98,14 @@ public:
             panic("[FD] Try close un exists fd")
             return -1;
         }
-//        printf("[FD] try close file %s\n", GetFile(fd)->GetCStylePath());
         Erase(fd);
     }
 
     static RefCountPtr<OpenedFile>& GetFile(int fd){
+        if(fd_array[fd] == nullptr){
+            printf("[FD] Access NULL fd %d\n", fd);
+            panic("")
+        }
         return fd_array[fd]->GetFile();
     }
 
@@ -125,15 +143,15 @@ public:
     static int CreatePipe(int pipefd[2], int flag){
         // TODO: flag
         int read_fd = FindUnUsedFd();
-        int write_fd = FindUnUsedFd();
+        int write_fd = FindUnusedFdBiggerOrEqual(read_fd + 1);
         auto read_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++fd_pipe_count);
         auto write_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++fd_pipe_count);
         fs->open(read_path.c_str(), O_CREATE | O_RDONLY);
         fs->open(write_path.c_str(), O_CREATE | O_WRONLY);
         RefCountPtr<OpenedFile> write_file(new OpenedFile(write_path));
         RefCountPtr<OpenedFile> read_file(new OpenedFile(read_path));
-        fd_array[read_fd] = new FileDescriber(read_file, FILE_ACCESS_TYPE::READ);
-        fd_array[write_fd] = new FileDescriber(write_file, FILE_ACCESS_TYPE::WRITE);
+        fd_array[read_fd] = new FileDescriber(read_file, FILE_ACCESS_TYPE::READ, 2);
+        fd_array[write_fd] = new FileDescriber(write_file, FILE_ACCESS_TYPE::WRITE, 2);
         pipefd[0] = read_fd;
         pipefd[1] = write_fd;
         return 0;
@@ -151,8 +169,13 @@ private:
     }
 
     static void Erase(int fd){
-        delete fd_array[fd];
-        fd_array[fd] = nullptr;
+        if(fd_array[fd] == nullptr){
+            return;
+        }
+        if(fd_array[fd]->DecreaseCount()){
+            delete fd_array[fd];
+            fd_array[fd] = nullptr;
+        }
     }
 };
 
