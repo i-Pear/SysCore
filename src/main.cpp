@@ -68,6 +68,7 @@ void simple_test(){
 //    add_test("/mount");
 //    add_test("/umount");
 //    add_test("/fstat");
+//    add_test("/pipe");
 }
 
 void busybox_test(){

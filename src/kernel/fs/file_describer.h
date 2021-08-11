@@ -50,6 +50,7 @@ private:
 };
 
 extern FileDescriber* fd_array[FILE_DESCRIBER_ARRAY_LENGTH];
+extern int fd_pipe_count;
 
 class FD{
 public:
@@ -63,7 +64,7 @@ public:
         fd_array[1] = new FileDescriber(stdout, FILE_ACCESS_TYPE::WRITE);
         fd_array[2] = new FileDescriber(stdout, FILE_ACCESS_TYPE::WRITE);
 
-        pipe_count_ = 0;
+        fd_pipe_count = 0;
     }
 
     static int OpenNewFile(const char* path, int flag, int fd){
@@ -125,8 +126,8 @@ public:
         // TODO: flag
         int read_fd = FindUnUsedFd();
         int write_fd = FindUnUsedFd();
-        auto read_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++pipe_count_);
-        auto write_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++pipe_count_);
+        auto read_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++fd_pipe_count);
+        auto write_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++fd_pipe_count);
         fs->open(read_path.c_str(), O_CREATE | O_RDONLY);
         fs->open(write_path.c_str(), O_CREATE | O_WRONLY);
         RefCountPtr<OpenedFile> write_file(new OpenedFile(write_path));
@@ -153,8 +154,6 @@ private:
         delete fd_array[fd];
         fd_array[fd] = nullptr;
     }
-
-    static int pipe_count_;
 };
 
 #endif //OS_RISC_V_FILE_DESCRIBER_H
