@@ -683,6 +683,12 @@ size_t sys_sendfile(Context* context){
     return write_bytes;
 }
 
+size_t sys_pipe2(Context* context){
+    int* pipefd = reinterpret_cast<int*>(context->a0);
+    int flags = context->a1;
+    return FD::CreatePipe(pipefd, flags);
+}
+
 /// syscall int & register & distribute
 
 void syscall_init() {
@@ -777,5 +783,6 @@ void syscall_register() {
     REGISTER(utimensat);
     REGISTER(fcntl);
     REGISTER(sendfile);
+    REGISTER(pipe2);
 #undef REGISTER
 }

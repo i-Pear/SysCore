@@ -62,6 +62,8 @@ public:
         fd_array[0] = new FileDescriber(stdin, FILE_ACCESS_TYPE::READ);
         fd_array[1] = new FileDescriber(stdout, FILE_ACCESS_TYPE::WRITE);
         fd_array[2] = new FileDescriber(stdout, FILE_ACCESS_TYPE::WRITE);
+
+        pipe_count_ = 0;
     }
 
     static int OpenNewFile(const char* path, int flag, int fd){
@@ -118,6 +120,23 @@ public:
         panic("can't find unused fd");
         return -1;
     }
+
+    static int CreatePipe(int pipefd[2], int flag){
+        // TODO: flag
+        int read_fd = FindUnUsedFd();
+        int write_fd = FindUnUsedFd();
+        auto read_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++pipe_count_);
+        auto write_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++pipe_count_);
+        fs->open(read_path.c_str(), O_CREATE | O_RDONLY);
+        fs->open(write_path.c_str(), O_CREATE | O_WRONLY);
+        RefCountPtr<OpenedFile> write_file(new OpenedFile(write_path));
+        RefCountPtr<OpenedFile> read_file(new OpenedFile(read_path));
+        fd_array[read_fd] = new FileDescriber(read_file, FILE_ACCESS_TYPE::READ);
+        fd_array[write_fd] = new FileDescriber(write_file, FILE_ACCESS_TYPE::WRITE);
+        pipefd[0] = read_fd;
+        pipefd[1] = write_fd;
+        return 0;
+    }
 private:
     static void Check(int fd){
         if(fd_array[fd] != nullptr){
@@ -134,6 +153,8 @@ private:
         delete fd_array[fd];
         fd_array[fd] = nullptr;
     }
+
+    static int pipe_count_;
 };
 
 #endif //OS_RISC_V_FILE_DESCRIBER_H
