@@ -532,17 +532,6 @@ size_t sys_brk(Context* context){
     return running->brk_control->brk(require);
 }
 
-size_t sys_clock_gettime(Context* context){
-    int clock_id=context->a0;
-    auto *timespec= reinterpret_cast<struct timespec *>(context->a1);
-
-    uint64 usec=timer();
-    timespec->tv_sec=usec/1000000;
-    timespec->tv_nsec=usec%1000000*1000;
-
-    return 0;
-}
-
 size_t sys_getuid(Context* context){
     return 0;
 }
@@ -605,23 +594,6 @@ size_t sys_rt_sigaction(Context* context){
     return 0;
 }
 
-size_t sys_getrusage(Context* context){
-    int who=context->a0;
-    struct rusage *usage= reinterpret_cast<struct rusage *>(context->a1);
-
-    memset(usage,0,sizeof (rusage));
-
-    uint64 usec=timer();
-
-    usage->ru_stime.tv_sec=usec/1000000;
-    usage->ru_stime.tv_usec=usec%1000000;
-
-    usage->ru_utime.tv_sec=usec/1000000;
-    usage->ru_utime.tv_usec=usec%1000000;
-
-    return 0;
-}
-
 size_t sys_kill(Context* context){
     int pid=context->a0;
     int signal=context->a1;
@@ -657,6 +629,35 @@ size_t sys_sysinfo(Context* context){
     info->totalswap=114514;
     info->freeswap=114514;
     info->procs=100;
+    return 0;
+}
+
+size_t sys_clock_gettime(Context* context){
+    int clock_id=context->a0;
+    auto *timespec= reinterpret_cast<struct timespec *>(context->a1);
+
+    size_t* pc=reinterpret_cast<size_t*>(context->sepc);
+    uint64 usec=timer();
+    timespec->tv_sec=usec/1000000;
+    timespec->tv_nsec=usec%1000000*1000;
+
+    return 0;
+}
+
+size_t sys_getrusage(Context* context){
+    int who=context->a0;
+    struct rusage *usage= reinterpret_cast<struct rusage *>(context->a1);
+
+    memset(usage,0,sizeof (rusage));
+
+    uint64 usec=timer();
+
+    usage->ru_stime.tv_sec=usec/1000000;
+    usage->ru_stime.tv_usec=usec%1000000;
+
+    usage->ru_utime.tv_sec=usec/1000000;
+    usage->ru_utime.tv_usec=usec%1000000;
+
     return 0;
 }
 
@@ -722,7 +723,6 @@ void syscall_register() {
     REGISTER(getdents64);
     REGISTER(mkdirat);
     REGISTER(unlinkat);
-    REGISTER(times);
     REGISTER(uname);
     REGISTER(wait4);
     REGISTER(clock_nanosleep);
@@ -752,7 +752,9 @@ void syscall_register() {
     REGISTER(rt_sigaction);
 
     REGISTER(getrusage);
-    REGISTER(gettimeofday);
     REGISTER(clock_gettime);
+
+    REGISTER(times);
+    REGISTER(gettimeofday);
 #undef REGISTER
 }

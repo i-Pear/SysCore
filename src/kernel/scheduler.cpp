@@ -314,7 +314,7 @@ void create_process(const char *elf_path, const char *argv[]) {
     load_elf(&elf_file, elf_control.getPtr(), &entry, &ph_off, &ph_num, &kernel_phdr);
     f_close(&elf_file);
 
-    Context *thread_context = new(Context);
+    Context *thread_context = new Context();
     thread_context->sstatus = register_read_sstatus();
     /**
      * 用户栈
@@ -467,6 +467,15 @@ void create_process(const char *elf_path, const char *argv[]) {
     new_pcb->stack_size = 4096;
 
     runnable.push_back(new_pcb);
+}
+
+void __yield() {
+    // sync with running_context
+    *running->thread_context = *running_context;
+
+    runnable.push_back(running);
+    running = nullptr;
+    schedule();
 }
 
 void yield() {

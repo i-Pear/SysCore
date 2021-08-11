@@ -87,6 +87,8 @@ void create_process(const char *elf_path,const char* []);
 
 void clone(int flags,size_t stack,int ptid);
 
+void __yield();
+
 void yield();
 
 int wait(int* wstatus);
