@@ -106,14 +106,13 @@ public:
         return res;
     }
 
-    // EraseEntry will dealloc physical page and page table page
-    static void ErasePageTable(size_t page_table_base) {
+    static void ErasePageTable(size_t page_table_base, bool release_physical_page = false) {
         check_table_base(page_table_base);
 
         for (int i = 0;i < 512; i++) {
             size_t* entry = (size_t *) page_table_base + i;
             if (*entry != 0) {
-                EraseEntry(entry);
+                EraseEntry(entry, release_physical_page);
             }
         }
 
@@ -123,12 +122,11 @@ public:
         }
     }
 
-    // EraseEntry will dealloc physical page
-    static void EraseEntry(size_t* entry_address) {
+    static void EraseEntry(size_t* entry_address, bool release_physical_page = false) {
         size_t entry = *entry_address;
         size_t page = ((entry >> 10) << 12);
         if (is_leaf(entry)) {
-            if (is_page_alloced(page)) {
+            if (release_physical_page && is_page_alloced(page)) {
                 printf("[PageTable] dealloc 0x%x\n", page);
                 dealloc_page(page);
             }
