@@ -302,9 +302,9 @@ void create_process(const char *elf_path, const char *argv[]) {
      * 用户栈
      * 栈通常向低地址方向增长，故此处增加__page_size
      */
-    size_t stack_page = (size_t) alloc_page(4096 * 5);
-    memset(reinterpret_cast<void *>(stack_page), 0, 4096 * 5);
-    thread_context->sp = stack_page + __page_size * 5 - 10 * 8;
+    size_t stack_page = (size_t) alloc_page(4096);
+    memset(reinterpret_cast<void *>(stack_page), 0, 4096);
+    thread_context->sp = stack_page + __page_size - 10 * 8;
 
     const char *env[] = {
             "SHELL=ash",
@@ -447,7 +447,7 @@ void create_process(const char *elf_path, const char *argv[]) {
     // TODO: 初始化工作目录为/，这不合理
     memset(new_pcb->cwd, 0, sizeof(new_pcb->cwd));
     new_pcb->cwd[0] = '/';
-    new_pcb->stack_size = 4096*5;
+    new_pcb->stack_size = 4096;
 
     runnable.push_back(new_pcb);
 }
@@ -593,7 +593,5 @@ void PCB::kill(int exit_ret) {
 
     // free file describer
     // TODO: free file describer
-
-    // TODO: free lists
 
 }
