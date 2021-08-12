@@ -80,9 +80,9 @@ PCB *running;
 
 void init_scheduler() {
 #ifndef QEMU
-    running_context = reinterpret_cast<Context *>(0x80000000 + 6 * 1024 * 1024 - sizeof(Context));
+    running_context = reinterpret_cast<Context *>(0x80000000 + 8 * 1024 * 1024 - sizeof(Context));
 #else
-    running_context= reinterpret_cast<Context *>(0x89000000 + 6 * 1024 * 1024 - sizeof(Context));
+    running_context= reinterpret_cast<Context *>(0x89000000 + 8 * 1024 * 1024 - sizeof(Context));
 #endif
     runnable.start = runnable.end = nullptr;
     blocked.start = blocked.end = nullptr;
