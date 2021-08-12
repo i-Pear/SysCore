@@ -4,6 +4,7 @@
 #include "scheduler.h"
 #include "time/time.h"
 #include "posix/posix_structs.h"
+#include "posix/fcntl.h"
 #include "fs/file_describer.h"
 #include "memory/Heap.h"
 #include "posix/errno.h"
@@ -673,11 +674,14 @@ size_t sys_utimensat(Context* context){
 size_t sys_fcntl(Context* context){
     int old_fd = sysGetRealFd((int) context->a0);
     size_t flag = context->a1;
+
+    if (flag == F_GETFL) {
+        return O_RDWR;
+    }
+
     int new_fd = sysGetRealFd((int) context->a2);
     int actual_fd = FD::FindUnusedFdBiggerOrEqual(new_fd);
-
     FD::CopyFd(old_fd, actual_fd);
-
     return actual_fd;
 }
 

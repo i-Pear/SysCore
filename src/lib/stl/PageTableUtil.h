@@ -38,6 +38,9 @@ public:
                                      0x80000000,
                                      PAGE_TABLE_LEVEL::LARGE,
                                      PRIVILEGE_LEVEL::USER);
+
+        ErasePageTable(page_table_base);
+        shutdown();
     }
 
     static void CreateMapping(size_t table_base,
@@ -61,6 +64,7 @@ public:
                 return;
             }
             table_base = GetClearPage();
+            printf("[PT] alloc 0x%x\n", table_base);
             *pte1 = calc_ppn(table_base) | non_leaf_attributes(privilege_level);
         }else{
             if(is_leaf(*pte1)){
@@ -73,6 +77,7 @@ public:
         size_t* pte2 = (size_t*)table_base + ppn2;
         if(*pte2 == 0){
             table_base = GetClearPage();
+            printf("[PT] alloc 0x%x\n", table_base);
             *pte2 = calc_ppn(table_base) | non_leaf_attributes(privilege_level);
         }else{
             if(is_leaf(*pte2)){
@@ -84,6 +89,7 @@ public:
 
         size_t* pte3 = (size_t*)table_base + ppn3;
         if(*pte3 == 0){
+            printf("[PT] mapping 0x%x\n", (virtual_address >> 12) << 12);
             *pte3 = calc_ppn(physical_address) | leaf_attributes(privilege_level);
         }
     }
@@ -104,6 +110,33 @@ public:
         size_t res = alloc_page(4096);
         ClearPage(res);
         return res;
+    }
+
+    static void ErasePageTable(size_t page_table_base){
+        check_table_base(page_table_base);
+
+        for (int i = 0;i < 512; i++) {
+            size_t* entry = (size_t *) page_table_base + i;
+            if (*entry != 0) {
+                EraseEntry(entry);
+            }
+        }
+
+        dealloc_page(page_table_base);
+        printf("[PT] dealloc 0x%x\n", page_table_base);
+    }
+
+    static void EraseEntry(size_t* entry_address){
+        size_t entry = *entry_address;
+        size_t page = ((entry >> 10) << 12);
+        if (is_leaf(entry)) {
+            printf("[PT] dealloc 0x%x\n", page);
+            dealloc_page(page);
+            // clear page table entry
+            *entry_address = 0;
+        } else {
+            ErasePageTable(page);
+        }
     }
 
 private:
