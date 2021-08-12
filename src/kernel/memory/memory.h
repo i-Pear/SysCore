@@ -70,4 +70,6 @@ size_t alloc_page(size_t size);
 
 void dealloc_page(size_t p);
 
+bool is_page_alloced(size_t p);
+
 #endif //OS_RISC_V_MEMORY_H

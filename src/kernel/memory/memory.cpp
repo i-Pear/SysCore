@@ -163,4 +163,10 @@ void dealloc_page(size_t p){
     __memory_update(1,start,start+length-1,-1);
 }
 
+bool is_page_alloced(size_t p){
+    if(p<__kernel_end)return false;
+    if(p>__kernel_end+__page_size*__reserved_page_num)return false;
+    return true;
+}
+
 #undef cnt
