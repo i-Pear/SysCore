@@ -13,6 +13,8 @@ public:
 
     void erase(void* p);
 
+    int size() const;
+
     ~MemKeeper();
 };
 

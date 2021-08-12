@@ -36,7 +36,12 @@ struct Map{
     }
 
     void erase(Key key){
-        // TODO erase key
+        for(auto i=data.start;i;i=i->next){
+            if(i->data.first==key){
+                data.erase(i);
+                return;
+            }
+        }
     }
 
     bool is_empty()const{

@@ -139,6 +139,10 @@ void busybox_test(){
 //    add_test("busybox_new find -name \"busybox_cmd.txt\"");
 }
 
+void lua_test(){
+    add_test("/lua-s sin30.lua");
+}
+
 /**
  * 此处打算通过 sret 进入u-mode
  * 中断后硬件会执行以下动作：
@@ -169,10 +173,10 @@ void init_thread() {
     FD::InitializeFileDescriber();
     init_self_tests();
 
-    simple_test();
+//    simple_test();
 //    busybox_test();
-
-    add_test("/lmbench_new bw_pipe -P 1");
+    lua_test();
+//    add_test("/lmbench_new bw_pipe -P 1");
 
     schedule();
 }

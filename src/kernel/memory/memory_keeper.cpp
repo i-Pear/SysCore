@@ -8,6 +8,10 @@ void MemKeeper::erase(void* p){
     elements.erase(p);
 }
 
+int MemKeeper::size() const{
+    return elements.length();
+}
+
 MemKeeper::~MemKeeper(){
     int length=elements.size;
     for(int i=0;i<length;i++){

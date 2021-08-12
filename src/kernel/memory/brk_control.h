@@ -42,13 +42,13 @@ public:
 
             for (int i = 0; i < page_count; i++) {
                 size_t new_page = alloc_page(4096);
-                memcpy((void *) new_page, memKeeper.elements[i], 4096);
+                memcpy((void *) new_page, other.memKeeper.elements[i], 4096);
 
                 memKeeper.add((void *) new_page);
                 PageTableUtil::CreateMapping(
                         pageTable,
                         BRK_VIRT_BEGIN + 4096 * i,
-                        new_page + 4096 * i,
+                        new_page,
                         PAGE_TABLE_LEVEL::SMALL,
                         PRIVILEGE_LEVEL::USER);
             }

@@ -548,17 +548,21 @@ size_t sys_gettid(Context* context){
 
 size_t sys_mmap(Context* context){
     // void *addr, size_t length, int prot, int flags, int fd, off_t offset
-    void* addr= (void*)(context->a0);
+    void* addr= (void*)(context->a0); // addr is just a hint, so ignore
     size_t length=context->a1;
     int prot=context->a2;
     int flags=context->a3;
     int fd=context->a4;
     off_t offset=context->a5;
 
-    printf("void *addr=0x%x , size_t length=0x%x , int prot=0x%x , int flags=0x%x , int fd=0x%x , off_t offset=0x%x \n",
-           addr,length,prot,flags,fd,offset);
+    return running->mmap_control->mmap(length);
+}
 
-    return 0;
+size_t sys_munmap(Context* context){
+    size_t addr=context->a0;
+    size_t length=context->a1;
+
+    return running->mmap_control->munmap(addr,length);
 }
 
 size_t sys_readlinkat(Context* context){
@@ -725,7 +729,7 @@ void syscall_distribute(int syscall_id, Context *context) {
     if (syscall_list[syscall_id] != NULL) {
         context->a0 = syscall_list[syscall_id](context);
 #ifdef STRACE
-        printf("[syscall] %d, %s = %d\n", syscall_id, syscall_name_list[syscall_id], context->a0);
+        printf("[syscall] %d, %s = 0x%x\n", syscall_id, syscall_name_list[syscall_id], context->a0);
 #endif
     } else {
         syscall_unhandled(context);
@@ -781,6 +785,7 @@ void syscall_register() {
     REGISTER(kill);
     REGISTER(sysinfo);
     REGISTER(mmap);
+    REGISTER(munmap);
     REGISTER(readlinkat);
     REGISTER(ioctl);
     REGISTER(rt_sigaction);

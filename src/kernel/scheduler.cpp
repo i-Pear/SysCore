@@ -150,6 +150,7 @@ void clone(int flags, size_t stack,int* parent_tid, size_t tls,int* child_tid) {
 
         child_pcb->elf_control= RefCountPtr<Elf_Control>(new Elf_Control(*running->elf_control, page_table));
         child_pcb->brk_control = RefCountPtr<BrkControl>(new BrkControl(*running->brk_control, page_table));
+        child_pcb->mmap_control=RefCountPtr<MmapControl>(new MmapControl(*running->mmap_control,page_table));
 
         runnable.push_back(child_pcb);
     }
@@ -442,6 +443,7 @@ void create_process(const char *elf_path, const char *argv[]) {
     new_pcb->page_table = RefCountPtr<size_t>((size_t *) page_table_base);
     new_pcb->kernel_phdr = RefCountPtr<Elf64_Phdr>(kernel_phdr);
     new_pcb->brk_control = RefCountPtr<BrkControl>(new BrkControl(page_table_base));
+    new_pcb->mmap_control=RefCountPtr<MmapControl>(new MmapControl(page_table_base));
     // TODO: 初始化工作目录为/，这不合理
     memset(new_pcb->cwd, 0, sizeof(new_pcb->cwd));
     new_pcb->cwd[0] = '/';

@@ -10,11 +10,11 @@
 #include "../lib/stl/RefCountPtr.h"
 #include "memory/brk_control.h"
 #include "memory/elf_control.h"
+#include "memory/mmap_control.h"
 
 #define MAX_PATH_LENGTH 32
 
 extern int global_pid;
-
 
 class PCB{
 public:
@@ -31,6 +31,8 @@ public:
     RefCountPtr<Elf64_Phdr> kernel_phdr;
 
     RefCountPtr<BrkControl> brk_control;
+
+    RefCountPtr<MmapControl> mmap_control;
 
     Context * thread_context;
     char cwd[MAX_PATH_LENGTH];
