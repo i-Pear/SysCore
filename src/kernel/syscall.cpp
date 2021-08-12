@@ -727,10 +727,10 @@ void syscall_distribute(int syscall_id, Context *context) {
     assert(context != NULL);
 
     if (syscall_list[syscall_id] !=nullptr) {
-#ifdef STRACE
+        context->a0 = syscall_list[syscall_id](context);
+        #ifdef STRACE
         printf("[syscall] %d, %s = 0x%x\n", syscall_id, syscall_name_list[syscall_id], context->a0);
 #endif
-        context->a0 = syscall_list[syscall_id](context);
     } else {
         syscall_unhandled(context);
     }
