@@ -19,6 +19,10 @@ extern int global_pid;
 class PCB{
 public:
 
+    PCB()=default; // used by new PCB()
+    PCB& operator=(const PCB& other)=delete; // copy not allowed
+    PCB(const PCB& other)=delete; // copy not allowed
+
     int pid;
     int ppid;
     size_t stack;
@@ -37,18 +41,14 @@ public:
     Context * thread_context;
     char cwd[MAX_PATH_LENGTH];
 
-    Map<size_t,size_t> occupied_file_describer;
+    RefCountPtr<Map<size_t,size_t>> occupied_file_describer;
     RefCountPtr<List<size_t>> occupied_kernel_heap;
-    List<size_t> occupied_pages;
+    RefCountPtr<List<size_t>> occupied_pages;
 
     // thread local
     List<pair<int,int>> signal_list;
-    int* wstatus;
+    int* wstatus=nullptr;
     size_t wait_pid;
-
-    PCB();
-
-    PCB(const PCB& other);
 
     void kill(int exit_ret);
 

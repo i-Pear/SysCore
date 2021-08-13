@@ -28,18 +28,22 @@ public:
     }
 
     Ptr* getPtr() {
+        assert(atomic_count_->ptr()!=nullptr);
         return atomic_count_->ptr();
     }
 
     Ptr* operator->() {
+        assert(atomic_count_->ptr()!=nullptr);
         return atomic_count_->ptr();
     }
 
     Ptr& operator*() {
+        assert(atomic_count_->ptr()!=nullptr);
         return *atomic_count_->ptr();
     }
 
     const Ptr& operator*() const{
+        assert(atomic_count_->ptr()!=nullptr);
         return *atomic_count_->ptr();
     }
 

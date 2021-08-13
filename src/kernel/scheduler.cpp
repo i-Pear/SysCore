@@ -52,19 +52,19 @@ char *get_running_cwd() {
 }
 
 void file_describer_bind(size_t file_id, size_t real_file_describer) {
-    running->occupied_file_describer.put(file_id, real_file_describer);
+    running->occupied_file_describer->put(file_id, real_file_describer);
 }
 
 void file_describer_erase(size_t file_id) {
-    running->occupied_file_describer.erase(file_id);
+    running->occupied_file_describer->erase(file_id);
 }
 
 bool file_describer_exists(size_t file_id) {
-    return running->occupied_file_describer.exists(file_id);
+    return running->occupied_file_describer->exists(file_id);
 }
 
 size_t file_describer_convert(size_t file_id) {
-    return running->occupied_file_describer.get(file_id);
+    return running->occupied_file_describer->get(file_id);
 }
 
 void bind_kernel_heap(size_t addr) {
@@ -72,7 +72,7 @@ void bind_kernel_heap(size_t addr) {
 }
 
 void bind_pages(size_t addr) {
-    running->occupied_pages.push_back(addr);
+    running->occupied_pages->push_back(addr);
 }
 
 List<PCB *> runnable, blocked;
@@ -102,28 +102,28 @@ void clone(int flags, size_t stack,int* parent_tid, size_t tls,int* child_tid) {
 
     // copy PCB
     PCB *child_pcb = new PCB();
-    *child_pcb = *running;
-    child_pcb->thread_context = child_context;
 
     // set pid and ppid
     child_pcb->ppid = running->pid;
     child_pcb->pid = get_new_pid();
+    child_pcb->stack=running->stack;
+    child_pcb->stack_size=running->stack_size;
+
+    child_pcb->page_table=running->page_table;
+    child_pcb->elf_control=running->elf_control;
+    child_pcb->kernel_phdr=running->kernel_phdr;
+    child_pcb->brk_control=running->brk_control;
+    child_pcb->mmap_control=running->mmap_control;
+
+    child_pcb->thread_context = child_context;
+
+    child_pcb->occupied_file_describer=running->occupied_file_describer;
+    child_pcb->occupied_kernel_heap=running->occupied_kernel_heap;
+    child_pcb->occupied_pages=running->occupied_pages;
 
     // set syscall return value
     running->thread_context->a0 = child_pcb->pid;
     child_context->a0 = 0;
-
-    // copy file describer
-    child_pcb->occupied_file_describer = running->occupied_file_describer;
-    // alloc file describer
-    {
-        auto *cnt = child_pcb->occupied_file_describer.data.start;
-        while (cnt != nullptr) {
-            // increase file describer counter
-            // TODO: increase file describer counter
-            cnt = cnt->next;
-        }
-    }
 
     if (stack != 0) {
         // fixed stack, will not copy spaces
@@ -261,7 +261,6 @@ void create_process(const char *_command) {
     create_process(elf, (const char **) argv);
 }
 
-
 void CreateSoftLink(const char *elf_path) {
     auto *exe = fs->root->first_child->search("/proc/self/exe");
     assert(exe != nullptr);
@@ -271,8 +270,6 @@ void CreateSoftLink(const char *elf_path) {
 }
 
 size_t rrr = 12345678;
-
-
 
 void create_process(const char *elf_path, const char *argv[]) {
     /**
@@ -435,19 +432,28 @@ void create_process(const char *elf_path, const char *argv[]) {
 
     // push into runnable list
     PCB *new_pcb = new PCB();
+
     new_pcb->pid = get_new_pid();
     new_pcb->ppid = 1;
+
     new_pcb->stack = stack_page;
-    new_pcb->thread_context = thread_context;
-    new_pcb->elf_control = elf_control;
+    new_pcb->stack_size = 4096;
+
     new_pcb->page_table = RefCountPtr<size_t>((size_t *) page_table_base);
+    new_pcb->elf_control = elf_control;
     new_pcb->kernel_phdr = RefCountPtr<Elf64_Phdr>(kernel_phdr);
     new_pcb->brk_control = RefCountPtr<BrkControl>(new BrkControl(page_table_base));
     new_pcb->mmap_control=RefCountPtr<MmapControl>(new MmapControl(page_table_base));
+
+    new_pcb->thread_context = thread_context;
+
     // TODO: 初始化工作目录为/，这不合理
     memset(new_pcb->cwd, 0, sizeof(new_pcb->cwd));
     new_pcb->cwd[0] = '/';
-    new_pcb->stack_size = 4096;
+
+    new_pcb->occupied_file_describer=RefCountPtr<Map<size_t,size_t>>(new Map<size_t,size_t>());
+    new_pcb->occupied_kernel_heap=RefCountPtr<List<size_t>>(new List<size_t>);
+    new_pcb->occupied_pages=RefCountPtr<List<size_t>>(new List<size_t>);
 
     runnable.push_back(new_pcb);
 }
@@ -573,10 +579,6 @@ int wait(int *wstatus) {
     blocked.push_back(running);
     running = nullptr;
     schedule();
-}
-
-PCB::PCB() : occupied_kernel_heap(new List<size_t>()) {
-
 }
 
 void PCB::kill(int exit_ret) {

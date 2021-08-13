@@ -78,21 +78,21 @@ void simple_test(){
 void busybox_test(){
 
     // tested
-//    add_test("busybox_new ash -c exit");
+    add_test("busybox_new ash -c exit");
     add_test("busybox_new sh -c exit");
-//    add_test("busybox_new du");
+    add_test("busybox_new du");
     add_test("busybox_new expr 1 + 1");
-    add_test("busybox_new false");
-    add_test("busybox_new true");
-    add_test("busybox_new clear");
-    add_test("busybox_new uname");
+//    add_test("busybox_new false");
+//    add_test("busybox_new true");
+//    add_test("busybox_new clear");
+//    add_test("busybox_new uname");
 //    add_test("busybox_new printf abc\n");
-    add_test("busybox_new basename /aaa/bbb");
-    add_test("busybox_new dirname /aaa/bbb");
-    add_test("busybox_new echo 123");
+//    add_test("busybox_new basename /aaa/bbb");
+//    add_test("busybox_new dirname /aaa/bbb");
+//    add_test("busybox_new echo 123");
 //    add_test("busybox_new printf \"abc\n\"");
-    add_test("busybox_new echo \"#### independent command test\"");
-    add_test("busybox_new sleep 1");
+//    add_test("busybox_new echo \"#### independent command test\"");
+//    add_test("busybox_new sleep 1");
 //    add_test("busybox_new cal");
 //    add_test("busybox_new date");
 //    add_test("busybox_new kill 10");
@@ -140,7 +140,7 @@ void busybox_test(){
 }
 
 void lua_test(){
-//    add_test("/busybox_new sh -c lua_testcode.sh");
+//    add_test("/busybox_new cat sin30.lua");
 }
 
 /**
@@ -175,8 +175,9 @@ void init_thread() {
 
 //    simple_test();
     busybox_test();
-//    lua_test();
+    lua_test();
 //    add_test("/lmbench_new bw_pipe -P 1");
+//    add_test("/busybox_new sh -c lua_testcode.sh");
 
     schedule();
 }
