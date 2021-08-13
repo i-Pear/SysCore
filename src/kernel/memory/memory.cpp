@@ -2,6 +2,7 @@
 #include "Heap.h"
 
 size_t __kernel_end;
+size_t alloc_start;
 int page_count;
 
 __Memory_SegmentTreeNode global_pages[__reserved_page_num * 4];
@@ -130,6 +131,7 @@ void init_memory(){
     __kernel_end=get_kernel_end();
 #endif
     __kernel_end=(__kernel_end+__page_size-1)/__page_size*__page_size;
+    alloc_start=__kernel_end;
     printf("kernel end= 0x%x\n",__kernel_end);
     int page_count=(__memory_end-__kernel_end)/__page_size;
 #ifdef QEMU
@@ -140,27 +142,15 @@ void init_memory(){
 }
 
 size_t alloc_page(size_t size){
-//     printf("Trying to alloc page, size=0x%x\n",size);
-    int count=(size+__page_size-1)/__page_size;
-//     printf("count=%d\n",count);
-    int start=__memory_find_space(1,count);
-    if(start==-1){
-        printf("Can't alloc page!\n");
-        shutdown();
-        return -1;
-    }
-//     printf("Alloced page of start=0x%x end=0x%x\n",__kernel_end+start*__page_size,__kernel_end+start*__page_size+count*__page_size);
-    __memory_update(1,start,start+count-1,1);
-    __memory_alloc_length[start]=count;
-    memset((void*)(__kernel_end + start * __page_size), 0, __page_size * count);
-    return __kernel_end+start*__page_size;
+    size=(size+__page_size-1)/__page_size*__page_size;
+    size_t ret=alloc_start;
+    alloc_start+=size;
+    alloc_start+=4096;
+    return ret;
 }
 
 void dealloc_page(size_t p){
-    int start=(p-__kernel_end)/__page_size;
-    int length=__memory_alloc_length[start];
-//     printf("dealloc_page page: start=%d length=%d\n",start,length);
-    __memory_update(1,start,start+length-1,-1);
+
 }
 
 bool is_page_alloced(size_t p){

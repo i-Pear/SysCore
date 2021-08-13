@@ -82,20 +82,20 @@ void busybox_test(){
     add_test("busybox_new sh -c exit");
     add_test("busybox_new du");
     add_test("busybox_new expr 1 + 1");
-//    add_test("busybox_new false");
-//    add_test("busybox_new true");
-//    add_test("busybox_new clear");
-//    add_test("busybox_new uname");
-//    add_test("busybox_new printf abc\n");
-//    add_test("busybox_new basename /aaa/bbb");
-//    add_test("busybox_new dirname /aaa/bbb");
-//    add_test("busybox_new echo 123");
-//    add_test("busybox_new printf \"abc\n\"");
-//    add_test("busybox_new echo \"#### independent command test\"");
-//    add_test("busybox_new sleep 1");
+    add_test("busybox_new false");
+    add_test("busybox_new true");
+    add_test("busybox_new clear");
+    add_test("busybox_new uname");
+    add_test("busybox_new printf abc\n");
+    add_test("busybox_new basename /aaa/bbb");
+    add_test("busybox_new dirname /aaa/bbb");
+    add_test("busybox_new echo 123");
+    add_test("busybox_new printf \"abc\n\"");
+    add_test("busybox_new echo \"#### independent command test\"");
+    add_test("busybox_new sleep 1");
 //    add_test("busybox_new cal");
 //    add_test("busybox_new date");
-//    add_test("busybox_new kill 10");
+    add_test("busybox_new kill 10");
     add_test("busybox_new pwd");
 
     // TODO: misc tests
@@ -107,14 +107,14 @@ void busybox_test(){
 //    add_test("busybox_new hwclock");    // need /etc/localtime
 
     // passed fs tests
-//    add_test("busybox_new sh -c \"echo ccccccc > test.txt \"");
+    add_test("busybox_new sh -c \"echo ccccccc > test.txt \"");
 //    add_test("busybox_new touch test.txt");
-//    add_test("busybox_new cat test.txt");
-//    add_test("busybox_new cut -c 3 test.txt");
+    add_test("busybox_new cat test.txt");
+    add_test("busybox_new cut -c 3 test.txt");
 
     // TODO: file system tests
 //    add_test("busybox_new which ls");
-//    add_test("busybox_new ls");
+    add_test("busybox_new ls");
 //    add_test("busybox_new sh -c \"echo ccccccc > test.txt \"");
 //    add_test("busybox_new cat test.txt");
 //    add_test("busybox_new cut -c 3 test.txt");
