@@ -109,10 +109,14 @@ public:
     static void ErasePageTable(size_t page_table_base, bool release_physical_page = false) {
         check_table_base(page_table_base);
 
+        if (page_table_base == CalculateTableBaseBySatp(register_read_satp())) {
+            panic("You can't release an used page table");
+        }
+
         for (int i = 0;i < 512; i++) {
             size_t* entry = (size_t *) page_table_base + i;
             if (*entry != 0) {
-                EraseEntry(entry, release_physical_page);
+                erase_entry(entry, release_physical_page);
             }
         }
 
@@ -122,7 +126,38 @@ public:
         }
     }
 
-    static void EraseEntry(size_t* entry_address, bool release_physical_page = false) {
+    static void EraseEntry(size_t page_table_base, size_t virtual_address, bool release_physical_page = false) {
+        check_table_base(page_table_base);
+        check_null(virtual_address, virtual_address);
+
+        auto table_base = (size_t *) page_table_base;
+        size_t ppn1 = get_ppn1(virtual_address);
+        size_t ppn2 = get_ppn2(virtual_address);
+        size_t ppn3 = get_ppn3(virtual_address);
+
+        if (inner_erase_entry(table_base, ppn1, release_physical_page)) return;
+        if (inner_erase_entry(table_base, ppn2, release_physical_page)) return;
+        if (inner_erase_entry(table_base, ppn3, release_physical_page)) return;
+    }
+private:
+    static bool inner_erase_entry(size_t*& table_base, size_t ppn, bool release_physical_page = false){
+        size_t entry = *(table_base + ppn);
+        size_t page = (entry >> 10) << 12;
+        if (is_leaf(entry)) {
+            if (release_physical_page && is_page_alloced(page)) {
+                printf("[PageTable] dealloc 0x%x\n", page);
+                dealloc_page(page);
+            }
+            *(table_base + ppn) = 0;
+            return true;
+        } else {
+            table_base = (size_t *) page;
+            return false;
+        }
+    }
+
+
+    static void erase_entry(size_t* entry_address, bool release_physical_page = false) {
         size_t entry = *entry_address;
         size_t page = ((entry >> 10) << 12);
         if (is_leaf(entry)) {
@@ -137,7 +172,6 @@ public:
         }
     }
 
-private:
     // mark non leaf node as USER level, because user & kernel can access same non leaf entry
     static size_t non_leaf_attributes(PRIVILEGE_LEVEL level){
         return 0xd1;
