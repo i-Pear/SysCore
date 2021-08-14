@@ -34,7 +34,7 @@ uint64 get_sec(void){
 
 uint64 timer(){
     uint64 x = r_time();
-    uint64 usec = x * 50 / 8/20/2/40;
+    uint64 usec = x * 50 / 8/160;
     return usec;
 }
 
