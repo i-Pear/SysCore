@@ -11,7 +11,6 @@ void init_heap(){
 }
 
 void* k_malloc(size_t size){
-    printf("[heap] alloc 0x%x\n",size);
     return (void*)heap_allocator.Alloc(size);
 }
 
