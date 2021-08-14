@@ -26,14 +26,6 @@ void *memmove(void *dst,void *src, uint n) {
 void bsp_init(){
     fpioa_pin_init();
 }
-FATFS fs;
-void fatfs_init(){
-    FRESULT res_sd;
-    res_sd = f_mount(&fs, "", 1);
-    if (res_sd != FR_OK) {
-        printf("fat init failed\n");
-    }
-}
 void open_memory_lock(){
     sysctl_pll_enable(SYSCTL_PLL1);
     sysctl_clock_enable(SYSCTL_CLOCK_PLL1);
@@ -46,5 +38,4 @@ void driver_init(){
     bsp_init();
     open_memory_lock();
 #endif
-    fatfs_init();
 }
