@@ -379,7 +379,7 @@ size_t sys_mkdirat(Context *context) {
     int dir_fd = sysGetRealFd(context->a0);
     char *path = (char *) get_actual_page(context->a1);
     int mode = (int) context->a2;
-    fs->mkdir(atFdCWD(dir_fd, path), mode);
+    fs->mkdir(atFdCWD(dir_fd, path), mode, fs->root->fs);
     return 0;
 }
 

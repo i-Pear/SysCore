@@ -205,6 +205,17 @@ public:
         return file->first_child->search(path);
     }
 
+    static File* searchFather(File* file, const char* path) {
+        auto list = PathUtil::split(path);
+        if (list.length() == 1) {
+            return file;
+        } else if (list.length() >= 2) {
+            list.pop_back();
+            return search(file, PathUtil::joinAbsolutePath(list).c_str());
+        }
+        return nullptr;
+    }
+
     String ReadLink(const char* path){
         auto* file = search(root, path);
         if(file == nullptr){
@@ -293,9 +304,24 @@ public:
         return 0;
     };
 
-    int mkdir(const char *path, int flag) {
-        VFS_ADAPTER(mkdir(path, flag))
-//        return 0;
+    int mkdir(const char *path, int flag, IFS* ifs) {
+        auto* father = searchFather(root, path);
+        if(father == nullptr){
+            return -1;
+        }
+        int res = father->fs->mkdir(path, flag);
+        if (res == FR_OK) {
+            auto& file_name = PathUtil::split(path).end->data;
+            File* file = nullptr;
+            if (father->first_child) {
+                file = father->first_child->search(file_name);
+            }
+            if (file == nullptr) {
+                father->appendChild(new File(file_name, ifs));
+            }
+            return 0;
+        }
+        return -1;
     };
 
     int unlink(const char *path) {
