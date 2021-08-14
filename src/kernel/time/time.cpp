@@ -36,7 +36,7 @@ uint64 timer(){
 //    return get_usec();
     uint64 x = r_time();
 //    uint32 y = sysctl_clock_get_freq(SYSCTL_CLOCK_CPU);
-    uint32 y = 406250;
+    uint64 y = 400000000;
     uint64 usec = x * 50 * 1000000UL / y;
     return usec;
 }

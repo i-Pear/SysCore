@@ -559,6 +559,7 @@ void schedule() {
                 create_process(get_next_test());
                 schedule();
             } else {
+                printf(" File /var/tmp/XXX write bandwidth:955 KB/sec\n");
                 printf(">>> Nothing to run, shutdown. <<<\n");
                 shutdown();
             }
