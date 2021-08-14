@@ -176,7 +176,7 @@ void init_thread() {
 
 //    simple_test();
     busybox_test();
-//    lua_test();n
+//    lua_test();
     printf("latency measurements\n");
     add_test("/lmbench_all lat_syscall -P 1 null");
 
