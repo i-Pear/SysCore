@@ -14,7 +14,7 @@ class OpenedFile{
 public:
     explicit OpenedFile(const String& path):path_(path){}
     virtual ~OpenedFile(){
-        printf("[OpenedFile] close %s\n", path_.c_str());
+//        printf("[OpenedFile] close %s\n", path_.c_str());
         fs->close(path_.c_str());
     }
     String& GetPath(){

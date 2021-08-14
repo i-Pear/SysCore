@@ -743,6 +743,10 @@ size_t sys_futex(Context* context) {
     return 0;
 }
 
+size_t sys_setitimer(Context* context) {
+    return 0;
+}
+
 /// syscall int & register & distribute
 
 void syscall_init() {
@@ -758,7 +762,7 @@ void syscall_unhandled(Context *context) {
 }
 
 void syscall_distribute(int syscall_id, Context *context) {
-#define STRACE
+//#define STRACE
     static int syscall_is_initialized = 0;
     if (syscall_is_initialized != 1) {
         syscall_init();
@@ -846,5 +850,7 @@ void syscall_register() {
     REGISTER(pipe2);
     REGISTER(pselect6);
     REGISTER(futex);
+    REGISTER(setitimer);
+
 #undef REGISTER
 }

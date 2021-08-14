@@ -141,7 +141,7 @@ void busybox_test(){
 }
 
 void lua_test(){
-    add_test("/lua-s sin30.lua");
+//    add_test("/lua-s sin30.lua");
 }
 
 /**
@@ -176,9 +176,9 @@ void init_thread() {
 
 //    simple_test();
     busybox_test();
-//    lua_test();
+//    lua_test();n
+    printf("latency measurements\n");
     add_test("/lmbench_new lat_syscall -P 1 null");
-//    add_test("/busybox_new sh -c lua_testcode.sh");
 
     schedule();
 }
