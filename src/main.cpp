@@ -259,7 +259,6 @@ int main() {
     lty(__kernel_stack_base);
 
     printf("[OS] Memory Init.\n");
-    printf("Simple syscall: 0.2935 microseconds\n");
     init_memory();
 //    init_kernel_heap();
     init_heap();
