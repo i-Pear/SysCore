@@ -17,7 +17,7 @@ volatile clint_t *const clint = (volatile clint_t *)CLINT_BASE_ADDR;
 
 uint64 get_nsec(void){
     /* No difference on cores */
-    return clint->mtime * 50 * 1000000000UL / sysctl_clock_get_freq(SYSCTL_CLOCK_CPU);
+    return clint->mtime * 1000000000UL / sysctl_clock_get_freq(SYSCTL_CLOCK_CPU) * 50;
 }
 
 uint64 get_usec(void){
@@ -87,8 +87,8 @@ long sys_clock_gettime(clockid_t which_clock, struct timespec *ts){
             break;
         case CLOCK_MONOTONIC:
             nsec = get_nsec();
-            ts->tv_sec = nsec / 1000000000;
-            ts->tv_nsec = nsec % 1000000000;
+            ts->tv_sec = nsec / 1000000000UL;
+            ts->tv_nsec = nsec % 1000000000UL;
             break;
         // case CLOCK_PROCESS_CPUTIME_ID:
         //     break;
