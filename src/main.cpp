@@ -185,19 +185,6 @@ add_test("/lmbench_new lat_pipe -P 1");
     schedule();
 }
 
-void fix_kernel_page_table(){
-    size_t table_base = register_read_satp() << 12;
-    size_t virtual_address = 0x38001000;
-    size_t physical_address = virtual_address;
-
-    PageTableUtil::CreateMapping(table_base,
-                                 virtual_address,
-                                 physical_address,
-                                 PAGE_TABLE_LEVEL::SMALL,
-                                 PRIVILEGE_LEVEL::SUPERVISOR);
-
-}
-
 void vfs_init() {
     File::init();
     auto *ifs = new FS;
