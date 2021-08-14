@@ -178,7 +178,7 @@ void init_thread() {
     busybox_test();
 //    lua_test();n
     printf("latency measurements\n");
-    add_test("/lmbench_new lat_syscall -P 1 null");
+    add_test("/lmbench_all lat_syscall -P 1 null");
 
     schedule();
 }
