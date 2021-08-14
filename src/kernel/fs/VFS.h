@@ -292,7 +292,11 @@ public:
 
 
     int fstat(const char *path, kstat *stat) {
-        VFS_ADAPTER(fstat(path, stat))
+        auto* file = search(root, path);
+        if(file == nullptr){
+            return -1;
+        }
+        return file->fs->fstat(path, stat);
     };
 
     int lseek(const char *path, size_t offset, int whence) {
