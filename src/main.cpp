@@ -174,11 +174,13 @@ void init_thread() {
     FD::InitializeFileDescriber();
     init_self_tests();
 
-//    simple_test();
-    busybox_test();
+    simple_test();
+//    busybox_test();
 //    lua_test();
-    add_test("/lmbench_new lat_syscall -P 1 null");
-//    add_test("/busybox_new sh -c lua_testcode.sh");
+add_test("/lmbench_new lat_pipe -P 1");
+//add_test("/busybox_new mkdir -p /var/tmp");
+//add_test("/busybox_new touch /var/tmp/lmbench");
+//add_test("/lmbench_new lat_syscall -P 1 open /var/tmp/lmbench");
 
     schedule();
 }
@@ -202,47 +204,25 @@ void vfs_init() {
     ifs->init();
     fs = new VFS(ifs);
 
-    auto *stdout = new StdoutFs;
+    auto* stdout = new StdoutFs;
+    auto* zero_fs = new ZeroFs;
+    auto* null_fs = new NullFs;
+    auto* pipe_fs = new PipeFs;
 
-    /** /dev/console **/
-    fs->root->appendChild(new File("dev", ifs));
-    fs->mkdir("/dev", O_DIRECTORY | O_RDWR);
-
-    auto *dev = fs->root->first_child->search("/dev");
-    assert(dev != nullptr);
-    dev->appendChild(new File("console", stdout));
+    /** /dev **/
+    fs->mkdir("/dev", 0, ifs);
+    fs->mkdir("/dev/console", 0, stdout);
+    fs->mkdir("/dev/zero", 0, zero_fs);
+    fs->mkdir("/dev/null", 0, null_fs);
 
     /** /sys/pipe **/
-    fs->root->appendChild(new File("sys", ifs));
-    fs->mkdir("/sys", O_DIRECTORY | O_RDWR);
-
-    auto* sys = fs->root->first_child->search("/sys");
-    assert(sys != nullptr);
-
-    sys->appendChild(new File("pipe", new PipeFs));
-    fs->mkdir("/pipe", O_DIRECTORY | O_RDWR);
-
-    auto* sys_pipe = fs->root->first_child->search("/sys/pipe");
-    assert(sys_pipe != nullptr);
-
+    fs->mkdir("/sys", 0, ifs);
+    fs->mkdir("/sys/pipe", 0, pipe_fs);
 
     /** /proc/self/exe **/
-    fs->root->appendChild(new File("proc", ifs));
-    fs->mkdir("/proc", O_DIRECTORY | O_RDWR);
-
-    auto* proc = fs->root->first_child->search("/proc");
-    assert(proc != nullptr);
-
-    proc->appendChild(new File("self", ifs));
-    fs->mkdir("/proc/self", O_DIRECTORY | O_RDWR);
-
-    auto* self = fs->root->first_child->search("/proc/self");
-    assert(self != nullptr);
-
-    self->appendChild(new File("exe", nullptr));
-
-    auto* exe = fs->root->first_child->search("/proc/self/exe");
-    assert(exe != nullptr);
+    fs->mkdir("/proc", 0, ifs);
+    fs->mkdir("/proc/self", 0, ifs);
+    fs->mkdir("/proc/self/exe", 0, nullptr);
 }
 
 int main() {

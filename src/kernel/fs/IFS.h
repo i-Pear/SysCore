@@ -161,6 +161,7 @@ public:
     }
 
     int read(const char *path, char *buf, int count) override {
+        printf("[Pipe] read %s\n", path);
         auto *read_buff = read_pair.get(String(path));
         if(read_buff == nullptr)return -1;
         int cur = 0;
@@ -172,6 +173,7 @@ public:
                 // TODO: 此处直接实现为非阻塞，如果没有足够的数据会直接返回
 //                return cur;
                 // 先调度其他进程，相当于阻塞住自己
+                printf("[Pipe] read %s block\n", path);
                 __yield();
             }
         }
@@ -179,6 +181,7 @@ public:
     }
 
     int write(const char *path, char *buf, int count) override {
+        printf("[Pipe] write %s\n", path);
         auto *write_buff = write_pair.get(String(path));
         if(write_buff == nullptr)return -1;
         for (auto i = 0; i < count; i++) {
