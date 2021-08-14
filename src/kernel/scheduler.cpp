@@ -458,6 +458,15 @@ void create_process(const char *elf_path, const char *argv[]) {
     runnable.push_back(new_pcb);
 }
 
+void yield_with_return(size_t a0){
+    *running->thread_context = *running_context;
+    running->thread_context->a0=a0;
+
+    runnable.push_back(running);
+    running = nullptr;
+    schedule();
+}
+
 void __yield() {
     // sync with running_context
     *running->thread_context = *running_context;
