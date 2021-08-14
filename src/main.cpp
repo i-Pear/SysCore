@@ -140,7 +140,7 @@ void busybox_test(){
 }
 
 void lua_test(){
-//    add_test("/busybox_new cat sin30.lua");
+    add_test("/lua -s sin30.lua");
 }
 
 /**
@@ -174,7 +174,7 @@ void init_thread() {
     init_self_tests();
 
 //    simple_test();
-    busybox_test();
+//    busybox_test();
     lua_test();
 //    add_test("/lmbench_new bw_pipe -P 1");
 //    add_test("/busybox_new sh -c lua_testcode.sh");

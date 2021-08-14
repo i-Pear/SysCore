@@ -3,6 +3,7 @@
 
 #include "stl.h"
 #include "../../kernel/memory/memory.h"
+#include "../../kernel/register.h"
 
 // 页面大小
 enum class PAGE_TABLE_LEVEL{

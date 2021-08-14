@@ -720,7 +720,7 @@ void syscall_unhandled(Context *context) {
 }
 
 void syscall_distribute(int syscall_id, Context *context) {
-//#define STRACE
+#define STRACE
     static int syscall_is_initialized = 0;
     if (syscall_is_initialized != 1) {
         syscall_init();
@@ -731,9 +731,12 @@ void syscall_distribute(int syscall_id, Context *context) {
     assert(context != NULL);
 
     if (syscall_list[syscall_id] !=nullptr) {
+#ifdef STRACE
+        printf("[syscall] %d, ", syscall_id);
+#endif
         context->a0 = syscall_list[syscall_id](context);
         #ifdef STRACE
-        printf("[syscall] %d, %s = 0x%x\n", syscall_id, syscall_name_list[syscall_id], context->a0);
+        printf("%s = 0x%x\n", syscall_name_list[syscall_id], context->a0);
 #endif
     } else {
         syscall_unhandled(context);
