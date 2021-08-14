@@ -714,24 +714,27 @@ size_t sys_pselect6(Context* context) {
     auto* timeout = (timespec*) context->a4;
     // sigset = context->a5
 
-    int res = 0;
     if (exception_fds) {
         FD_ZERO(exception_fds);
     }
 
-    for (int i = 0;i < ndfs; i++) {
-        int count = 0;
-        if (read_fds && FD_ISSET(i, read_fds)) {
-            ++count;
-        }
-        if (write_fds && FD_ISSET(i, write_fds)) {
-            ++count;
-        }
-        if (count) {
-            res += fs->test_pipe(FD::GetFile(i)->GetCStylePath());
+    if (read_fds) {
+        fd_set read_fd_set_copy = *read_fds;
+        FD_ZERO(read_fds);
+
+        for (int i = 0;i < ndfs; i++) {
+            if (FD_ISSET(i, &read_fd_set_copy)) {
+                int res;
+                res = fs->test_pipe(FD::GetFile(i)->GetCStylePath());
+                if (res) {
+                    FD_SET(i, read_fds);
+                    return 1;
+                }
+            }
         }
     }
-    return res > 0 ? 1 : 0;
+
+    return 0;
 }
 
 /// syscall int & register & distribute

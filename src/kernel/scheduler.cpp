@@ -461,6 +461,7 @@ void create_process(const char *elf_path, const char *argv[]) {
 void yield_with_return(size_t a0){
     *running->thread_context = *running_context;
     running->thread_context->a0=a0;
+    running->thread_context->sepc += 4;
 
     runnable.push_back(running);
     running = nullptr;

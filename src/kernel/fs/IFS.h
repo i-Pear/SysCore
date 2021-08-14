@@ -218,15 +218,10 @@ public:
         if (read_pair.exists(path)) {
             auto* buff = read_pair.get(path);
             if (buff->is_empty()) {
-                __yield();
-            }
-        } else if (write_pair.exists(path)) {
-            auto* buff = write_pair.get(path);
-            if (buff->is_empty()) {
-                __yield();
+                yield_with_return(0);
             }
         }
-        return 0;
+        return 1;
     }
 };
 

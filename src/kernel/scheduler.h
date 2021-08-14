@@ -91,6 +91,8 @@ void clone(int flags,size_t stack,int* parent_tid, size_t tls,int* child_tid);
 
 void __yield();
 
+void yield_with_return(size_t a0);
+
 void yield();
 
 int wait(int* wstatus);
