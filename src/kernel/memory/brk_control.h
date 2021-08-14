@@ -57,6 +57,7 @@ public:
 
     size_t brk(size_t p) {
         if (!brk_init) {
+            brk_init=true;
             size_t page = PageTableUtil::GetClearPage();
             page_count = 1;
             memKeeper.add(reinterpret_cast<void *>(page));

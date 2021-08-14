@@ -26,6 +26,18 @@ elf_ctl_segment::elf_ctl_segment(const elf_ctl_segment& other,size_t page_table)
     }
 }
 
+void elf_ctl_segment::register_pageTable(size_t page_table){
+    int length=pages.length();
+    for(int i=0;i<length;i++){
+        elf_ctl_page& cnt=pages[i];
+        PageTableUtil::CreateMapping(page_table,
+                                    cnt.v_addr,
+                                    cnt.m_addr,
+                                    PAGE_TABLE_LEVEL::SMALL,
+                                    PRIVILEGE_LEVEL::USER);
+    }
+}
+
 elf_ctl_segment::~elf_ctl_segment(){
     int length=pages.length();
     for(int i=0;i<length;i++){
@@ -36,7 +48,11 @@ elf_ctl_segment::~elf_ctl_segment(){
 Elf_Control::Elf_Control(size_t page_table):page_table(page_table){}
 
 Elf_Control::Elf_Control(const Elf_Control& other,size_t page_table):page_table(page_table){
+    // only reference++, need to add to page table
     segments[0]=other.segments[0];
+    segments[0]->register_pageTable(page_table);
+
+    // copy data segment, with page table added
     segments[1]=RefCountPtr<elf_ctl_segment>(
             new elf_ctl_segment(*other.segments[1],page_table)
             );

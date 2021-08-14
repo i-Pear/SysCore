@@ -25,6 +25,8 @@ public:
 
     void add(size_t page_table,size_t target_v_addr,size_t source_mem_addr);
 
+    void register_pageTable(size_t page_table);
+
     bool is_text() const;
 
     elf_ctl_segment(const elf_ctl_segment& other,size_t page_table);
