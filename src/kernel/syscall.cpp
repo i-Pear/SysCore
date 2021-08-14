@@ -229,7 +229,7 @@ size_t sys_execve(Context *context) {
 
 size_t sys_gettimeofday(Context *context) {
     auto timeVal=(TimeVal*)context->a0;
-    uint64 usec=timer();
+    uint64 usec=get_usec();
     timeVal->sec=usec/1000000;
     timeVal->usec=usec%1000000;
 
@@ -633,9 +633,9 @@ size_t sys_clock_gettime(Context* context){
     auto *timespec= reinterpret_cast<struct timespec *>(context->a1);
 
     size_t* pc=reinterpret_cast<size_t*>(context->sepc);
-    uint64 usec=timer();
-    timespec->tv_sec=usec/1000000;
-    timespec->tv_nsec=usec%1000000*1000;
+    uint64 nsec = get_nsec();
+    timespec->tv_sec = nsec / 1000000000UL;
+    timespec->tv_nsec= nsec % 1000000000UL;
 
     return 0;
 }
@@ -646,7 +646,7 @@ size_t sys_getrusage(Context* context){
 
     memset(usage,0,sizeof (rusage));
 
-    uint64 usec=timer();
+    uint64 usec = get_usec();
 
     usage->ru_stime.tv_sec=usec/1000000;
     usage->ru_stime.tv_usec=usec%1000000;

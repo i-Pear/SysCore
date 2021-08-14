@@ -28,12 +28,12 @@ typedef struct _clint
     clint_mtime_t mtime;
 } __attribute__((packed, aligned(4))) clint_t;
 
-
+uint64 r_time(void);
 uint64 get_nsec(void);
 uint64 get_usec(void);
 uint64 get_msec(void);
 uint64 get_sec(void);
-uint64 timer(void);
+// uint64 timer(void);
 void init_rtc(void);
 uint64 mktime(struct tm *timptr);
 uint64 mktime_set(const uint64 year0, const uint64 mon0, const uint64 day, const uint64 hour, const uint64 min, const uint64 sec);
@@ -46,5 +46,5 @@ typedef enum _clockid_t{
     CLOCK_THREAD_CPUTIME_ID
 } clockid_t;
 
-long sys_clock_gettime(clockid_t which_clock, struct timespec *ts);
+long clock_gettime(clockid_t which_clock, struct timespec *ts);
 #endif //OS_RISC_V_TIME_H

@@ -11,13 +11,9 @@
      return res;
  }
 
-#define CLINT_BASE_ADDR     (0x02000000U)
-
-volatile clint_t *const clint = (volatile clint_t *)CLINT_BASE_ADDR;
-
 uint64 get_nsec(void){
     /* No difference on cores */
-    return clint->mtime * 1000000000UL / sysctl_clock_get_freq(SYSCTL_CLOCK_CPU) * 50;
+    return r_time() * 1000000000UL / sysctl_clock_get_freq(SYSCTL_CLOCK_CPU) * 50;
 }
 
 uint64 get_usec(void){
@@ -32,14 +28,14 @@ uint64 get_sec(void){
     return get_nsec() / 1000000000;
 }
 
-uint64 timer(){
-//    return get_usec();
-    uint64 x = r_time();
-//    uint32 y = sysctl_clock_get_freq(SYSCTL_CLOCK_CPU);
-    uint32 y = 406250;
-    uint64 usec = x * 50 * 1000000UL / y;
-    return usec;
-}
+// uint64 timer(){
+// //    return get_usec();
+//     uint64 x = r_time();
+// //    uint32 y = sysctl_clock_get_freq(SYSCTL_CLOCK_CPU);
+//     uint32 y = 406250;
+//     uint64 usec = x * 50 * 1000000UL / y;
+//     return usec;
+// }
 
 void init_rtc(){
     rtc_init();
@@ -79,7 +75,7 @@ void current_timespec(struct timespec *ts) {
     ts->tv_nsec = nsec % 1000000000;
 }
 
-long sys_clock_gettime(clockid_t which_clock, struct timespec *ts){
+long clock_gettime(clockid_t which_clock, struct timespec *ts){
     uint64 nsec;
     switch(which_clock){
         case CLOCK_REALTIME:

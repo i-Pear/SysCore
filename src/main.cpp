@@ -17,7 +17,6 @@
 #include "lib/stl/UniquePtr.h"
 #include "lib/stl/PageTableUtil.h"
 #include "kernel/time/time.h"
-#include "kernel/posix/pselect.h"
 
 void vfs_init();
 void fix_kernel_page_table();
@@ -140,10 +139,6 @@ void busybox_test(){
 //    add_test("busybox_new find -name \"busybox_cmd.txt\"");
 }
 
-void lua_test(){
-    add_test("/lua-s sin30.lua");
-}
-
 /**
  * 此处打算通过 sret 进入u-mode
  * 中断后硬件会执行以下动作：
@@ -174,11 +169,10 @@ void init_thread() {
     FD::InitializeFileDescriber();
     init_self_tests();
 
-//    simple_test();
-    busybox_test();
-//    lua_test();
-    add_test("/lmbench_new lat_syscall -P 1 null");
-//    add_test("/busybox_new sh -c lua_testcode.sh");
+    simple_test();
+//    busybox_test();
+
+    add_test("/lmbench_new bw_pipe -P 1");
 
     schedule();
 }
@@ -244,7 +238,9 @@ void vfs_init() {
     auto* exe = fs->root->first_child->search("/proc/self/exe");
     assert(exe != nullptr);
 }
+#define CLINT_BASE_ADDR     (0x02000000U)
 
+volatile clint_t *const clint = (volatile clint_t *)CLINT_BASE_ADDR;
 int main() {
     printf("   _____            _____               \n"
            "  / ____|          / ____|              \n"
@@ -265,8 +261,53 @@ int main() {
     kernelContext.kernel_handle_interrupt = (size_t) handle_interrupt;
     kernelContext.kernel_restore = (size_t) __restore;
 
-    init_thread();
+    // init_thread();
     // unreachable
+    init_rtc();
+    // tm timep;
+    // uint64 ans;
+    // timep.tm_year=2020;
+    // timep.tm_mon = 1;
+    // timep.tm_mday = 1;
+    // timep.tm_hour = 0;
+    // timep.tm_min = 0;
+    // timep.tm_sec = 0;
+    // ans = mktime(&timep);
+    // printf("%d\n",ans);
+    // ans = mktime_set(2020,1,1,0,0,0);
+    // printf("%d\n",ans);
+    timespec ts;
+    // rtc_timer_set(2021,8,12,8,51,0);
+    // uint64 start = clint_get_time();
+    // uint64 end = clint_get_time();
+    // uint64 start1 = timer();
+    // uint64 end1 = timer();
+    // start = clint_get_time();
+    // start1 = timer();
+    uint64 a,b;
+    while(1){
+        // current_timespec(&ts);
+        clock_gettime(CLOCK_REALTIME,&ts);
+        // end = clint_get_time();
+        // printf("clint_time:%d\t",end-start);
+        // end1 = timer();
+        // printf("r_time:%d\n",end1-start1);
+        printf("%d %d\t",ts.tv_sec,ts.tv_nsec);
+        clock_gettime(CLOCK_MONOTONIC,&ts);
+        printf("%d %d\n",ts.tv_sec,ts.tv_nsec);
+        
+        // uint64_t clint_usec =
+        // clint->mtime * 1000 /
+        // (sysctl_clock_get_freq(SYSCTL_CLOCK_CPU) / 50 / 1000000UL );
+
+        // a = clint_usec / 1000000000UL;
+        // b = clint_usec % 1000000000UL;
+        // printf("%d %d\n", a, b);
+        sleep(1);
+    }
+ 
+    // seconds = time(NULL);
+    // printf("自 1970-01-01 起的小时数 = %d\n", seconds/3600);
     panic("Unreachable code!");
     return 0;
 }
