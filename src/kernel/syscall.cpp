@@ -399,10 +399,11 @@ size_t sys_unlinkat(Context *context) {
 
 size_t sys_times(Context *context) {
     struct ES_tms *tms = (struct ES_tms *)get_actual_page(context->a0);
-    tms->tms_utime = 1;
+    tms->tms_utime = 1; 
     tms->tms_stime = 1;
     tms->tms_cutime = 1;
     tms->tms_cstime = 1;
+    // 这里求的应该是周期数，可以使用r_time()函数结束周期-开始周期求，需要在相应的函数开头和结尾做一下运算把时间记录下来
     return (1000);
 }
 
@@ -636,6 +637,7 @@ size_t sys_clock_gettime(Context* context){
     uint64 nsec = get_nsec();
     timespec->tv_sec = nsec / 1000000000UL;
     timespec->tv_nsec= nsec % 1000000000UL;
+    // 现在这个是CLOCK_MONOTONIC模式
 
     return 0;
 }
@@ -653,7 +655,7 @@ size_t sys_getrusage(Context* context){
 
     usage->ru_utime.tv_sec=usec/1000000;
     usage->ru_utime.tv_usec=usec%1000000;
-
+    // 需要统计总的时间
     return 0;
 }
 

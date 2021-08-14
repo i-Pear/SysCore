@@ -287,15 +287,15 @@ int main() {
     uint64 a,b;
     while(1){
         // current_timespec(&ts);
-        clock_gettime(CLOCK_REALTIME,&ts);
-        // end = clint_get_time();
-        // printf("clint_time:%d\t",end-start);
-        // end1 = timer();
-        // printf("r_time:%d\n",end1-start1);
-        printf("%d %d\t",ts.tv_sec,ts.tv_nsec);
-        clock_gettime(CLOCK_MONOTONIC,&ts);
-        printf("%d %d\n",ts.tv_sec,ts.tv_nsec);
-        
+        // clock_gettime(CLOCK_REALTIME,&ts);
+        // // end = clint_get_time();
+        // // printf("clint_time:%d\t",end-start);
+        // // end1 = timer();
+        // // printf("r_time:%d\n",end1-start1);
+        // printf("%d %d\t",ts.tv_sec,ts.tv_nsec);
+        // clock_gettime(CLOCK_MONOTONIC,&ts);
+        // printf("%d %d\n",ts.tv_sec,ts.tv_nsec);
+        printf("%d\t%d\t%d\t%d\n",get_nsec()% 1000000000UL,get_usec(),get_msec(),get_sec());
         // uint64_t clint_usec =
         // clint->mtime * 1000 /
         // (sysctl_clock_get_freq(SYSCTL_CLOCK_CPU) / 50 / 1000000UL );

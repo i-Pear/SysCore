@@ -13,7 +13,8 @@
 
 uint64 get_nsec(void){
     /* No difference on cores */
-    return r_time() * 1000000000UL / sysctl_clock_get_freq(SYSCTL_CLOCK_CPU) * 50;
+    return r_time() * 1600000UL / sysctl_clock_get_freq(SYSCTL_CLOCK_CPU) * 50 * 625;
+    // 之前错误原因应该是计算过程中溢出
 }
 
 uint64 get_usec(void){
