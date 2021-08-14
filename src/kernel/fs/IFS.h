@@ -87,6 +87,11 @@ public:
         NOT_IMPLEMENT
         return 0;
     }
+
+    virtual String fs_name() {
+        NOT_IMPLEMENT
+        return 0;
+    }
 };
 
 
@@ -131,11 +136,19 @@ public:
     int read_dir(const char *path, char *buff, int new_request) override;
 
     int lseek(const char *path, size_t offset, int whence) override;
+
+    String fs_name() override {
+        return "FatFs";
+    }
 };
 
 
 class StdoutFs : public IFS {
 public:
+    String fs_name() override {
+        return "StdoutFs";
+    }
+
     int init() override {
         return 0;
     }
@@ -156,8 +169,12 @@ class PipeFs: public IFS{
 private:
     Map<String, List<unsigned char> *> read_pair, write_pair;
 public:
+    String fs_name() override {
+        return "PipeFs";
+    }
+
     int init() override {
-        return IFS::init();
+        return 0;
     }
 
     int read(const char *path, char *buf, int count) override {
@@ -234,6 +251,10 @@ public:
 
 class ZeroFs: public IFS {
 public:
+    String fs_name() override {
+        return "ZeroFs";
+    }
+
     int open(const char *path, int flag) override {
         return 0;
     }
@@ -256,6 +277,10 @@ public:
 
 class NullFs: public IFS {
 public:
+    String fs_name() override {
+        return "NullFs";
+    }
+
     int open(const char *path, int flag) override {
         return 0;
     }

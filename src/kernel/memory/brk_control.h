@@ -65,6 +65,7 @@ public:
                                          PAGE_TABLE_LEVEL::SMALL,
                                          PRIVILEGE_LEVEL::USER);
             PageTableUtil::FlushCurrentPageTable();
+            printf("[brk]\n");
         }
         if (p == 0) {
             return BRK_VIRT_BEGIN;

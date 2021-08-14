@@ -237,32 +237,24 @@ public:
         return res;
     }
 
+
     int open(const char *path, int flag) {
         if (flag & O_CREATE) {
-            auto list = PathUtil::split(path);
-            if (list.is_empty()) {
-                panic("cannot create root dir!")
+            String file_name = PathUtil::split(path).end->data;
+            File* father_file = searchFather(root, path);
+            if (father_file == nullptr) {
+                return -1;
             }
-            if(list.length() == 1){
+            if(father_file == root){
                 int fr = root->fs->open(path, flag);
                 if(fr == FR_OK){
-                    root->appendChild(new File(list.start->data, root->fs));
+                    root->appendChild(new File(file_name, root->fs));
                 }
                 return fr;
             }
-            auto new_list = List<String>();
-            auto *p = list.start;
-            auto len = list.length();
-            for(auto i = 0;i < len - 1; i++){
-                new_list.push_back(p->data);
-                p = p->next;
-            }
-            auto father_str = PathUtil::joinAbsolutePath(new_list);
-            auto* father_file = root->first_child->search(father_str);
-            if(father_file == nullptr)return -1;
             int fr = father_file->fs->open(path, flag);
             if(fr == FR_OK){
-                father_file->appendChild(new File(list.end->data, father_file->fs));
+                father_file->appendChild(new File(file_name, father_file->fs));
             }
             return fr;
         }
@@ -352,6 +344,7 @@ public:
         if(file == nullptr){
             return -1;
         }
+        printf("[PIPE] fs.name = %s\n", file->fs->fs_name().c_str());
         return file->fs->pipe(read_path, write_path, flags, unused_param);
     }
 
