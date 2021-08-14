@@ -737,6 +737,12 @@ size_t sys_pselect6(Context* context) {
     return 0;
 }
 
+size_t sys_futex(Context* context) {
+    auto* uaddr = (int*) context->a0;
+    *uaddr = 0;
+    return 0;
+}
+
 /// syscall int & register & distribute
 
 void syscall_init() {
@@ -839,5 +845,6 @@ void syscall_register() {
     REGISTER(sendfile);
     REGISTER(pipe2);
     REGISTER(pselect6);
+    REGISTER(futex);
 #undef REGISTER
 }
