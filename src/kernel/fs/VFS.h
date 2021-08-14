@@ -315,7 +315,7 @@ public:
         }
         int res = father->fs->mkdir(path, flag);
         if (res == FR_OK) {
-            auto& file_name = PathUtil::split(path).end->data;
+            auto file_name = PathUtil::split(path).end->data;
             File* file = nullptr;
             if (father->first_child) {
                 file = father->first_child->search(file_name);
