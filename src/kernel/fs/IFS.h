@@ -223,6 +223,10 @@ public:
         }
         return 1;
     }
+
+    int fstat(const char *path, kstat *stat) override {
+        return 0;
+    }
 };
 
 class ZeroFs: public IFS {
@@ -241,6 +245,10 @@ public:
     int close(const char *path) override {
         return 0;
     }
+
+    int fstat(const char *path, kstat *stat) override {
+        return 0;
+    }
 };
 
 class NullFs: public IFS {
@@ -254,6 +262,10 @@ public:
     }
 
     int close(const char *path) override {
+        return 0;
+    }
+
+    int fstat(const char *path, kstat *stat) override {
         return 0;
     }
 };
