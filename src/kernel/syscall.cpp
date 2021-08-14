@@ -8,6 +8,7 @@
 #include "fs/file_describer.h"
 #include "memory/Heap.h"
 #include "posix/errno.h"
+#include "posix/pselect.h"
 
 //#define get_actual_page(x) (((x)>0x80000000)?(x):(x)+ get_running_elf_page())
 #define get_actual_page(x) (x)
@@ -705,6 +706,34 @@ size_t sys_pipe2(Context* context){
     return FD::CreatePipe(pipefd, flags);
 }
 
+size_t sys_pselect6(Context* context) {
+    int ndfs = (int) context->a0;
+    auto* read_fds = (fd_set*) context->a1;
+    auto* write_fds = (fd_set*) context->a2;
+    auto* exception_fds = (fd_set*) context->a3;
+    auto* timeout = (timespec*) context->a4;
+    // sigset = context->a5
+
+    int res = 0;
+    if (exception_fds) {
+        FD_ZERO(exception_fds);
+    }
+
+    for (int i = 0;i < ndfs; i++) {
+        int count = 0;
+        if (read_fds && FD_ISSET(i, read_fds)) {
+            ++count;
+        }
+        if (write_fds && FD_ISSET(i, write_fds)) {
+            ++count;
+        }
+        if (count) {
+            res += fs->test_pipe(FD::GetFile(i)->GetCStylePath());
+        }
+    }
+    return res > 0 ? 1 : 0;
+}
+
 /// syscall int & register & distribute
 
 void syscall_init() {
@@ -806,5 +835,6 @@ void syscall_register() {
     REGISTER(gettimeofday);
     REGISTER(sendfile);
     REGISTER(pipe2);
+    REGISTER(pselect6);
 #undef REGISTER
 }

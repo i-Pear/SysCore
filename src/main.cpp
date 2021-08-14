@@ -17,6 +17,7 @@
 #include "lib/stl/UniquePtr.h"
 #include "lib/stl/PageTableUtil.h"
 #include "kernel/time/time.h"
+#include "kernel/posix/pselect.h"
 
 void vfs_init();
 void fix_kernel_page_table();
@@ -175,8 +176,8 @@ void init_thread() {
 
 //    simple_test();
     busybox_test();
-    lua_test();
-//    add_test("/lmbench_new bw_pipe -P 1");
+//    lua_test();
+    add_test("/lmbench_new lat_syscall -P 1 null");
 //    add_test("/busybox_new sh -c lua_testcode.sh");
 
     schedule();

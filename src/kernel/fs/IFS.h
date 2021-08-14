@@ -82,6 +82,11 @@ public:
         NOT_IMPLEMENT
         return 0;
     }
+
+    virtual int test_pipe(const char* path) {
+        NOT_IMPLEMENT
+        return 0;
+    }
 };
 
 
@@ -206,6 +211,21 @@ public:
         auto *buff = new List<unsigned char>();
         read_pair.put(String(read_path), buff);
         write_pair.put(String(write_path), buff);
+        return 0;
+    }
+
+    int test_pipe(const char *path) override {
+        if (read_pair.exists(path)) {
+            auto* buff = read_pair.get(path);
+            if (buff->is_empty()) {
+                __yield();
+            }
+        } else if (write_pair.exists(path)) {
+            auto* buff = write_pair.get(path);
+            if (buff->is_empty()) {
+                __yield();
+            }
+        }
         return 0;
     }
 };

@@ -324,6 +324,15 @@ public:
         }
         return file->fs->pipe(read_path, write_path, flags, unused_param);
     }
+
+    int test_pipe(const char *path) {
+        if (path == nullptr) return -1;
+        auto* file = search(root, path);
+        if(file == nullptr){
+            return -1;
+        }
+        return file->fs->test_pipe(path);
+    }
 };
 
 class TestFile {

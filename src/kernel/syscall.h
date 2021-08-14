@@ -144,6 +144,7 @@
 #define SYS_set_tid_address 96
 #define SYS_unshare 97
 #define SYS_futex 98
+#define SYS_pselect6 72
 
 
 
