@@ -379,7 +379,7 @@ size_t sys_mkdirat(Context *context) {
     int dir_fd = sysGetRealFd(context->a0);
     char *path = (char *) get_actual_page(context->a1);
     int mode = (int) context->a2;
-    fs->mkdir(atFdCWD(dir_fd, path), mode);
+    fs->mkdir(atFdCWD(dir_fd, path), mode, fs->root->fs);
     return 0;
 }
 
@@ -451,8 +451,6 @@ size_t sys_umount2(Context *context) {
 }
 
 size_t sys_fstat(Context* context){
-    return 0;
-
     // fd: 文件句柄；
     // kst: 接收保存文件状态的指针；
     // int ret = fstat(fd, &kst);
@@ -464,10 +462,11 @@ size_t sys_fstat(Context* context){
 
 size_t sys_fstatat(Context* context) {
     int dirfd=context->a0;
-    auto *pathname= reinterpret_cast<const char *>(context->a1);
+    auto *pathname= reinterpret_cast<char *>(context->a1);
     auto *statbuf= reinterpret_cast<struct kstat *>(context->a2);
     int flags=context->a3;
-
+    char* path = atFdCWD(dirfd, pathname);
+    return fs->fstat(path, statbuf);
     return 0;
 }
 
