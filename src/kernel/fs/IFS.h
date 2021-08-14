@@ -225,4 +225,37 @@ public:
     }
 };
 
+class ZeroFs: public IFS {
+public:
+    int open(const char *path, int flag) override {
+        return 0;
+    }
+
+    int read(const char *path, char *buf, int count) override {
+        for (int i = 0;i < count; i++) {
+            buf[i] = 0;
+        }
+        return count;
+    }
+
+    int close(const char *path) override {
+        return 0;
+    }
+};
+
+class NullFs: public IFS {
+public:
+    int open(const char *path, int flag) override {
+        return 0;
+    }
+
+    int write(const char *path, char *buf, int count) override {
+        return count;
+    }
+
+    int close(const char *path) override {
+        return 0;
+    }
+};
+
 #endif //OS_RISC_V_IFS_H
