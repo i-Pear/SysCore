@@ -145,6 +145,12 @@ struct List{
             cnt=cnt->next;
         }
     }
+
+    ~List<T>(){
+        while (start!= nullptr){
+            pop_front();
+        }
+    }
 };
 
 #endif //OS_RISC_V_LIST_H
