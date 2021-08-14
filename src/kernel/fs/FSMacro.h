@@ -9,6 +9,7 @@
 #define O_RDWR 0x002 // read & write
 #define O_CREATE 0x40  // always create
 #define O_DIRECTORY 0x0200000 // it's a directory
+#define O_LARGEFILE 0x8000
 
 /// file type
 

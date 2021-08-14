@@ -22,14 +22,15 @@ public:
     }
 
     static int add_flag(const char *path, int flag) {
-        if (flag == 0) {
-            flag |= O_RDWR;
-        }
+//        if (flag == 0) {
+//            flag |= O_RDWR;
+//        }
         if ((strlen(path) > 0 && path[strlen(path) - 1] == '/') || flag & O_DIRECTORY) {
             flag |= S_IFDIR;
         } else {
             flag |= S_IFREG;
         }
+        flag |= O_RDWR;
         return flag;
     }
 };
