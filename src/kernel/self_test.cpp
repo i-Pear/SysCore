@@ -124,6 +124,8 @@ void add_test(const char* name){
 void create_XXX_testfile(){
     fs->mkdir("/var", 0, fs->root->fs);
     fs->mkdir("/var/tmp", 0, fs->root->fs);
+    File* XXX = VFS::search(fs->root, "/var/tmp/XXX");
+    if (XXX) return;
     fs->open("/var/tmp/XXX", O_CREATE | O_RDWR);
     char buf[1024];
     memset(buf, 0, sizeof(buf));
@@ -139,9 +141,7 @@ void init_self_tests(){
         self_test_init_magic= 187439611;
         test_cnt=0;
         test_total=0;
-        #ifdef QEMU
         create_XXX_testfile();
-        #endif
 
         //    simple_test();
         //    busybox_test();
