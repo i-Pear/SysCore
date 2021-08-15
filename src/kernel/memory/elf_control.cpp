@@ -3,7 +3,7 @@
 elf_ctl_segment::elf_ctl_segment(bool is_text):_is_text(is_text){}
 
 void elf_ctl_segment::add(size_t page_table,size_t target_v_addr,size_t source_mem_addr){
-    size_t page= alloc_page(4096);
+    size_t page= alloc_page();
     memcpy((void *)page, (void *)source_mem_addr, 4096);
     PageTableUtil::CreateMapping(page_table,
                                  target_v_addr,

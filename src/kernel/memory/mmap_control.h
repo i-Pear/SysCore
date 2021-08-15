@@ -37,7 +37,7 @@ public:
 
         // copy pages
         for (auto i=other.memKeeper.start;i;i=i->next) {
-            size_t new_page = alloc_page(4096);
+            size_t new_page = alloc_page();
             memcpy((void *) new_page, (const void*)(i->data.source_addr), 4096);
 
             memKeeper.push_back({new_page,i->data.mapped_to});
@@ -55,7 +55,7 @@ public:
         size_t need_page=(length+4096-1)/4096; //align
         size_t ret=mmap_start;
         for(int i=0;i<need_page;i++){
-            size_t new_page = alloc_page(4096);
+            size_t new_page = alloc_page();
             memset((void*)(new_page), 0, 4096);
             memKeeper.push_back({mmap_start,new_page});
             PageTableUtil::CreateMapping(

@@ -102,7 +102,7 @@ public:
     }
 
     static size_t GetClearPage(){
-        size_t res = alloc_page(4096);
+        size_t res = alloc_page();
         ClearPage(res);
         return res;
     }

@@ -41,7 +41,7 @@ public:
             page_count = other.page_count;
 
             for (int i = 0; i < page_count; i++) {
-                size_t new_page = alloc_page(4096);
+                size_t new_page = alloc_page();
                 memcpy((void *) new_page, other.memKeeper.elements[i], 4096);
 
                 memKeeper.add((void *) new_page);
@@ -77,7 +77,7 @@ public:
         }
         if (need_page > page_count) {
             for (int i = page_count; i < need_page; i++) {
-                size_t new_page = alloc_page(4096);
+                size_t new_page = alloc_page();
                 memKeeper.add(reinterpret_cast<void *>(new_page));
                 PageTableUtil::CreateMapping(
                         pageTable,

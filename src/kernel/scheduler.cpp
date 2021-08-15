@@ -137,10 +137,10 @@ void clone(int flags, size_t stack,int* parent_tid, size_t tls,int* child_tid) {
         runnable.push_back(child_pcb);
     } else {
         // fork, generate a new stack
-        size_t stack = alloc_page(running->stack_size);
+        size_t stack = alloc_page();
         memcpy(reinterpret_cast<void *>(stack), reinterpret_cast<const void *>(running->stack), running->stack_size);
 
-        size_t page_table = alloc_page(4096);
+        size_t page_table = alloc_page();
         memset(reinterpret_cast<void *>(page_table), 0, 4096);
         PageTableUtil::init_pageTable(page_table);
         child_context->satp = (page_table >> 12) | (8LL << 60);
@@ -303,7 +303,7 @@ void create_process(const char *elf_path, const char *argv[]) {
      * 用户栈
      * 栈通常向低地址方向增长，故此处增加__page_size
      */
-    size_t stack_page = (size_t) alloc_page(4096);
+    size_t stack_page = (size_t) alloc_page();
     memset(reinterpret_cast<void *>(stack_page), 0, 4096);
     thread_context->sp = stack_page + __page_size - 10 * 8;
 
