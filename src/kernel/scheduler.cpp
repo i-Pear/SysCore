@@ -520,20 +520,8 @@ void schedule() {
 
         __restore();
     } else {
-        if (!runnable.is_empty()) {
-            // pick one to run
-            running = runnable.start->data;lty(running);lty(running->elf_page_base);
-            runnable.pop_front();
-
-            lty(running->thread_context->satp);lty(running->thread_context->sepc);
-
-            // printf("trying to restore\n");
-
-            // sync with running_context
-            *running_context = *running->thread_context;
-
-            __restore();
-        } else if (!blocked.is_empty()) {
+        static int try_unfreeze=0;
+        if (!blocked.is_empty()) {
             // search one to unfreeze
             auto cnt = blocked.start;
             while (cnt != nullptr) {
@@ -553,8 +541,25 @@ void schedule() {
                 }
                 cnt = cnt->next;
             }
-            panic("There exists a dead waiting loop. All processes are blocked.");
-        } else {
+        }
+        if (!runnable.is_empty()) {
+            // pick one to run
+            running = runnable.start->data;lty(running);lty(running->elf_page_base);
+            runnable.pop_front();
+
+            lty(running->thread_context->satp);lty(running->thread_context->sepc);
+
+            // printf("trying to restore\n");
+
+            // sync with running_context
+            *running_context = *running->thread_context;
+
+            __restore();
+        }
+        {
+            if(!blocked.is_empty()){
+                panic("There exists a dead waiting loop. All processes are blocked.");
+            }
             if (has_next_test()) {
                 create_process(get_next_test());
                 schedule();
