@@ -185,7 +185,9 @@ void init_thread() {
     init_scheduler();
     FD::InitializeFileDescriber();
     init_self_tests();
+#ifdef QEMU
     create_XXX_testfile();
+#endif
 
 //    simple_test();
 //    busybox_test();
