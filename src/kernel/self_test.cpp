@@ -148,8 +148,8 @@ void init_self_tests(){
         //    lua_test();
         add_test("/lmbench_all lat_syscall -P 1 read");
         add_test("/lmbench_all lat_syscall -P 1 write");
-        add_test("/busybox_new mkdir -p /var/tmp");
-        add_test("/busybox_new touch /var/tmp/lmbench");
+        add_test("/busybox mkdir -p /var/tmp");
+        add_test("/busybox touch /var/tmp/lmbench");
         add_test("/lmbench_all lat_syscall -P 1 stat /var/tmp/lmbench");
         add_test("/lmbench_all lat_syscall -P 1 fstat /var/tmp/lmbench");
         add_test("/lmbench_all lat_syscall -P 1 open /var/tmp/lmbench");
