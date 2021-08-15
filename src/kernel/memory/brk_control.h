@@ -83,7 +83,7 @@ public:
                 PageTableUtil::CreateMapping(
                         pageTable,
                         BRK_VIRT_BEGIN + 4096 * i,
-                        new_page + 4096 * i,
+                        new_page,
                         PAGE_TABLE_LEVEL::SMALL,
                         PRIVILEGE_LEVEL::USER);
             }
