@@ -33,11 +33,8 @@ uint64 get_sec(void){
 }
 
 uint64 timer(){
-//    return get_usec();
     uint64 x = r_time();
-//    uint32 y = sysctl_clock_get_freq(SYSCTL_CLOCK_CPU);
-    uint32 y = 406250;
-    uint64 usec = x * 50 * 1000000UL / y;
+    uint64 usec = x / 10;
     return usec;
 }
 
