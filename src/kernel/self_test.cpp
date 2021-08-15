@@ -137,12 +137,15 @@ void create_XXX_testfile(){
 }
 
 void init_self_tests(){
+    DDD()
     if(self_test_init_magic!=187439611){
+        DDD()
         self_test_init_magic= 187439611;
         test_cnt=0;
         test_total=0;
+        DDD()
         create_XXX_testfile();
-
+        DDD()
         //    simple_test();
         //    busybox_test();
         //    lua_test();
