@@ -298,9 +298,7 @@ void create_process(const char *elf_path, const char *argv[]) {
     Elf64_Phdr *kernel_phdr;
     int ph_num;
     RefCountPtr<Elf_Control> elf_control(new Elf_Control(page_table_base));
-    printf("start load elf\n");
     load_elf(&elf_file, elf_control.getPtr(), &entry, &ph_off, &ph_num, &kernel_phdr);
-    printf("start load  end elf\n");
     f_close(&elf_file);
 
     Context *thread_context = new Context();

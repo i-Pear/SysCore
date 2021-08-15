@@ -76,13 +76,9 @@ void init_thread() {
     printf("[OS] Interrupt & Timer Interrupt Open.\n");
     interrupt_timer_init();
     printf("[OS] init scheduler.\n");
-    DDD()
     init_scheduler();
-    DDD()
     FD::InitializeFileDescriber();
-    DDD()
     init_self_tests();
-    DDD()
     schedule();
 }
 
