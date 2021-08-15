@@ -22,7 +22,7 @@ void SD_HIGH_SPEED_ENABLE(void) {
 
 static void sd_lowlevel_init(uint8 spi_index) {
     gpiohs_set_drive_mode(7, GPIO_DM_OUTPUT);
-    spi_set_clk_rate(SPI_DEVICE_0, 187500);     /*set clk rate*/
+//    spi_set_clk_rate(SPI_DEVICE_0, 187500);     /*set clk rate*/
 }
 
 static void sd_write_data(uint8 const *data_buff, uint32 length) {
