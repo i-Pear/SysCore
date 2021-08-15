@@ -11,6 +11,10 @@ void puts(char *str);
 
 extern "C" void printf(const char *format, ...);
 
+//#define LOG(x, ...) printf(x, __VA_ARGS__)
+#define LOG(x, ...)
+
+
 void sprintf(char* dist, const char *format, ...);
 
 size_t getchar_blocked();

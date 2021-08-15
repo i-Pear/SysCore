@@ -14,7 +14,7 @@ class OpenedFile{
 public:
     explicit OpenedFile(const String& path):path_(path){}
     virtual ~OpenedFile(){
-        printf("[OpenedFile] close %s\n", path_.c_str());
+        LOG("[OpenedFile] close %s\n", path_.c_str());
         fs->close(path_.c_str());
     }
     String& GetPath(){
@@ -83,7 +83,7 @@ public:
     }
 
     static int OpenNewFile(const char* path, int flag, int fd){
-        printf("[FD] open file %s\n", path);
+        LOG("[FD] open file %s\n", path);
         int res = fs->open(path, flag);
         if(res == FR_OK){
             RefCountPtr<OpenedFile> file(new OpenedFile(path));

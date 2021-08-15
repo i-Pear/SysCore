@@ -254,7 +254,7 @@ public:
             }
             int fr = father_file->fs->open(path, flag);
             if(fr == FR_OK){
-                printf("[open new] %s, fs_name = %s\n", path, father_file->fs->fs_name());
+                LOG("[open new] %s, fs_name = %s\n", path, father_file->fs->fs_name());
                 father_file->appendChild(new File(file_name, father_file->fs));
             }
             return fr;
@@ -353,7 +353,7 @@ public:
         if(file == nullptr){
             return -1;
         }
-        printf("[PIPE] fs.name = %s\n", file->fs->fs_name());
+        LOG("[PIPE] fs.name = %s\n", file->fs->fs_name());
         return file->fs->pipe(read_path, write_path, flags, unused_param);
     }
 

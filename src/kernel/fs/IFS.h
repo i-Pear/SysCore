@@ -175,7 +175,7 @@ public:
     }
 
     int read(const char *path, char *buf, int count) override {
-        printf("[Pipe] read %s\n", path);
+        LOG("[Pipe] read %s\n", path);
         auto *read_buff = read_pair.get(String(path));
         if(read_buff == nullptr)return -1;
         int cur = 0;

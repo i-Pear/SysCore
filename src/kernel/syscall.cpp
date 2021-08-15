@@ -519,7 +519,7 @@ size_t sys_writev(Context* context){
 
 size_t sys_brk(Context* context){
     size_t require=context->a0;
-    printf("brk: require= 0x%x\n",require);
+    LOG("brk: require= 0x%x\n",require);
     return running->brk_control->brk(require);
 }
 

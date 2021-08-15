@@ -99,7 +99,7 @@ void init_scheduler() {
 
 void clone(int flags, size_t stack,int* parent_tid, size_t tls,int* child_tid) {
 
-    printf("[clone ]flag=0x%x\n", flags);
+//    LOG("[clone ]flag=0x%x\n", flags);
 
     // sync with running_context
     *running->thread_context = *running_context;
