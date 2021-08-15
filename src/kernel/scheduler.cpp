@@ -570,7 +570,7 @@ void schedule() {
             }
             if(memory_dirty){
                 // has run a test this time, try to reboot
-                init_thread();
+                _start();
             }
             if (has_next_test()) {
                 create_process(get_next_test());

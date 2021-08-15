@@ -311,7 +311,7 @@ public:
         }
         int res = FR_OK;
         if (real_created_by_father) {
-            printf("[mkdir] path real create: %s\n", path);
+//            printf("[mkdir] path real create: %s\n", path);
             res = father->fs->mkdir(path, flag);
         }
         if (res == FR_OK) {
@@ -321,7 +321,7 @@ public:
                 file = father->first_child->search(file_name);
             }
             if (file == nullptr) {
-                printf("[mkdir] virtual-path = %s, fs_name = %s\n", path, ifs->fs_name());
+//                printf("[mkdir] virtual-path = %s, fs_name = %s\n", path, ifs->fs_name());
                 father->appendChild(new File(file_name, ifs));
             }
             return 0;

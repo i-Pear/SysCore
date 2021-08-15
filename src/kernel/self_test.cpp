@@ -1,5 +1,6 @@
 #include "self_test.h"
 #include "stdio.h"
+#include "fs/VFS.h"
 
 int test_cnt;
 int test_total;
@@ -120,26 +121,42 @@ void add_test(const char* name){
     tests[test_total++]=name;
 }
 
+void create_XXX_testfile(){
+    fs->mkdir("/var", 0, fs->root->fs);
+    fs->mkdir("/var/tmp", 0, fs->root->fs);
+    fs->open("/var/tmp/XXX", O_CREATE | O_RDWR);
+    char buf[1024];
+    memset(buf, 0, sizeof(buf));
+    for (int i = 0;i < 1024 * 7; i++) {
+        fs->write("/var/tmp/XXX", buf, sizeof(buf));
+    }
+    fs->close("/var/tmp/XXX");
+    printf("Create XXX test_file successfully.\n");
+}
+
 void init_self_tests(){
     if(self_test_init_magic!=187439611){
         self_test_init_magic= 187439611;
         test_cnt=0;
         test_total=0;
+        #ifdef QEMU
+        create_XXX_testfile();
+        #endif
 
         //    simple_test();
         //    busybox_test();
         //    lua_test();
-        add_test("/lmbench_all lat_syscall -P 1 null");
         add_test("/lmbench_all lat_syscall -P 1 read");
-        //add_test("/lmbench_all lat_syscall -P 1 write");
-        //add_test("/busybox mkdir -p /var/tmp");
-        //add_test("/busybox touch /var/tmp/lmbench");
-        //add_test("/lmbench_all lat_syscall -P 1 stat /var/tmp/lmbench");
-        //add_test("/lmbench_all lat_syscall -P 1 fstat /var/tmp/lmbench");
-        //add_test("/lmbench_all lat_syscall -P 1 open /var/tmp/lmbench");
-        //add_test("/lmbench_all lat_pipe -P 1");
+        add_test("/lmbench_all lat_syscall -P 1 write");
+        add_test("/busybox mkdir -p /var/tmp");
+        add_test("/busybox touch /var/tmp/lmbench");
+        add_test("/lmbench_all lat_syscall -P 1 stat /var/tmp/lmbench");
+        add_test("/lmbench_all lat_syscall -P 1 fstat /var/tmp/lmbench");
+        add_test("/lmbench_all lat_syscall -P 1 open /var/tmp/lmbench");
+        add_test("/lmbench_all lat_pipe -P 1");
         //add_test("/lmbench_all bw_file_rd -P 1 512k io_only /var/tmp/XXX");
         //add_test("/lmbench_all bw_file_rd -P 1 512k open2close /var/tmp/XXX");
-        //add_test("/lmbench_all bw_mmap_rd -P 1 512k mmap_only /var/tmp/XXX");
+        add_test("/lmbench_all bw_mmap_rd -P 1 512k mmap_only /var/tmp/XXX");
+        add_test("/lmbench_all lat_syscall -P 1 null");
     }
 }

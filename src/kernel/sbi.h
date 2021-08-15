@@ -15,6 +15,8 @@
 
 extern "C" size_t sbi_call(size_t which, size_t arg0, size_t arg1, size_t arg2);
 
+extern "C" void _start();
+
 extern "C" size_t read_time();
 
 extern "C" size_t get_kernel_end();

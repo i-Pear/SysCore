@@ -44,21 +44,6 @@ void test_lib() {
     TestFile testFile;
 }
 
-
-
-void create_XXX_testfile(){
-    fs->mkdir("/var", 0, fs->root->fs);
-    fs->mkdir("/var/tmp", 0, fs->root->fs);
-    fs->open("/var/tmp/XXX", O_CREATE | O_RDWR);
-    char buf[1024];
-    memset(buf, 0, sizeof(buf));
-    for (int i = 0;i < 1024 * 7; i++) {
-        fs->write("/var/tmp/XXX", buf, sizeof(buf));
-    }
-    fs->close("/var/tmp/XXX");
-    printf("Create XXX test_file successfully.\n");
-}
-
 /**
  * 此处打算通过 sret 进入u-mode
  * 中断后硬件会执行以下动作：
@@ -94,10 +79,6 @@ void init_thread() {
     init_scheduler();
     FD::InitializeFileDescriber();
     init_self_tests();
-
-#ifdef QEMU
-    create_XXX_testfile();
-#endif
 
     schedule();
 }
