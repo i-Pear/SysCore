@@ -742,6 +742,10 @@ size_t sys_futex(Context* context) {
     return 0;
 }
 
+size_t sys_setitimer(Context* context) {
+    return 0;
+}
+
 /// syscall int & register & distribute
 
 void syscall_init() {
@@ -845,5 +849,6 @@ void syscall_register() {
     REGISTER(pipe2);
     REGISTER(pselect6);
     REGISTER(futex);
+    REGISTER(setitimer);
 #undef REGISTER
 }
