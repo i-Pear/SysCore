@@ -26,7 +26,7 @@ public:
     // dealloc 8 -> 0 0 0 1 0 ...
     // alloc 16 -> 0 0 0 1 0 1 1 0 ...
     size_t Alloc(size_t size) {
-        LOG("[heap alloc] 0x%x\n", size);
+//        LOG("[heap alloc] 0x%x\n", size);
         size_t bits = (size + 8) / 8;
         size_t i = 0;
         while (true){
