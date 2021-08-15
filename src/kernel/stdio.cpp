@@ -8,6 +8,8 @@ size_t getchar_blocked() {
     return res;
 }
 
+
+
 void putchar(char c) { sbi_call(SBI_CONSOLE_PUTCHAR, c, 0, 0); }
 
 void puts(char *str) {

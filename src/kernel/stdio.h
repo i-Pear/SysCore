@@ -14,6 +14,7 @@ extern "C" void printf(const char *format, ...);
 //#define LOG(x, ...) printf(x, __VA_ARGS__)
 #define LOG(x, ...)
 
+#define DDD() {printf("[debug] %s:%d\n",__FILE__,__LINE__);}
 
 void sprintf(char* dist, const char *format, ...);
 
