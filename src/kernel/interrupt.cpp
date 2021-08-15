@@ -4,6 +4,7 @@
 #include "../lib/stl/stl.h"
 #include "../lib/stl/PageTableUtil.h"
 #include "scheduler.h"
+#include "time/time.h"
 
 static size_t INTERVAL = 1e5;
 static size_t TICKS = 0;
@@ -15,7 +16,10 @@ Context *tick(Context* context);
 
 Context *page_fault(Context* context, size_t stval);
 
+size_t int_start;
+
 Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
+//    int_start=timer();
     int is_interrupt = (int)(scause >> 63);
     scause &= 31;
     switch (scause) {
@@ -77,6 +81,7 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
         // user ecall
         case 8:{
             syscall(context);
+
             __restore();
         }
         // ins page fault & load page fault

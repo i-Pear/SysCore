@@ -646,13 +646,13 @@ size_t sys_getrusage(Context* context){
 
     memset(usage,0,sizeof (rusage));
 
-    uint64 usec=timer();
-
-    usage->ru_stime.tv_sec=usec/1000000;
-    usage->ru_stime.tv_usec=usec%1000000;
-
-    usage->ru_utime.tv_sec=usec/1000000;
-    usage->ru_utime.tv_usec=usec%1000000;
+//    uint64 usec=timer();
+//
+//    usage->ru_stime.tv_sec=usec/1000000;
+//    usage->ru_stime.tv_usec=usec%1000000;
+//
+//    usage->ru_utime.tv_sec=usec/1000000;
+//    usage->ru_utime.tv_usec=usec%1000000;
 
     return 0;
 }
@@ -762,7 +762,7 @@ void syscall_unhandled(Context *context) {
 }
 
 void syscall_distribute(int syscall_id, Context *context) {
-#define STRACE
+//#define STRACE
     static int syscall_is_initialized = 0;
     if (syscall_is_initialized != 1) {
         syscall_init();
@@ -776,7 +776,10 @@ void syscall_distribute(int syscall_id, Context *context) {
 #ifdef STRACE
         printf("[pid=%d] [syscall] %d, ",running->pid, syscall_id);
 #endif
+//        size_t int_start=timer();
         context->a0 = syscall_list[syscall_id](context);
+//        size_t int_end=timer();
+//        printf("<int cost %d>\n",(int_end-int_start));
         #ifdef STRACE
         printf("%s = 0x%x\n", syscall_name_list[syscall_id], context->a0);
 #endif

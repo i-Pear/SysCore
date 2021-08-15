@@ -247,6 +247,15 @@ void vfs_init() {
 
 int main() {
 
+//    size_t old=timer();
+//    while(true){
+//        size_t nn=timer();
+//        if(nn-old>1000000){
+//            printf("%d\n",nn/1000000);
+//            old=nn;
+//        }
+//    }
+
     printf("   _____            _____               \n"
            "  / ____|          / ____|              \n"
            " | (___  _   _ ___| |     ___  _ __ ___ \n"
