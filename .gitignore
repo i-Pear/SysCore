@@ -8,3 +8,4 @@ build/
 .vscode/
 *.dump
 1.txt
+/lmbench_source/

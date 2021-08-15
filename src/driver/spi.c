@@ -323,3 +323,19 @@ static spi_frame_format_t spi_get_frame_format(spi_device_num_t spi_num)
     volatile spi_t *spi_adapter = spi[spi_num];
     return ((spi_adapter->ctrlr0 >> frf_offset) & 0x3);
 }
+
+uint32_t spi_set_clk_rate(spi_device_num_t spi_num, uint32_t spi_clk)
+{
+    uint32_t spi_baudr = sysctl_clock_get_freq(SYSCTL_CLOCK_SPI0 + spi_num) / spi_clk;
+    if(spi_baudr < 2 )
+    {
+        spi_baudr = 2;
+    }
+    else if(spi_baudr > 65534)
+    {
+        spi_baudr = 65534;
+    }
+    volatile spi_t *spi_adapter = spi[spi_num];
+    spi_adapter->baudr = spi_baudr;
+    return sysctl_clock_get_freq(SYSCTL_CLOCK_SPI0 + spi_num) / spi_baudr;
+}
