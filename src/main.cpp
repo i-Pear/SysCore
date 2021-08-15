@@ -198,18 +198,18 @@ void vfs_init() {
 
     /** /dev **/
     fs->mkdir("/dev", 0, ifs);
-    fs->mkdir("/dev/console", 0, stdout);
-    fs->mkdir("/dev/zero", 0, zero_fs);
-    fs->mkdir("/dev/null", 0, null_fs);
+    fs->mkdir("/dev/console", 0, stdout, false);
+    fs->mkdir("/dev/zero", 0, zero_fs, false);
+    fs->mkdir("/dev/null", 0, null_fs, false);
 
     /** /sys/pipe **/
     fs->mkdir("/sys", 0, ifs);
-    fs->mkdir("/sys/pipe", 0, pipe_fs);
+    fs->mkdir("/sys/pipe", 0, pipe_fs, false);
 
     /** /proc/self/exe **/
     fs->mkdir("/proc", 0, ifs);
     fs->mkdir("/proc/self", 0, ifs);
-    fs->mkdir("/proc/self/exe", 0, nullptr);
+    fs->mkdir("/proc/self/exe", 0, ifs);
 }
 
 int main() {

@@ -254,6 +254,7 @@ public:
             }
             int fr = father_file->fs->open(path, flag);
             if(fr == FR_OK){
+                printf("[open new] %s, fs_name = %s\n", path, father_file->fs->fs_name());
                 father_file->appendChild(new File(file_name, father_file->fs));
             }
             return fr;
@@ -300,12 +301,19 @@ public:
         return 0;
     };
 
-    int mkdir(const char *path, int flag, IFS* ifs) {
+    int mkdir(const char *path, int flag, IFS* ifs, bool real_created_by_father = true) {
+        if (path == "/") {
+            return 0;
+        }
         auto* father = searchFather(root, path);
         if(father == nullptr){
             return -1;
         }
-        int res = father->fs->mkdir(path, flag);
+        int res = FR_OK;
+        if (real_created_by_father) {
+            printf("[mkdir] path real create: %s\n", path);
+            res = father->fs->mkdir(path, flag);
+        }
         if (res == FR_OK) {
             auto file_name = PathUtil::split(path).end->data;
             File* file = nullptr;
@@ -313,6 +321,7 @@ public:
                 file = father->first_child->search(file_name);
             }
             if (file == nullptr) {
+                printf("[mkdir] virtual-path = %s, fs_name = %s\n", path, ifs->fs_name());
                 father->appendChild(new File(file_name, ifs));
             }
             return 0;
@@ -344,7 +353,7 @@ public:
         if(file == nullptr){
             return -1;
         }
-        printf("[PIPE] fs.name = %s\n", file->fs->fs_name().c_str());
+        printf("[PIPE] fs.name = %s\n", file->fs->fs_name());
         return file->fs->pipe(read_path, write_path, flags, unused_param);
     }
 

@@ -88,10 +88,7 @@ public:
         return 0;
     }
 
-    virtual String fs_name() {
-        NOT_IMPLEMENT
-        return 0;
-    }
+    virtual const char* fs_name() = 0;
 };
 
 
@@ -137,7 +134,7 @@ public:
 
     int lseek(const char *path, size_t offset, int whence) override;
 
-    String fs_name() override {
+    const char* fs_name() override {
         return "FatFs";
     }
 };
@@ -145,7 +142,7 @@ public:
 
 class StdoutFs : public IFS {
 public:
-    String fs_name() override {
+    const char* fs_name() override {
         return "StdoutFs";
     }
 
@@ -169,7 +166,7 @@ class PipeFs: public IFS{
 private:
     Map<String, List<unsigned char> *> read_pair, write_pair;
 public:
-    String fs_name() override {
+    const char* fs_name() override {
         return "PipeFs";
     }
 
@@ -251,7 +248,7 @@ public:
 
 class ZeroFs: public IFS {
 public:
-    String fs_name() override {
+    const char* fs_name() override {
         return "ZeroFs";
     }
 
@@ -277,7 +274,7 @@ public:
 
 class NullFs: public IFS {
 public:
-    String fs_name() override {
+    const char* fs_name() override {
         return "NullFs";
     }
 
