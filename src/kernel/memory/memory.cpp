@@ -1,5 +1,6 @@
 #include "memory.h"
 #include "Heap.h"
+#include "../interrupt.h"
 
 size_t __kernel_end;
 int page_count;
@@ -9,18 +10,18 @@ int memory_pointer; // point to the first available page
 
 void init_memory(){
     // get kernel end
-#ifdef QEMU
-    __kernel_end=0x84000000;
-#else
-    __kernel_end=get_kernel_end();
-#endif
+//#ifdef QEMU
+//    __kernel_end=0x84000000;
+//#else
+    __kernel_end=0x80100000;
+//#endif
     __kernel_end=(__kernel_end+__page_size-1)/__page_size*__page_size;
     printf("kernel end= 0x%x\n",__kernel_end);
 
 #ifdef QEMU
-    page_count=1600;
+    page_count=1500;
 #else
-    page_count=(__memory_end-__kernel_end)/__page_size;
+    page_count=(__memory_end-__kernel_end-sizeof(Context))/__page_size;
 #endif
     printf("[Memory] total global_pages' count is %d\n",page_count);
 

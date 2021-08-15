@@ -36,6 +36,5 @@ extern unsigned char fs_img[];
 void driver_init(){
 #ifndef QEMU
     bsp_init();
-    open_memory_lock();
 #endif
 }
