@@ -122,26 +122,16 @@ void add_test(const char* name){
 }
 
 void create_XXX_testfile(){
-    DDD()
     fs->mkdir("/var", 0, fs->root->fs);
-    DDD()
     fs->mkdir("/var/tmp", 0, fs->root->fs);
-    DDD()
     File* XXX = VFS::search(fs->root, "/var/tmp/XXX");
-    DDD()
     if (XXX) return;
-    DDD()
     fs->open("/var/tmp/XXX", O_CREATE | O_RDWR);
-    DDD()
     char buf[1024];
-    DDD()
     memset(buf, 0, sizeof(buf));
-    DDD()
     for (int i = 0;i < 1024 * 7; i++) {
-        if(i%1024==0)DDD();
         fs->write("/var/tmp/XXX", buf, sizeof(buf));
     }
-    DDD()
     fs->close("/var/tmp/XXX");
     printf("Create XXX test_file successfully.\n");
 }
