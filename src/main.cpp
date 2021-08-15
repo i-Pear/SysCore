@@ -145,14 +145,15 @@ void lua_test(){
 }
 
 void create_XXX_testfile(){
-    FIL xxx;
-    f_open(&xxx,"/var/tmp/XXX",O_CREATE|O_RDWR);
+    fs->mkdir("/var", 0, fs->root->fs);
+    fs->mkdir("/var/tmp", 0, fs->root->fs);
+    fs->open("/var/tmp/XXX", O_CREATE | O_RDWR);
     char buf[1024];
-    UINT write_bytes;
-    for(int i=0;i<1024*4;i++){
-        f_write(&xxx,buf,1024,&write_bytes);
+    memset(buf, 0, sizeof(buf));
+    for (int i = 0;i < 1024 * 7; i++) {
+        fs->write("/var/tmp/XXX", buf, sizeof(buf));
     }
-    f_close(&xxx);
+    fs->close("/var/tmp/XXX");
     printf("Create XXX test_file successfully.\n");
 }
 
