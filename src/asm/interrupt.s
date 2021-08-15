@@ -31,6 +31,9 @@
     .extern debug_func
 # 进入中断
 __interrupt:
+    bneq a7,173,__real_interrupt
+    sret
+__real_interrupt:
     #保存原先的栈顶指针到sscratch
     csrw sscratch, sp
 
