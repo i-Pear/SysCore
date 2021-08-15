@@ -107,7 +107,8 @@ Context *page_fault(Context* context, size_t stval){
 
     size_t* vir= reinterpret_cast<size_t *>(vir_addr);
     printf("[Page fault] trying to access address 0x%x  pc=0x%x\n",vir_addr,context->sepc);
-    panic("why page fault?")
+//    panic("why page fault?")
+    exit_process(1);
 
 //    PageTableUtil::CreateMapping(table_base, vir_addr, phy_addr, PAGE_TABLE_LEVEL::SMALL, PRIVILEGE_LEVEL::USER);
     return context;

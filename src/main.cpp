@@ -144,6 +144,18 @@ void lua_test(){
     add_test("/lua-s sin30.lua");
 }
 
+void create_XXX_testfile(){
+    FIL xxx;
+    f_open(&xxx,"/var/tmp/XXX",O_CREATE|O_RDWR);
+    char buf[1024];
+    UINT write_bytes;
+    for(int i=0;i<1024*4;i++){
+        f_write(&xxx,buf,1024,&write_bytes);
+    }
+    f_close(&xxx);
+    printf("Create XXX test_file successfully.\n");
+}
+
 /**
  * 此处打算通过 sret 进入u-mode
  * 中断后硬件会执行以下动作：
@@ -173,13 +185,14 @@ void init_thread() {
     init_scheduler();
     FD::InitializeFileDescriber();
     init_self_tests();
+    create_XXX_testfile();
 
 //    simple_test();
 //    busybox_test();
 //    lua_test();
-add_test("/lmbench_new lat_syscall -P 1 null");
-add_test("/lmbench_new lat_syscall -P 1 read");
-add_test("/lmbench_new lat_syscall -P 1 write");
+//add_test("/lmbench_new lat_syscall -P 1 null");
+//add_test("/lmbench_new lat_syscall -P 1 read");
+//add_test("/lmbench_new lat_syscall -P 1 write");
 //add_test("/busybox_new mkdir -p /var/tmp");
 //add_test("/busybox_new touch /var/tmp/lmbench");
 //add_test("/lmbench_new lat_syscall -P 1 stat /var/tmp/lmbench");
@@ -188,6 +201,7 @@ add_test("/lmbench_new lat_syscall -P 1 write");
 //add_test("/lmbench_new lat_pipe -P 1");
 //add_test("/lmbench_new bw_file_rd -P 1 512k io_only /var/tmp/XXX");
 //add_test("/lmbench_new bw_file_rd -P 1 512k open2close /var/tmp/XXX");
+add_test("/lmbench_all bw_mmap_rd -P 1 512k mmap_only /var/tmp/XXX");
 
     schedule();
 }
