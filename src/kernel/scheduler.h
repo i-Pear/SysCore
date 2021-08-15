@@ -16,6 +16,10 @@
 
 extern int global_pid;
 
+extern int memory_dirty;
+
+void init_thread();
+
 class PCB{
 public:
 

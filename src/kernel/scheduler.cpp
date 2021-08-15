@@ -11,6 +11,8 @@ extern "C" {
 
 int global_pid = 1;
 
+int memory_dirty;
+
 // Warning: when do sth with running, sync with latest running_context first
 Context *running_context;
 
@@ -83,6 +85,8 @@ List<PCB *> runnable, blocked;
 PCB *running;
 
 void init_scheduler() {
+    memory_dirty=0;
+
 #ifndef QEMU
     running_context = reinterpret_cast<Context *>(0x80000000 + 8 * 1024 * 1024 - sizeof(Context));
 #else
@@ -564,8 +568,13 @@ void schedule() {
             if(!blocked.is_empty()){
                 panic("There exists a dead waiting loop. All processes are blocked.");
             }
+            if(memory_dirty){
+                // has run a test this time, try to reboot
+                init_thread();
+            }
             if (has_next_test()) {
                 create_process(get_next_test());
+                memory_dirty=1;
                 schedule();
             } else {
                 printf(">>> Nothing to run, shutdown. <<<\n");
