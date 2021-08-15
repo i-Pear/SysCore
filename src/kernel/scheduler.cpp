@@ -51,6 +51,10 @@ char *get_running_cwd() {
     return running->cwd;
 }
 
+int& get_running_pipe_read_count(){
+    return running->pipe_read_count;
+}
+
 void file_describer_bind(size_t file_id, size_t real_file_describer) {
     running->occupied_file_describer->put(file_id, real_file_describer);
 }

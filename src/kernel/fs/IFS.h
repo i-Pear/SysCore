@@ -187,15 +187,21 @@ public:
                 // TODO: 此处直接实现为非阻塞，如果没有足够的数据会直接返回
 //                return cur;
                 // 先调度其他进程，相当于阻塞住自己
-                printf("[Pipe] read %s block\n", path);
+//                printf("[Pipe] read %s block\n", path);
+                if (get_running_pipe_read_count() > 10) {
+                    printf("[Pipe] kill process because of dead lock\n");
+                    exit_process(0);
+                }
+                ++get_running_pipe_read_count();
                 __yield();
             }
         }
+        get_running_pipe_read_count() = 0;
         return cur;
     }
 
     int write(const char *path, char *buf, int count) override {
-        printf("[Pipe] write %s\n", path);
+//        printf("[Pipe] write %s\n", path);
         auto *write_buff = write_pair.get(String(path));
         if(write_buff == nullptr)return -1;
         for (auto i = 0; i < count; i++) {

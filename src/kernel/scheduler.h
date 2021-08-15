@@ -40,6 +40,7 @@ public:
 
     Context * thread_context;
     char cwd[MAX_PATH_LENGTH];
+    int pipe_read_count = 0;
 
     RefCountPtr<Map<size_t,size_t>> occupied_file_describer;
     RefCountPtr<List<size_t>> occupied_kernel_heap;
@@ -72,6 +73,8 @@ void bind_pages(size_t addr);
 int get_new_pid();
 
 char* get_running_cwd();
+
+int& get_running_pipe_read_count();
 
 void init_scheduler();
 
