@@ -3,8 +3,11 @@
 
 HeapAllocator heap_allocator;
 
+char heap_space[KERNEL_HEAP_PAGE_NUM * 4096];
+
 void init_heap(){
-    size_t start = alloc_page(KERNEL_HEAP_PAGE_NUM * 4096);
+    auto start = reinterpret_cast<size_t>(heap_space);
+    memset(heap_space,0, sizeof(heap_space));
     heap_allocator.SetStart(start);
     heap_allocator.SetEnd(start + KERNEL_HEAP_PAGE_NUM * 4096);
     heap_allocator.Init();

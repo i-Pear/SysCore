@@ -193,7 +193,7 @@ void init_thread() {
 //    simple_test();
 //    busybox_test();
 //    lua_test();
-//add_test("/lmbench_new lat_syscall -P 1 null");
+add_test("/lmbench_new lat_syscall -P 1 null");
 //add_test("/lmbench_new lat_syscall -P 1 read");
 //add_test("/lmbench_new lat_syscall -P 1 write");
 //add_test("/busybox_new mkdir -p /var/tmp");
@@ -204,7 +204,7 @@ void init_thread() {
 //add_test("/lmbench_new lat_pipe -P 1");
 //add_test("/lmbench_new bw_file_rd -P 1 512k io_only /var/tmp/XXX");
 //add_test("/lmbench_new bw_file_rd -P 1 512k open2close /var/tmp/XXX");
-add_test("/lmbench_all bw_mmap_rd -P 1 512k mmap_only /var/tmp/XXX");
+//add_test("/lmbench_all bw_mmap_rd -P 1 512k mmap_only /var/tmp/XXX");
 
     schedule();
 }

@@ -4,7 +4,7 @@
 size_t __kernel_end;
 int page_count;
 
-bool memory_pool[4096];
+size_t memory_pool[2048];
 int memory_pointer; // point to the first available page
 
 void init_memory(){

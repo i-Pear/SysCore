@@ -78,6 +78,7 @@ public:
         if (need_page > page_count) {
             for (int i = page_count; i < need_page; i++) {
                 size_t new_page = alloc_page();
+                memset(reinterpret_cast<void*>(new_page), 0, 4096);
                 memKeeper.add(reinterpret_cast<void *>(new_page));
                 PageTableUtil::CreateMapping(
                         pageTable,

@@ -519,7 +519,7 @@ size_t sys_writev(Context* context){
 
 size_t sys_brk(Context* context){
     size_t require=context->a0;
-//    printf("brk: require= 0x%x\n",require);
+    printf("brk: require= 0x%x\n",require);
     return running->brk_control->brk(require);
 }
 
@@ -761,7 +761,7 @@ void syscall_unhandled(Context *context) {
 }
 
 void syscall_distribute(int syscall_id, Context *context) {
-#define STRACE
+//#define STRACE
     static int syscall_is_initialized = 0;
     if (syscall_is_initialized != 1) {
         syscall_init();
