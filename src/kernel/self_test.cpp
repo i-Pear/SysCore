@@ -136,6 +136,14 @@ void create_XXX_testfile(){
     printf("Create XXX test_file successfully.\n");
 }
 
+void create_lmbench_testfile(){
+    File* LM = VFS::search(fs->root, "/var/tmp/lmbench");
+    if (LM) return;
+    fs->open("/var/tmp/lmbench", O_CREATE | O_RDWR);
+    fs->close("/var/tmp/lmbench");
+    printf("Create lmbench test_file successfully.\n");
+}
+
 void init_self_tests(){
     DDD()
     if(self_test_init_magic!=187439611){
@@ -152,8 +160,8 @@ void init_self_tests(){
         add_test("/lmbench_all lat_syscall -P 1 null");
         add_test("/lmbench_all lat_syscall -P 1 read");
         add_test("/lmbench_all lat_syscall -P 1 write");
-        add_test("/busybox mkdir -p /var/tmp");
-        add_test("/busybox touch /var/tmp/lmbench");
+//        add_test("/busybox mkdir -p /var/tmp");
+//        add_test("/busybox touch /var/tmp/lmbench");
         add_test("/lmbench_all lat_syscall -P 1 stat /var/tmp/lmbench");
         add_test("/lmbench_all lat_syscall -P 1 fstat /var/tmp/lmbench");
         add_test("/lmbench_all lat_syscall -P 1 open /var/tmp/lmbench");
