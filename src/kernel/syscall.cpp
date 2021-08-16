@@ -243,20 +243,20 @@ size_t sys_exit(Context *context) {
 }
 
 size_t sys_getppid(Context *context) {
-    unsigned int* ins=(unsigned int*)(context->sepc-4);
-    if( ins[0]==0x0ad00893U &&              // li	a7,173
-        ins[1]==0x00000073U &&              // ecall
-        (ins[2]&0x0000FFFFU)==0x00008082U)  // ret
-    {
-        ins[0]=0x0010051BU;                 // li a0,0x200000000
-        ins[1]=0x02151513U;
-        ins[2]=(ins[2]&0xFFFF0000U)|0x00008502U; // jr a0
-
-        PageTableUtil::FlushInstructionStream();
-        // This syscall can't return normally because of instruction changes
-        // Try redo this syscall in userspace
-        context->sepc-=8;
-    }
+//    unsigned int* ins=(unsigned int*)(context->sepc-4);
+//    if( ins[0]==0x0ad00893U &&              // li	a7,173
+//        ins[1]==0x00000073U &&              // ecall
+//        (ins[2]&0x0000FFFFU)==0x00008082U)  // ret
+//    {
+//        ins[0]=0x0010051BU;                 // li a0,0x200000000
+//        ins[1]=0x02151513U;
+//        ins[2]=(ins[2]&0xFFFF0000U)|0x00008502U; // jr a0
+//
+//        PageTableUtil::FlushInstructionStream();
+//        // This syscall can't return normally because of instruction changes
+//        // Try redo this syscall in userspace
+//        context->sepc-=8;
+//    }
     return get_running_ppid();
 }
 
@@ -804,7 +804,7 @@ void syscall_distribute(int syscall_id, Context *context) {
         LOG("[pid=%d] [syscall] %d, ",running->pid, syscall_id);
 #endif
         context->a0 = syscall_list[syscall_id](context);
-        #ifdef STRACE
+#ifdef STRACE
         LOG("%s = 0x%x\n", syscall_name_list[syscall_id], context->a0);
 #endif
     } else {

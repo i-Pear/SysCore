@@ -31,7 +31,20 @@
     .extern debug_func
 # 进入中断
 __interrupt:
+
+    csrw sscratch, a0       # backup a0
+    li a0,173
+    bne a0,a7,__real_interrupt
+    #csrr a0, scause         # a0=scause
+    #andi a0,a0,31           # a0=scause&31
+    #addi a0,a0,-8           # a0=(scause&31)-8
+    #bne a0,zero,__real_interrupt
+
+    j __handle_getppid
+
+__real_interrupt:
     #保存原先的栈顶指针到sscratch
+    csrr a0, sscratch
     csrw sscratch, sp
 
     # 在栈上开辟 Context 所需的空间
@@ -104,7 +117,7 @@ __restore:
     csrw    scause, s4
     csrw    satp, s5
 
-    sfence.vma zero, zero
+#    sfence.vma zero, zero
 
     # 恢复通用寄存器
     LOAD    x1, 1
@@ -120,7 +133,10 @@ __restore:
 
     sret
 
-__just_a_test:
-    li a0,0x200000000
-    jr  a0
-    nop # ending
+__handle_getppid:
+    csrr a0,sepc
+    addi a0,a0,4
+    csrw sepc,a0
+    li a0, 0x80000000+8*1024*1024-4         # place for ppid
+    lw a0,0(a0)                             # get ppid
+    sret                                    # return

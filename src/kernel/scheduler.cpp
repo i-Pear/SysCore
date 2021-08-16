@@ -570,6 +570,7 @@ void schedule() {
             // sync with running_context
             *running_context = *running->thread_context;
             *fast_pid=running->pid;
+            PageTableUtil::FlushCurrentPageTable();
             __restore();
         }
         {
