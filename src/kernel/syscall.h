@@ -3,7 +3,6 @@
 
 #include "interrupt.h"
 
-void init_syscall();
 
 #define SYS_getcwd 17
 #define SYS_dup 23

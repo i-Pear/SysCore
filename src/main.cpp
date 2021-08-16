@@ -1,39 +1,3 @@
-//#pragma GCC optimize("Ofast")
-//#pragma GCC optimize("inline")
-//#pragma GCC optimize("-fdelayed-branch")
-//#pragma GCC optimize("-fguess-branch-probability")
-//#pragma GCC optimize("-fif-conversion")
-//#pragma GCC optimize("-fif-conversion2")
-//#pragma GCC optimize("-floop-optimize")
-//#pragma GCC optimize("-fmerge-constants")
-//
-//#pragma GCC optimize("-fcaller-saves")
-//#pragma GCC optimize("-fcse-follow-jumps")
-//#pragma GCC optimize("-fdelete-null-pointer-checks")
-//#pragma GCC optimize("-fexpensive-optimizations")
-//#pragma GCC optimize("-fforce-mem")
-//#pragma GCC optimize("-fgcse")
-//#pragma GCC optimize("-fgcse-lm")
-//#pragma GCC optimize("-foptimize-sibling-calls")
-//#pragma GCC optimize("-fregmove")
-//#pragma GCC optimize("-freorder-functions")
-//#pragma GCC optimize("-frerun-cse-after-loop")
-//#pragma GCC optimize("-fsched-interblock")
-//#pragma GCC optimize("-fschedule-insns")
-//#pragma GCC optimize("-fstrength-reduce")
-//#pragma GCC optimize("-fthread-jumps")
-//#pragma GCC optimize("-funit-at-a-time")
-//
-//#pragma GCC optimize("-fgcse-after-reload")
-//#pragma GCC optimize("-finline-functions")
-//#pragma GCC optimize("-finline-small-functions")
-//#pragma GCC optimize("-fno-stack-protector")
-//#pragma GCC optimize("-funroll-loops")
-//#pragma GCC optimize("-ftree-loop-vectorize")
-//#pragma GCC optimize("-ftree-slp-vectorize")
-//#pragma GCC optimize("-fvect-cost-model")
-//#pragma GCC optimize("-ffast-math")
-
 #include "kernel/interrupt.h"
 #include "kernel/register.h"
 #include "kernel/scheduler.h"
@@ -54,7 +18,6 @@
 #include "lib/stl/PageTableUtil.h"
 #include "kernel/time/time.h"
 #include "kernel/posix/pselect.h"
-#include "kernel/syscall.h"
 
 void vfs_init();
 void fix_kernel_page_table();
@@ -116,7 +79,6 @@ void init_thread() {
     init_scheduler();
     FD::InitializeFileDescriber();
     init_self_tests();
-    init_syscall();
 
     schedule();
 }
