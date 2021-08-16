@@ -2,8 +2,6 @@
 #include "../../driver/rtc/rtc.h"
 #include "../../driver/sysctl.h"
 
-#include "../stdio.h"
-
  uint64 r_time () {
      uint64 res;
      asm volatile(
@@ -36,9 +34,8 @@ uint64 get_sec(void){
 
 uint64 timer(){
     uint64 x = r_time();
-    printf("");
-    uint64 usec = x / 10;
-//    uint64 usec = x * 50 * 1000000UL / 50000000;
+//    uint64 usec = x / 10;
+    uint64 usec = x * 50 * 1000000UL / 50000000;
     return usec;
 }
 
