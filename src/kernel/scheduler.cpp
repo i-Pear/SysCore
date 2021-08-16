@@ -93,9 +93,9 @@ void init_scheduler() {
     memory_dirty=0;
 
 #ifndef QEMU
-    running_context = reinterpret_cast<Context *>(__memory_end - sizeof(Context)-sizeof(int));
+    running_context = reinterpret_cast<Context *>(__memory_end - sizeof(Context)-8);
 #else
-    running_context= reinterpret_cast<Context *>(0x89000000 + 8 * 1024 * 1024 - sizeof(Context)-sizeof(int));
+    running_context= reinterpret_cast<Context *>(0x89000000 + 8 * 1024 * 1024 - sizeof(Context)-8);
 #endif
     runnable.start = runnable.end = nullptr;
     blocked.start = blocked.end = nullptr;
