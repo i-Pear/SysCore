@@ -21,21 +21,33 @@ class IFS{
 文件接口实现
 
 ### FATFs
-
+主文件系统，用于真正在SD卡上进行创建文件
 ```c++
 class FS : public IFS
 ```
 
 ### PipeFs
-
+管道文件系统，用于虚拟管道进行管道通信
 ```c++
 class PipeFs: public IFS
 ```
 
 ### StdoutFs
-
+标准输出
 ```c++
 class StdoutFs : public IFS
+```
+
+### ZeroFs
+用于实现/dev/zero
+```c++
+class ZeroFs : public IFS
+```
+
+### NullFs
+用于实现/dev/null
+```c++
+class NullFs : public IFS
 ```
 
 ## VFS
