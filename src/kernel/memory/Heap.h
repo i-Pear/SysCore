@@ -79,19 +79,19 @@ public:
         }
     }
 private:
-    void Check(size_t i){
+    inline void Check(size_t i){
         if(i < 0 || i > KERNEL_HEAP_BIT_MAP_SIZE * 64){
             panic("kernel heap no space")
         }
     }
 
-    size_t Get(size_t bit) {
+    inline size_t Get(size_t bit) {
         size_t index = (bit / 64);
         size_t offset = (63 - (bit % 64));
         return (bit_map_[index] & (1LL << offset)) ? 1 : 0;
     }
 
-    void Set(size_t bit, size_t value) {
+    inline void Set(size_t bit, size_t value) {
         size_t index = (bit / 64);
         size_t offset = (63 - (bit % 64));
         bit_map_[index] = bit_map_[index] | (1LL << offset);
