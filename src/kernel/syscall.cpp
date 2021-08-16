@@ -641,6 +641,10 @@ size_t sys_sysinfo(Context* context){
     return 0;
 }
 
+size_t sys_set_tid_address(Context* context){
+    return 0;
+}
+
 size_t sys_clock_gettime(Context* context){
     int clock_id=context->a0;
     auto *timespec= reinterpret_cast<struct timespec *>(context->a1);
@@ -788,18 +792,20 @@ void syscall_unhandled(Context *context) {
     context->a0=0;
 }
 
-void syscall_distribute(int syscall_id, Context *context) {
+void init_syscall(){
+    syscall_init();
+    syscall_register();
+}
+
+inline void syscall_distribute(int syscall_id, Context *context) {
 //#define STRACE
-    static int syscall_is_initialized = 0;
-    if (syscall_is_initialized != 1) {
-        syscall_init();
-        syscall_register();
-        syscall_is_initialized = 1;
-    }
+
     assert(syscall_id >= 0 && syscall_id < SYSCALL_LIST_LENGTH);
     assert(context != NULL);
 
+#ifndef BENCHING
     if (syscall_list[syscall_id] !=nullptr) {
+#endif
 #ifdef STRACE
         LOG("[pid=%d] [syscall] %d, ",running->pid, syscall_id);
 #endif
@@ -807,9 +813,11 @@ void syscall_distribute(int syscall_id, Context *context) {
 #ifdef STRACE
         LOG("%s = 0x%x\n", syscall_name_list[syscall_id], context->a0);
 #endif
+#ifndef BENCHING
     } else {
         syscall_unhandled(context);
     }
+#endif
 #undef STRACE
 }
 
@@ -870,6 +878,7 @@ void syscall_register() {
     REGISTER(clock_gettime);
     REGISTER(utimensat);
     REGISTER(fcntl);
+    REGISTER(set_tid_address);
 
     REGISTER(times);
     REGISTER(gettimeofday);
