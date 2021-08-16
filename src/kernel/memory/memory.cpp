@@ -21,7 +21,7 @@ void init_memory(){
 #ifdef QEMU
     page_count=1500;
 #else
-    page_count=(__memory_end-__kernel_end-sizeof(Context))/__page_size;
+    page_count=(__memory_end-__kernel_end-sizeof(Context)-sizeof(size_t))/__page_size;
 #endif
     printf("[Memory] total global_pages' count is %d\n",page_count);
 

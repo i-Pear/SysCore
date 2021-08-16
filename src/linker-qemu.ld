@@ -26,6 +26,12 @@ SECTIONS
         *(.text.entry)
         . = ALIGN(4K);
         *(.align.interrupt)
+
+        . = ALIGN(4K);
+        f_syscall_start = .;  /* f_syscall 独立为一页 */
+        *(.f_syscall)
+        . = ALIGN(4K);
+
         /* 要链接的文件的 .text 字段集中放在这里 */
         *(.text .text.*)
     }
