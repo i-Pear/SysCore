@@ -803,9 +803,9 @@ inline void syscall_distribute(int syscall_id, Context *context) {
     assert(syscall_id >= 0 && syscall_id < SYSCALL_LIST_LENGTH);
     assert(context != NULL);
 
-#ifndef BENCHING
+//#ifndef BENCHING
     if (syscall_list[syscall_id] !=nullptr) {
-#endif
+//#endif
 #ifdef STRACE
         LOG("[pid=%d] [syscall] %d, ",running->pid, syscall_id);
 #endif
@@ -813,11 +813,11 @@ inline void syscall_distribute(int syscall_id, Context *context) {
 #ifdef STRACE
         LOG("%s = 0x%x\n", syscall_name_list[syscall_id], context->a0);
 #endif
-#ifndef BENCHING
+//#ifndef BENCHING
     } else {
         syscall_unhandled(context);
     }
-#endif
+//#endif
 #undef STRACE
 }
 
