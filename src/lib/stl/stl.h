@@ -18,7 +18,7 @@
 #define mtl(x) ;
 #endif
 
-#define BENCHING
+//#define BENCHING
 
 #define DDD() {printf("[DDD] %s:%d \n",__FILE__,__LINE__);}
 #define panic(message) {printf("[panic] %s:%d  %s\n",__FILE__,__LINE__,message);shutdown();}
