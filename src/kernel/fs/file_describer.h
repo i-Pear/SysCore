@@ -102,8 +102,12 @@ public:
     }
 
     static RefCountPtr<OpenedFile>& GetFile(int fd){
+        if (fd < 0 || fd > FILE_DESCRIBER_ARRAY_LENGTH) {
+            printf("[FileDescriber] Error fd %d\n", fd);
+            panic("")
+        }
         if(fd_array[fd] == nullptr){
-            printf("[FD] Access NULL fd %d\n", fd);
+            printf("[FileDescriber] Access NULL fd %d\n", fd);
             panic("")
         }
         return fd_array[fd]->GetFile();
@@ -111,7 +115,7 @@ public:
 
     static void CopyFd(int source_fd, int target_fd){
         if(!Exists(source_fd)){
-            printf("[FD] fd %d not exists!\n", source_fd);
+            printf("[FileDescriber] fd %d not exists!\n", source_fd);
             panic("")
         }
         if(Exists(target_fd)){
@@ -159,6 +163,10 @@ public:
     }
 private:
     static void Check(int fd){
+        if (fd < 0 || fd > FILE_DESCRIBER_ARRAY_LENGTH) {
+            printf("[FileDescriber] Error fd %d\n", fd);
+            panic("")
+        }
         if(fd_array[fd] != nullptr){
             printf("[FD] fd %d is used\n", fd);
             panic("")
