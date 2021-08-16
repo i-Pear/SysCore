@@ -237,7 +237,7 @@ size_t sys_gettimeofday(Context *context) {
 }
 
 size_t sys_exit(Context *context) {
-    printf("Program exited with exit code 0x%x\n",context->a0);
+//    printf("Program exited with exit code 0x%x\n",context->a0);
     exit_process(context->a0);
     return context->a0;
 }
