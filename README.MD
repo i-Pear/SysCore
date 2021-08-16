@@ -6,19 +6,20 @@
 * iPear@https://github.com/i-Pear
 * Waitti@https://github.com/Waitti-long
 
-## Compile
+## 一、开发板运行
 
 ```shell
 # 将工具链bin目录释放至环境变量
+export PATH=$PATH:/usr/your_toolchain_path
 ```
 
 ```shell
 # 编译出k210.bin
-make
+make all
 ```
 
 ```shell
-# 烧录到板子
+# 烧录到开发板
 make up
 # 通过串口查看
 make see
@@ -28,44 +29,23 @@ make run
 
 <img src="doc\assets\make_run_demo.gif" alt="make_run_demo" style="zoom:60%;" />
 
-## Img
+### 格式化SD卡的命令
 
 ```shell
-# 构建fat.img
-make img
-```
-
-## 格式化SD卡的命令
-
-```shell
-注意！你的sd卡究竟是不是/dev/sda!!!!!!!!!!!
-sudo dd if=/dev/zero of=/dev/sda bs=1M count=1
+！！！格式化前强检查SD卡是不是/dev/sda，否则可能格式化本机硬盘
+sudo dd if=/dev/zero of=/dev/sda bs=1M count=20
 sudo mkfs.vfat -F 32 /dev/sda
-sudo test_lib -d /mnt/sd || mkdir -p /mnt/sd
+if [ ! -d "/mnt/sd" ]; then mkdir -p /mnt/sd; fi
 sudo mount -t vfat /dev/sda /mnt/sd
 sudo cp -r test_suites/* /mnt/sd
 sudo umount /mnt/sd
 ```
 
-## 如何在Syscore中使用qemu
+## 二、QEMU模拟器运行
 
-首先，在src/driver中新建img.h并声明变量如下
+### 1. 安装QEMU
 
-```c
-// 由于本代码过长请自己生成，此处无法完全写入MD也无法写入git
-// 另外也不要把该文件上传到git上
-// 这个文件是把fat32镜像转成byte array
-unsigned char fs_img[] = {
-0xeb, 0x58, 0x90, 0x6d, 0x6b, 0x66, 0x73, 0x2e, 0x66, 0x61, 0x74, 0x00,
-```
-
-编译driver
-
-```sh
-make qemu-driver
-```
-
-然后，下载qemu-6.0.0源码
+下载qemu-6.0.0源码
 
 将target/riscv/cpu_helper.c中的以下代码注释掉，目的是使得任何的PTE_U都可以访问目标地址
 
@@ -100,40 +80,60 @@ export PATH=$PATH:qemu-6.0.0/build/riscv64-softmmu
 qemu-system-riscv64 --version
 ```
 
-运行qemu并监听1234端口
-```shell
-make qemu
-```
+### 2. 准备SD卡内存镜像
 
-再开一个shell运行gdb
-```shell
-make debug
-```
+首先，新建asserts文件夹并放入SD卡所需文件，执行命令：
 
-## 制作img.h的方法
-
-```shell
+```c
 dd if=/dev/zero of=fs.img bs=1M count=20
 mkfs.vfat -F 32 fs.img
 sudo mount fs.img /mnt/sd
-sudo cp -r test_suites/* /mnt/sd
+sudo cp -r ./assets/* /mnt/sd
 sync
 sudo umount /mnt/sd
 xxd -i fs.img img.h
 ```
 
-## 加载符号
-```gdb
-readelf -WS <elf> | grep .text | awk '{ print"0x"$5 }'
-add-symbol-file <elf> <address>
+得到img.h文件，将其放入kernel/driver文件夹，编译driver：
+
+```sh
+make qemu-driver
 ```
 
-## 以下是一些有用的网站
+### 3. 启动QEMU
 
-* Risc-V Registers: https://www.five-embeddev.com/riscv-isa-manual/latest/supervisor.html#supervisor
-* K210 Datasheet: https://s3.cn-north-1.amazonaws.com.cn/dl.kendryte.com/documents/kendryte_datasheet_20180919020633.pdf
+运行qemu并使用1234端口进行debug
 
-## 鸣谢
+```shell
+make dqemu
+make debug # 再开一个shell运行gdb
+```
+
+也可以直接全速运行：
+
+```makefile
+make qemu
+```
+
+### 4. 加载符号
+
+可以同时加载内核和用户态程序两个符号，享受双倍断点
+
+```gdb
+file build/kernel.o
+add-symbol-file your_userspace_running_exectuable
+```
+
+## 三、一些有用的网站
+
+* Risc-V Registers：https://www.five-embeddev.com/riscv-isa-manual/latest/supervisor.html#supervisor
+* K210 Datasheet：https://s3.cn-north-1.amazonaws.com.cn/dl.kendryte.com/documents/kendryte_datasheet_20180919020633.pdf
+* Linux Syscall：https://man7.org/linux/man-pages/man2/syscall.2.html
+* AUX栈配置详解：https://man7.org/linux/man-pages/man3/getauxval.3.html
+* glibc源码：https://code.woboq.org/userspace/glibc/
+* VDSO相关：https://www.linuxjournal.com/content/creating-vdso-colonels-other-chicken
+
+## 四、鸣谢
 
 rCore-Tutorial: https://rcore-os.github.io/rCore-Tutorial-Book-v3/index.html
 
