@@ -145,6 +145,7 @@
 #define SYS_unshare 97
 #define SYS_futex 98
 #define SYS_pselect6 72
+#define SYS_prlimit64 261
 
 
 

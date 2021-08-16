@@ -15,6 +15,11 @@ typedef unsigned int uint32;
 typedef unsigned int uint32_t;
 typedef unsigned int uint;
 
+struct rlimit {
+    unsigned long int rlim_cur;  /* Soft limit */
+    unsigned long int rlim_max;  /* Hard limit (ceiling for rlim_cur) */
+};
+
 struct ES_tms
 {
     long tms_utime;   /* user cpu time */

@@ -760,6 +760,20 @@ size_t sys_setitimer(Context* context) {
     return 0;
 }
 
+size_t sys_prlimit64(Context* context) {
+    int pid=context->a0;
+    int resource=context->a1;
+    auto *new_limit=(const struct rlimit *)context->a2;
+    auto *old_limit=(struct rlimit *)context->a3;
+
+    if(old_limit){
+        old_limit->rlim_cur=1024;
+        old_limit->rlim_max=1024*1024;
+    }
+
+    return 0;
+}
+
 /// syscall int & register & distribute
 
 void syscall_init() {
@@ -864,5 +878,6 @@ void syscall_register() {
     REGISTER(pselect6);
     REGISTER(futex);
     REGISTER(setitimer);
+    REGISTER(prlimit64);
 #undef REGISTER
 }
