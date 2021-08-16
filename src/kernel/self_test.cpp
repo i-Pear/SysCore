@@ -146,6 +146,7 @@ void init_self_tests(){
         //    simple_test();
         //    busybox_test();
         //    lua_test();
+        add_test("/lmbench_all lat_syscall -P 1 null");
         add_test("/lmbench_all lat_syscall -P 1 read");
         add_test("/lmbench_all lat_syscall -P 1 write");
         add_test("/busybox mkdir -p /var/tmp");
@@ -157,6 +158,5 @@ void init_self_tests(){
         //add_test("/lmbench_all bw_file_rd -P 1 512k io_only /var/tmp/XXX");
         //add_test("/lmbench_all bw_file_rd -P 1 512k open2close /var/tmp/XXX");
         add_test("/lmbench_all bw_mmap_rd -P 1 512k mmap_only /var/tmp/XXX");
-        add_test("/lmbench_all lat_syscall -P 1 null");
     }
 }

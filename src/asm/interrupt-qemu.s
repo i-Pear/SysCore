@@ -106,6 +106,9 @@ __restore:
 
     sfence.vma zero, zero
 
+#    li a0,0x200000000
+#    jr  a0
+
     # 恢复通用寄存器
     LOAD    x1, 1
     # 恢复 x3 至 x31
