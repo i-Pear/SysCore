@@ -77,7 +77,8 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
         // user ecall
         case 8:{
             syscall(context);
-            __restore();
+//            __restore();
+            __fast_restore();
         }
         // ins page fault & load page fault
         case 12 ... 13:{

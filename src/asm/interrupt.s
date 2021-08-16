@@ -119,3 +119,39 @@ __restore:
     LOAD    x2, 2
 
     sret
+
+.global __fast_restore
+# 离开中断
+# 从 Context 中恢复所有寄存器，并跳转至 Context 中 sepc 的位置
+__fast_restore:
+
+    # receive Context
+    li      sp, 0x80000000+8*1024*1024-8
+    addi    sp, sp, -CONTEXT_SIZE*8
+    # 恢复 CSR
+    LOAD    s1, 32
+    LOAD    s2, 33
+    LOAD    s3, 34
+    LOAD    s4, 35
+    LOAD    s5, 36
+    csrw    sstatus, s1
+    csrw    sepc, s2
+    csrw    stval, s3
+    csrw    scause, s4
+    csrw    satp, s5
+
+    # sfence.vma zero, zero
+
+    # 恢复通用寄存器
+    LOAD    x1, 1
+    # 恢复 x3 至 x31
+    .set    n, 3
+    .rept   29
+        LOAD_N  %n
+        .set    n, n + 1
+    .endr
+
+    # 恢复 sp（又名 x2）这里最后恢复是为了上面可以正常使用 LOAD 宏
+    LOAD    x2, 2
+
+    sret
