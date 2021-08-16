@@ -787,11 +787,11 @@ void syscall_distribute(int syscall_id, Context *context) {
 
     if (syscall_list[syscall_id] !=nullptr) {
 #ifdef STRACE
-        printf("[pid=%d] [syscall] %d, ",running->pid, syscall_id);
+        LOG("[pid=%d] [syscall] %d, ",running->pid, syscall_id);
 #endif
         context->a0 = syscall_list[syscall_id](context);
         #ifdef STRACE
-        printf("%s = 0x%x\n", syscall_name_list[syscall_id], context->a0);
+        LOG("%s = 0x%x\n", syscall_name_list[syscall_id], context->a0);
 #endif
     } else {
         syscall_unhandled(context);
