@@ -230,7 +230,7 @@ static int check_block_size(void) {
 
         if (0 == result) {
             if (ocr[0] & 0x40) {
-                printf("[SD] SDHC/SDXC detected\n");
+//                printf("[SD] SDHC/SDXC detected\n");
                 if (512 != BSIZE) {
                     printf("BSIZE != 512\n");
                     return 0xff;
@@ -314,12 +314,12 @@ int sdcard_init(void) {
 #include "sdcard.h"
         sdcard_read_sector((uint8*)buff, 0);
         SD_SECTOR_SIZE = *(uint16 *) (buff + 11);
-        printf("[SD] SD_SECTOR_SIZE = %d\n", SD_SECTOR_SIZE);
+//        printf("[SD] SD_SECTOR_SIZE = %d\n", SD_SECTOR_SIZE);
         SD_BLOCK_SIZE = (*(uint8 *) (buff + 13)) * (uint32)SD_SECTOR_SIZE;
-        printf("[SD] SD_BLOCK_SIZE = %d\n", SD_BLOCK_SIZE);
+//        printf("[SD] SD_BLOCK_SIZE = %d\n", SD_BLOCK_SIZE);
 //        SD_SECTOR_COUNT = *(uint32 *) (buff + 32);
         SD_SECTOR_COUNT = 125171712;
-        printf("[SD] SD_SECTOR_COUNT = %d\n", SD_SECTOR_COUNT);
+//        printf("[SD] SD_SECTOR_COUNT = %d\n", SD_SECTOR_COUNT);
     }
     return !result;
 }

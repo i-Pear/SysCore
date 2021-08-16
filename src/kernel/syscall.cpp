@@ -237,12 +237,26 @@ size_t sys_gettimeofday(Context *context) {
 }
 
 size_t sys_exit(Context *context) {
-    printf("Program exited with exit code 0x%x\n",context->a0);
+//    printf("Program exited with exit code 0x%x\n",context->a0);
     exit_process(context->a0);
     return context->a0;
 }
 
 size_t sys_getppid(Context *context) {
+    unsigned int* ins=(unsigned int*)(context->sepc-4);
+    if( ins[0]==0x0ad00893U &&              // li	a7,173
+        ins[1]==0x00000073U &&              // ecall
+        (ins[2]&0x0000FFFFU)==0x00008082U)  // ret
+    {
+        ins[0]=0x0010051BU;                 // li a0,0x200000000
+        ins[1]=0x02151513U;
+        ins[2]=(ins[2]&0xFFFF0000U)|0x00008502U; // jr a0
+
+        PageTableUtil::FlushInstructionStream();
+        // This syscall can't return normally because of instruction changes
+        // Try redo this syscall in userspace
+        context->sepc-=8;
+    }
     return get_running_ppid();
 }
 

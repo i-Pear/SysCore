@@ -29,6 +29,7 @@ all: mk-build driver
                                     $(OBJ_DRIVER) \
                                     src/asm/boot.s \
                                     src/asm/interrupt.s \
+                                    src/asm/fast-call.s \
                                     src/main.cpp
 	$(OBJCOPY) $(KERNEL_O) --strip-all -O binary $(KERNEL_BIN)
 	@cp $(BOOTLOADER) $(BOOTLOADER).copy
@@ -78,6 +79,7 @@ qemu:
                                         $(SRC_ALL) \
                                         src/asm/boot.s \
                                         src/asm/interrupt-qemu.s \
+                                        src/asm/fast-call.s \
                                         build/driver-qemu.o \
                                         src/main.cpp \
                                         -DQEMU
@@ -91,6 +93,7 @@ dqemu:
                                         $(SRC_ALL) \
                                         src/asm/boot.s \
                                         src/asm/interrupt-qemu.s \
+                                        src/asm/fast-call.s \
                                         build/driver-qemu.o \
                                         src/main.cpp \
                                         -DQEMU

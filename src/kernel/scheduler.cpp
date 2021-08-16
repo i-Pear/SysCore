@@ -16,6 +16,11 @@ int memory_dirty;
 // Warning: when do sth with running, sync with latest running_context first
 Context *running_context;
 
+// fast_syscall related
+int* fast_pid;
+size_t fast_syscall_page;
+extern "C" size_t f_syscall_get_start();
+
 PCB *search_by_pid(List<PCB *> **list, int pid) {
     // search in running
     if (running != nullptr && running->pid == pid) {
@@ -88,13 +93,16 @@ void init_scheduler() {
     memory_dirty=0;
 
 #ifndef QEMU
-    running_context = reinterpret_cast<Context *>(0x80000000 + 8 * 1024 * 1024 - sizeof(Context));
+    running_context = reinterpret_cast<Context *>(__memory_end - sizeof(Context)-8);
 #else
-    running_context= reinterpret_cast<Context *>(0x89000000 + 8 * 1024 * 1024 - sizeof(Context));
+    running_context= reinterpret_cast<Context *>(0x89000000 + 8 * 1024 * 1024 - sizeof(Context)-8);
 #endif
     runnable.start = runnable.end = nullptr;
     blocked.start = blocked.end = nullptr;
     running = nullptr;
+
+    fast_pid=(int*)(__memory_end -sizeof(int));
+    fast_syscall_page=f_syscall_get_start();
 }
 
 void clone(int flags, size_t stack,int* parent_tid, size_t tls,int* child_tid) {
@@ -525,7 +533,7 @@ void schedule() {
     if (running != nullptr) {
         // sync with running_context
         *running_context = *running->thread_context;
-
+        *fast_pid=running->pid;
         __restore();
     } else {
         static int try_unfreeze=0;
@@ -561,7 +569,7 @@ void schedule() {
 
             // sync with running_context
             *running_context = *running->thread_context;
-
+            *fast_pid=running->pid;
             __restore();
         }
         {

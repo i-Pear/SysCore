@@ -136,6 +136,14 @@ void create_XXX_testfile(){
     printf("Create XXX test_file successfully.\n");
 }
 
+void create_lmbench_testfile(){
+    File* LM = VFS::search(fs->root, "/var/tmp/lmbench");
+    if (LM) return;
+    fs->open("/var/tmp/lmbench", O_CREATE | O_RDWR);
+    fs->close("/var/tmp/lmbench");
+    printf("Create lmbench test_file successfully.\n");
+}
+
 void init_self_tests(){
     if(self_test_init_magic!=187439611){
         self_test_init_magic= 187439611;
@@ -146,17 +154,23 @@ void init_self_tests(){
         //    simple_test();
         //    busybox_test();
         //    lua_test();
+
+        add_test("/lmbench_all lat_syscall -P 1 null");
         add_test("/lmbench_all lat_syscall -P 1 read");
         add_test("/lmbench_all lat_syscall -P 1 write");
-        add_test("/busybox mkdir -p /var/tmp");
-        add_test("/busybox touch /var/tmp/lmbench");
+//        add_test("/busybox mkdir -p /var/tmp");
+//        add_test("/busybox touch /var/tmp/lmbench");
         add_test("/lmbench_all lat_syscall -P 1 stat /var/tmp/lmbench");
         add_test("/lmbench_all lat_syscall -P 1 fstat /var/tmp/lmbench");
         add_test("/lmbench_all lat_syscall -P 1 open /var/tmp/lmbench");
+
         add_test("/lmbench_all lat_pipe -P 1");
-        //add_test("/lmbench_all bw_file_rd -P 1 512k io_only /var/tmp/XXX");
-        //add_test("/lmbench_all bw_file_rd -P 1 512k open2close /var/tmp/XXX");
+        add_test("/lmbench_all lat_sig -P 1 install");
+        add_test("/lmbench_all lat_proc -P 1 fork");
+
+        add_test("/lmbench_all lat_mmap -P 1 512k /var/tmp/XXX");
+        add_test("/busybox echo Bandwidth measurements");
         add_test("/lmbench_all bw_mmap_rd -P 1 512k mmap_only /var/tmp/XXX");
-        add_test("/lmbench_all lat_syscall -P 1 null");
+        add_test("/lmbench_all bw_mmap_rd -P 1 512k open2close /var/tmp/XXX");
     }
 }

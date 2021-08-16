@@ -57,25 +57,25 @@ void test_lib() {
  * 所以这里需要恢复现场+将模拟硬件自动完成的动作。
  */
 void init_thread() {
-    printf("[OS] bsp init.\n");
+//    printf("[OS] bsp init.\n");
     driver_init();
-    printf("[OS] Memory Init.\n");
+//    printf("[OS] Memory Init.\n");
     init_memory();
     init_heap();
-    kernelContext.kernel_satp = register_read_satp() | (8LL << 60);lty(kernelContext.kernel_satp);
+    kernelContext.kernel_satp = register_read_satp() | (8LL << 60);
     kernelContext.kernel_handle_interrupt = (size_t) handle_interrupt;
     kernelContext.kernel_restore = (size_t) __restore;
-    printf("[OS] test library\n");
+//    printf("[OS] test library\n");
     test_lib();
     //    printf("[OS] rtc init.\n");
     //    init_rtc();
     //    printf("[OS] fix page table before driver\n");
     //    fix_kernel_page_table();
-    printf("[FS] fs init.\n");
+//    printf("[FS] fs init.\n");
     vfs_init();
-    printf("[OS] Interrupt & Timer Interrupt Open.\n");
+//    printf("[OS] Interrupt & Timer Interrupt Open.\n");
     interrupt_timer_init();
-    printf("[OS] init scheduler.\n");
+//    printf("[OS] init scheduler.\n");
     init_scheduler();
     FD::InitializeFileDescriber();
     init_self_tests();
@@ -111,14 +111,15 @@ void vfs_init() {
 }
 
 int main() {
-    printf("   _____            _____               \n"
-           "  / ____|          / ____|              \n"
-           " | (___  _   _ ___| |     ___  _ __ ___ \n"
-           "  \\___ \\| | | / __| |    / _ \\| '__/ _ \\\n"
-           "  ____) | |_| \\__ \\ |___| (_) | | |  __/\n"
-           " |_____/ \\__, |___/\\_____\\___/|_|  \\___|\n"
-           "          __/ |                         \n"
-           "         |___/                          \n");
+
+//    printf("   _____            _____               \n"
+//           "  / ____|          / ____|              \n"
+//           " | (___  _   _ ___| |     ___  _ __ ___ \n"
+//           "  \\___ \\| | | / __| |    / _ \\| '__/ _ \\\n"
+//           "  ____) | |_| \\__ \\ |___| (_) | | |  __/\n"
+//           " |_____/ \\__, |___/\\_____\\___/|_|  \\___|\n"
+//           "          __/ |                         \n"
+//           "         |___/                          \n");
 
     init_thread();
     // unreachable
