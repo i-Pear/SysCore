@@ -99,4 +99,6 @@ extern void close_interrupt();
 
 extern "C" void __restore();
 
+extern "C" void __fast_restore();
+
 #endif
