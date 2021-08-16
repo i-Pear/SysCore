@@ -18,9 +18,16 @@
 #define mtl(x) ;
 #endif
 
+#define BENCHING
+
 #define DDD() {printf("[DDD] %s:%d \n",__FILE__,__LINE__);}
 #define panic(message) {printf("[panic] %s:%d  %s\n",__FILE__,__LINE__,message);shutdown();}
+
+#ifndef BENCHING
 #define assert(equal) if(!(equal)){printf("[assert] %s:%d error\n",__FILE__,__LINE__);shutdown();}
+#else
+#define assert(equal)
+#endif
 
 extern "C" void memcpy(void *to,const void *from, size_t size);
 
@@ -33,12 +40,12 @@ void strcpy(char* to,const char* from);
 int strcmp(const char *cs, const char *ct);
 
 template<typename T>
-T max(const T& a,const T& b) {
+inline T max(const T& a,const T& b) {
     return a > b ? a : b;
 }
 
 template<typename T>
-T min(const T& a,const T& b) {
+inline T min(const T& a,const T& b) {
     return a < b ? a : b;
 }
 
