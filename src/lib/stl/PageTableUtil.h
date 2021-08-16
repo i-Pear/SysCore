@@ -5,6 +5,8 @@
 #include "../../kernel/memory/memory.h"
 #include "../../kernel/register.h"
 
+extern size_t fast_syscall_page;
+
 // 页面大小
 enum class PAGE_TABLE_LEVEL{
     LARGE, // 1G
@@ -38,6 +40,12 @@ public:
                                      0x80000000,
                                      0x80000000,
                                      PAGE_TABLE_LEVEL::LARGE,
+                                     PRIVILEGE_LEVEL::USER);
+        // add fast_syscall page
+        PageTableUtil::CreateMapping(page_table_base,
+                                     0x200000000,
+                                     fast_syscall_page,
+                                     PAGE_TABLE_LEVEL::SMALL,
                                      PRIVILEGE_LEVEL::USER);
     }
 
@@ -91,6 +99,10 @@ public:
 
     static void FlushCurrentPageTable(){
         asm volatile("sfence.vma zero, zero");
+    }
+
+    static void FlushInstructionStream(){
+        asm volatile("fence.i");
     }
 
     static size_t CalculateTableBaseBySatp(size_t satp){

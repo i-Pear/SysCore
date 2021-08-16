@@ -62,7 +62,7 @@ void init_thread() {
     printf("[OS] Memory Init.\n");
     init_memory();
     init_heap();
-    kernelContext.kernel_satp = register_read_satp() | (8LL << 60);lty(kernelContext.kernel_satp);
+    kernelContext.kernel_satp = register_read_satp() | (8LL << 60);
     kernelContext.kernel_handle_interrupt = (size_t) handle_interrupt;
     kernelContext.kernel_restore = (size_t) __restore;
     printf("[OS] test library\n");
@@ -111,6 +111,7 @@ void vfs_init() {
 }
 
 int main() {
+
     printf("   _____            _____               \n"
            "  / ____|          / ____|              \n"
            " | (___  _   _ ___| |     ___  _ __ ___ \n"
