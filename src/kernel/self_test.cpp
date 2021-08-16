@@ -168,6 +168,7 @@ void init_self_tests(){
         add_test("/lmbench_all lat_sig -P 1 install");
         add_test("/lmbench_all lat_proc -P 1 fork");
 
+        add_test("/busybox echo Bandwidth measurements");
         add_test("/lmbench_all lat_mmap -P 1 512k /var/tmp/XXX");
         add_test("/lmbench_all bw_mmap_rd -P 1 512k mmap_only /var/tmp/XXX");
         add_test("/lmbench_all bw_mmap_rd -P 1 512k open2close /var/tmp/XXX");
