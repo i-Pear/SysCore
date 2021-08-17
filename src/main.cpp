@@ -18,6 +18,7 @@
 #include "lib/stl/PageTableUtil.h"
 #include "kernel/time/time.h"
 #include "kernel/posix/pselect.h"
+#include "vdso/vdso.h"
 
 void vfs_init();
 void fix_kernel_page_table();
@@ -62,6 +63,7 @@ void init_thread() {
 //    printf("[OS] Memory Init.\n");
     init_memory();
     init_heap();
+    init_vdso();
     kernelContext.kernel_satp = register_read_satp() | (8LL << 60);
     kernelContext.kernel_handle_interrupt = (size_t) handle_interrupt;
     kernelContext.kernel_restore = (size_t) __restore;

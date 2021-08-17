@@ -385,31 +385,8 @@ void create_process(const char *elf_path, const char *argv[]) {
     put_aux((size_t **) &sp, AT_CLKTCK, 64);                     // 17
     put_aux((size_t **) &sp, AT_RANDOM, (size_t) &rrr);                     // 17
     put_aux((size_t **) &sp, AT_EXECFN, filename_addr);       // 31
+    put_aux((size_t **) &sp, AT_SYSINFO_EHDR, 0x300000000);
 
-
-//    put_aux((size_t**)&sp,0, 0);
-//    put_aux((size_t**)&sp,0, 0);
-//    put_aux((size_t**)&sp,AT_EXECFN, filename_addr); //31
-//    put_aux((size_t**)&sp,AT_CLKTCK, 0x64); //17
-//    put_aux((size_t**)&sp,AT_HWCAP, 0x112d); //16
-//    put_aux((size_t**)&sp,AT_EGID, 0); //14
-//    put_aux((size_t**)&sp,AT_GID, 0); //13
-//    put_aux((size_t**)&sp,AT_EUID, 0); //12
-//    put_aux((size_t**)&sp,AT_UID, 0); //11
-//    put_aux((size_t**)&sp,AT_ENTRY, entry); //9
-//    put_aux((size_t**)&sp,AT_FLAGS, 0); //8
-//    put_aux((size_t**)&sp,AT_BASE, 0); //7
-//    put_aux((size_t**)&sp,AT_PAGESZ, 0x1000); //6
-//    put_aux((size_t**)&sp,AT_PHNUM, ph_num); //5
-//    put_aux((size_t**)&sp,AT_PHENT, sizeof(Elf64_Phdr)); //4 -> 0x38(ss_new)
-//    put_aux((size_t**)&sp,AT_PHDR, ph_off); //3 !
-//    put_aux((size_t**)&sp,45, 0);
-//    put_aux((size_t**)&sp,44, 0);
-//    put_aux((size_t**)&sp,43, 0);
-//    put_aux((size_t**)&sp,42, 0);
-//    put_aux((size_t**)&sp,41, 0);
-//    put_aux((size_t**)&sp,40, 0);
-//    put_aux((size_t**)&sp,33, elf_str_addr);
     sp -= 8; // 0 word
     // envp
     for (auto i = envp_strings.start; i; i = i->next) {

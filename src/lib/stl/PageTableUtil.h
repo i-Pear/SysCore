@@ -4,6 +4,7 @@
 #include "stl.h"
 #include "../../kernel/memory/memory.h"
 #include "../../kernel/register.h"
+#include "../../vdso/vdso.h"
 
 extern size_t fast_syscall_page;
 
@@ -45,6 +46,17 @@ public:
         PageTableUtil::CreateMapping(page_table_base,
                                      0x200000000,
                                      fast_syscall_page,
+                                     PAGE_TABLE_LEVEL::SMALL,
+                                     PRIVILEGE_LEVEL::USER);
+        // map vdso
+        PageTableUtil::CreateMapping(page_table_base,
+                                     0x300000000,
+                                     vdso_text_page,
+                                     PAGE_TABLE_LEVEL::SMALL,
+                                     PRIVILEGE_LEVEL::USER);
+        PageTableUtil::CreateMapping(page_table_base,
+                                     0x300001000,
+                                     vdso_data_page,
                                      PAGE_TABLE_LEVEL::SMALL,
                                      PRIVILEGE_LEVEL::USER);
     }

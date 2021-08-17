@@ -1,17 +1,24 @@
 # SysCore
 
 * 2021全国大学生计算机系统能力大赛 - 操作系统赛- 内核实现赛道
+
 * 学校：东北大学
+
 * 参赛队伍：0x80200000
+
 * iPear@https://github.com/i-Pear
+
 * Waitti@https://github.com/Waitti-long
 
-## 一、开发板运行
+## 一、环境准备
 
-```shell
+  ```shell
 # 将工具链bin目录释放至环境变量
 export PATH=$PATH:/usr/your_toolchain_path
-```
+  ```
+
+## 二、开发板运行
+
 
 ```shell
 # 编译出k210.bin
@@ -41,7 +48,7 @@ sudo cp -r test_suites/* /mnt/sd
 sudo umount /mnt/sd
 ```
 
-## 二、QEMU模拟器运行
+## 三、QEMU模拟器运行
 
 ### 1. 安装QEMU
 
@@ -124,7 +131,7 @@ file build/kernel.o
 add-symbol-file your_userspace_running_exectuable
 ```
 
-## 三、一些有用的网站
+## 四、一些有用的网站
 
 * Risc-V Registers：https://www.five-embeddev.com/riscv-isa-manual/latest/supervisor.html#supervisor
 * K210 Datasheet：https://s3.cn-north-1.amazonaws.com.cn/dl.kendryte.com/documents/kendryte_datasheet_20180919020633.pdf
@@ -133,7 +140,7 @@ add-symbol-file your_userspace_running_exectuable
 * glibc源码：https://code.woboq.org/userspace/glibc/
 * VDSO相关：https://www.linuxjournal.com/content/creating-vdso-colonels-other-chicken
 
-## 四、鸣谢
+## 五、鸣谢
 
 rCore-Tutorial: https://rcore-os.github.io/rCore-Tutorial-Book-v3/index.html
 

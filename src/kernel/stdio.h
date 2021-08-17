@@ -11,8 +11,8 @@ void puts(char *str);
 
 extern "C" void printf(const char *format, ...);
 
-//#define LOG(x, ...) printf(x, __VA_ARGS__)
-#define LOG(x, ...)
+//#define LOG(...) printf(__VA_ARGS__)
+#define LOG(...)
 
 
 void sprintf(char* dist, const char *format, ...);

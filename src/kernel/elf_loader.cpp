@@ -1,6 +1,4 @@
 #include "elf_loader.h"
-#include "../lib/stl/stl.h"
-#include "memory/memory.h"
 #include "memory/Heap.h"
 
 void load_elf(FIL* elf_file,Elf_Control* elf_control,size_t* entry,Elf64_Off* e_phoff,int* phnum,Elf64_Phdr** kernel_phdr) {
