@@ -506,34 +506,39 @@ void exit_process(int exit_ret) {
     schedule();
 }
 
+int try_unfreeze_times=0;
+
+void try_to_unfreeze(){
+    // search one to unfreeze
+    auto cnt = blocked.start;
+    while (cnt != nullptr) {
+        if (!cnt->data->signal_list.is_empty()) {
+            // has signal, wake up
+            running = cnt->data;
+            // remove it from blocked list
+            blocked.erase(cnt);
+            // get signal to return value
+            running->thread_context->a0 = running->signal_list.start->data.first;
+            if (running->wstatus) {
+                *running->wstatus = running->signal_list.start->data.second << 8;
+            }
+            running->signal_list.pop_front();
+
+            schedule();
+        }
+        cnt = cnt->next;
+    }
+}
+
 void schedule() {
     if (running != nullptr) {
         // sync with running_context
         *running_context = *running->thread_context;
         *fast_pid=running->pid;
         __restore();
-    } else {
-        static int try_unfreeze=0;
-        if (!blocked.is_empty()) {
-            // search one to unfreeze
-            auto cnt = blocked.start;
-            while (cnt != nullptr) {
-                if (!cnt->data->signal_list.is_empty()) {
-                    // has signal, wake up
-                    running = cnt->data;
-                    // remove it from blocked list
-                    blocked.erase(cnt);
-                    // get signal to return value
-                    running->thread_context->a0 = running->signal_list.start->data.first;
-                    if (running->wstatus) {
-                        *running->wstatus = running->signal_list.start->data.second << 8;
-                    }
-                    running->signal_list.pop_front();
-
-                    schedule();
-                }
-                cnt = cnt->next;
-            }
+    } else{
+        if ((try_unfreeze_times++>100)&&!blocked.is_empty()) {
+            try_to_unfreeze();
         }
         if (!runnable.is_empty()) {
             // pick one to run
@@ -552,6 +557,7 @@ void schedule() {
         }
         {
             if(!blocked.is_empty()){
+                try_to_unfreeze();
                 panic("There exists a dead waiting loop. All processes are blocked.");
             }
             if(memory_dirty){

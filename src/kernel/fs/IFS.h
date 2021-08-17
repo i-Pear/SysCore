@@ -188,7 +188,7 @@ public:
 //                return cur;
                 // 先调度其他进程，相当于阻塞住自己
 //                printf("[Pipe] read %s block\n", path);
-                if (get_running_pipe_read_count() > 10) {
+                if (get_running_pipe_read_count() > 200) {
                     printf("[Pipe] kill process because of dead lock\n");
                     exit_process(0);
                 }
