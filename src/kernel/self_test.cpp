@@ -122,6 +122,7 @@ void add_test(const char* name){
 }
 
 void create_XXX_testfile(){
+    printf("Creating XXX test_file...\n");
     fs->mkdir("/var", 0, fs->root->fs);
     fs->mkdir("/var/tmp", 0, fs->root->fs);
     File* XXX = VFS::search(fs->root, "/var/tmp/XXX");
@@ -129,7 +130,7 @@ void create_XXX_testfile(){
     fs->open("/var/tmp/XXX", O_CREATE | O_RDWR);
     char buf[1024];
     memset(buf, 0, sizeof(buf));
-    for (int i = 0;i < 1024 * 7; i++) {
+    for (int i = 0;i < 1024 * 1; i++) {
         fs->write("/var/tmp/XXX", buf, sizeof(buf));
     }
     fs->close("/var/tmp/XXX");
@@ -137,6 +138,7 @@ void create_XXX_testfile(){
 }
 
 void create_lmbench_testfile(){
+    printf("Creating lmbench test_file...\n");
     File* LM = VFS::search(fs->root, "/var/tmp/lmbench");
     if (LM) return;
     fs->open("/var/tmp/lmbench", O_CREATE | O_RDWR);
@@ -150,6 +152,7 @@ void init_self_tests(){
         test_cnt=0;
         test_total=0;
         create_XXX_testfile();
+        create_lmbench_testfile();
 
         //    simple_test();
         //    busybox_test();
