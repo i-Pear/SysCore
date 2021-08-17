@@ -118,10 +118,10 @@ put_aux((size_t **) &sp, AT_SYSINFO_EHDR, 0x300000000);
 
 未启用VDSO：
 
-![](D:\Project\syscore\doc\assets\vdso.jpg)
+![](assets\vdso.jpg)
 
 启用VDSO：
 
 可看到CLOCK_GETTIME已经全部被VDSO转发，不再请求ecall
 
-![](D:\Project\syscore\doc\assets\no-vdso.jpg)
+![](assets\no-vdso.jpg)
