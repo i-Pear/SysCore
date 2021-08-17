@@ -20,7 +20,8 @@
 
 #define DDD() {printf("[DDD] %s:%d \n",__FILE__,__LINE__);}
 #define panic(message) {printf("[panic] %s:%d  %s\n",__FILE__,__LINE__,message);shutdown();}
-#define assert(equal) if(!(equal)){printf("[assert] %s:%d error\n",__FILE__,__LINE__);shutdown();}
+//#define assert(equal) if(!(equal)){printf("[assert] %s:%d error\n",__FILE__,__LINE__);shutdown();}
+#define assert(equal)
 
 extern "C" void memcpy(void *to,const void *from, size_t size);
 
