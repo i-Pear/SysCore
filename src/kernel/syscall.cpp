@@ -750,6 +750,10 @@ size_t sys_pselect6(Context* context) {
     return 0;
 }
 
+size_t sys_set_tid_address(Context* context){
+    return 0;
+}
+
 size_t sys_futex(Context* context) {
     auto* uaddr = (int*) context->a0;
     *uaddr = 0;
@@ -879,5 +883,6 @@ void syscall_register() {
     REGISTER(futex);
     REGISTER(setitimer);
     REGISTER(prlimit64);
+    REGISTER(set_tid_address);
 #undef REGISTER
 }
