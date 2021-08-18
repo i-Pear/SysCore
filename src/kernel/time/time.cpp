@@ -11,9 +11,9 @@
      return res;
  }
 
-#define CLINT_BASE_ADDR     (0x02000000U)
+// #define CLINT_BASE_ADDR     (0x02000000U)
 
-volatile clint_t *const clint = (volatile clint_t *)CLINT_BASE_ADDR;
+// volatile clint_t *const clint = (volatile clint_t *)CLINT_BASE_ADDR;
 
 uint64 get_nsec(void){
     return r_time() * 1600000UL / sysctl_clock_get_freq(SYSCTL_CLOCK_CPU) * 50 * 625;
