@@ -646,9 +646,13 @@ size_t sys_clock_gettime(Context* context){
     auto *timespec= reinterpret_cast<struct timespec *>(context->a1);
 
     size_t* pc=reinterpret_cast<size_t*>(context->sepc);
-    uint64 usec=timer();
-    timespec->tv_sec=usec/1000000;
-    timespec->tv_nsec=usec%1000000*1000;
+    // uint64 usec=timer();
+    // timespec->tv_sec=usec/1000000;
+    // timespec->tv_nsec=usec%1000000*1000;
+    uint64 nsec = get_nsec();
+    timespec->tv_sec = nsec / 1000000000UL;
+    timespec->tv_nsec= nsec % 1000000000UL;
+    // 现在这个是CLOCK_MONOTONIC模式
 
     return 0;
 }

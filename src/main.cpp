@@ -123,8 +123,14 @@ int main() {
 //           "          __/ |                         \n"
 //           "         |___/                          \n");
 
-    init_thread();
+    // init_thread();
+    printf("start_timer:%d\n",timer());
     // unreachable
+    sleep(1);
+    printf("end_timer:%d\n",timer());
+    printf("start_get_nsec:%d\n",get_usec());
+    sleep(1);
+    printf("end_get_nsec:%d\n",get_usec());
     panic("Unreachable code!");
     return 0;
 }

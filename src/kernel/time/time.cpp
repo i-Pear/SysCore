@@ -16,8 +16,7 @@
 volatile clint_t *const clint = (volatile clint_t *)CLINT_BASE_ADDR;
 
 uint64 get_nsec(void){
-    /* No difference on cores */
-    return clint->mtime * 50 * 1000000000UL / sysctl_clock_get_freq(SYSCTL_CLOCK_CPU);
+    return r_time() * 1600000UL / sysctl_clock_get_freq(SYSCTL_CLOCK_CPU) * 50 * 625;
 }
 
 uint64 get_usec(void){
@@ -33,9 +32,10 @@ uint64 get_sec(void){
 }
 
 uint64 timer(){
-    uint64 x = r_time();
-    uint64 usec = x / 10;
+    // uint64 x = r_time();
+    // uint64 usec = x / 10;
 //    uint64 usec = x * 50 * 1000000UL / 406250;
+    uint64 usec = get_usec();
     return usec;
 }
 

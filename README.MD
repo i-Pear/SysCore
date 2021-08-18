@@ -10,6 +10,8 @@
 
 * Waitti@https://github.com/Waitti-long
 
+* fluctlight001@https://github.com/fluctlight001
+
 ## 一、环境准备
 
   ```shell
