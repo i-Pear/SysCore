@@ -1,1 +1,1 @@
-![](assets/SysCore系统架构图.png)
+<img src="https://gitlab.eduxiji.net/iPear/syscore/-/raw/main/doc/Modules/assets/SysCore系统架构图.png"  alt="SysCore系统架构图"/>

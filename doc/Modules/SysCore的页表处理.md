@@ -4,7 +4,7 @@
 
 在RiscV中页表结构如下：
 
-![img.png](assets/img.png)
+![img.png](https://gitlab.eduxiji.net/iPear/syscore/-/raw/main/doc/Modules/assets/img.png)
 
 - V 位决定了该页表项的其余部分是否有效（V = 1 时有效）。若 V = 0，则任何遍历
 到此页表项的虚址转换操作都会导致页错误。

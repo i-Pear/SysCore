@@ -36,7 +36,8 @@ make see
 make run
 ```
 
-<img src="doc\Modules\assets\make_run_demo.gif" alt="make_run_demo" style="zoom:60%;" />
+<img src="https://gitlab.eduxiji.net/iPear/syscore/-/raw/main/doc/Modules/assets/make_run_demo.gif" alt="make_run_demo" style="zoom:60%;" />
+
 
 ### 格式化SD卡的命令
 
