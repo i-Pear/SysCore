@@ -133,7 +133,11 @@ file build/kernel.o
 add-symbol-file your_userspace_running_exectuable
 ```
 
-## 四、一些有用的网站
+## 四、OS各模块详细文档
+
+[比赛相关文档](doc/)
+
+## 五、一些有用的网站
 
 * Risc-V Registers：https://www.five-embeddev.com/riscv-isa-manual/latest/supervisor.html#supervisor
 * K210 Datasheet：https://s3.cn-north-1.amazonaws.com.cn/dl.kendryte.com/documents/kendryte_datasheet_20180919020633.pdf
@@ -142,7 +146,7 @@ add-symbol-file your_userspace_running_exectuable
 * glibc源码：https://code.woboq.org/userspace/glibc/
 * VDSO相关：https://www.linuxjournal.com/content/creating-vdso-colonels-other-chicken
 
-## 五、鸣谢
+## 六、鸣谢
 
 rCore-Tutorial: https://rcore-os.github.io/rCore-Tutorial-Book-v3/index.html
 
