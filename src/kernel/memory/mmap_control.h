@@ -51,12 +51,11 @@ public:
 
     }
 
-    size_t mmap(size_t length) {
+    size_t mmap(size_t length,int fd) {
         size_t need_page=(length+4096-1)/4096; //align
         size_t ret=mmap_start;
         for(int i=0;i<need_page;i++){
             size_t new_page = alloc_page();
-            memset((void*)(new_page), 0, 4096);
             memKeeper.push_back({mmap_start,new_page});
             PageTableUtil::CreateMapping(
                     pageTable,
