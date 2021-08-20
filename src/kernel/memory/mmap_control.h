@@ -88,6 +88,7 @@ public:
             panic("munmap address is not mapped!")
             munmap_next:;
         }
+        if(memKeeper.is_empty())mmap_start=MMAP_VIRT_BEGIN;
         PageTableUtil::FlushCurrentPageTable();
         return 0;
     }
