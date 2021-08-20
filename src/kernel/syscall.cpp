@@ -741,7 +741,8 @@ size_t sys_pselect6(Context* context) {
         for (int i = 0;i < ndfs; i++) {
             if (FD_ISSET(i, &read_fd_set_copy)) {
                 int res;
-                res = fs->test_pipe(FD::GetFile(i)->GetCStylePath());
+                res = FastPipe::TestPipe(i);
+//                res = fs->test_pipe(FD::GetFile(i)->GetCStylePath());
                 if (res) {
                     FD_SET(i, read_fds);
                     return 1;
