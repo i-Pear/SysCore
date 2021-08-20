@@ -403,5 +403,7 @@ public:
 };
 
 extern VFS *fs;
+extern FIL* LastOpenedFile;
+
 
 #endif //OS_RISC_V_VFS_H
