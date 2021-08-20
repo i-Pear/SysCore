@@ -32,10 +32,11 @@ uint64 get_sec(void){
 }
 
 uint64 timer(){
-    // uint64 x = r_time();
-    // uint64 usec = x / 10;
-//    uint64 usec = x * 50 * 1000000UL / 406250;
+#ifdef QEMU
+    uint64 usec = r_time()/10;
+#else
     uint64 usec = get_usec();
+#endif
     return usec;
 }
 
