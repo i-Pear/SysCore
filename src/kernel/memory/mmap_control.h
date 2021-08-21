@@ -7,6 +7,7 @@
 #include "../../lib/stl/PageTableUtil.h"
 #include "../../lib/stl/vector.h"
 #include "../../driver/fatfs/ff.h"
+#include "../time/time.h"
 
 #define MMAP_VIRT_BEGIN 0x100000000
 
@@ -70,8 +71,10 @@ public:
         }
         PageTableUtil::FlushCurrentPageTable();
         UINT read_bytes;
+        size_t start=timer();
         f_read(LastOpenedFile,(void*)ret,length,&read_bytes);
-//        f_lseek(LastOpenedFile,0);
+        printf("<read cost %d>\n",timer()-start);
+        f_lseek(LastOpenedFile,0);
         return ret;
     }
 
