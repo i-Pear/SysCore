@@ -174,9 +174,9 @@ void init_self_tests(){
 //        add_test("/lmbench_all lat_proc -P 1 exec");
 //        add_test("/busybox echo END lat_proc_exec 0");
 
-        add_test("/busybox echo START bw_pipe");
-        add_test("/lmbench_all bw_pipe -P 1");
-        add_test("/busybox echo END bw_pipe 0");
+//        add_test("/busybox echo START bw_pipe");
+//        add_test("/lmbench_all bw_pipe -P 1");
+//        add_test("/busybox echo END bw_pipe 0");
 
         add_test("/busybox echo START lat_pipe");
         add_test("/lmbench_all lat_pipe -P 1");
