@@ -197,6 +197,7 @@ private:
     }
 
     static void Erase(int fd){
+        if (fd == 1) return;
         if(fd_array[fd] == nullptr){
             return;
         }
