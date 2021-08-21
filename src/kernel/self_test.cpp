@@ -170,10 +170,6 @@ void init_self_tests(){
         add_test("/lmbench_all lat_proc -P 1 fork");
         add_test("/busybox echo END lat_proc_fork 0");
 
-//        add_test("/busybox echo START lat_proc_exec");
-//        add_test("/lmbench_all lat_proc -P 1 exec");
-//        add_test("/busybox echo END lat_proc_exec 0");
-
 //        add_test("/busybox echo START bw_pipe");
 //        add_test("/lmbench_all bw_pipe -P 1");
 //        add_test("/busybox echo END bw_pipe 0");
@@ -185,6 +181,10 @@ void init_self_tests(){
         add_test("/busybox echo START lat_mmap");
         add_test("/lmbench_all lat_mmap -P 1 512k /var/tmp/XXX");
         add_test("/busybox echo END lat_mmap 0");
+
+        add_test("/busybox echo START lat_proc_exec");
+        add_test("/lmbench_all lat_proc -P 1 exec");
+        add_test("/busybox echo END lat_proc_exec 0");
 
     }
 }
