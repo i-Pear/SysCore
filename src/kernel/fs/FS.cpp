@@ -51,7 +51,7 @@ int FS::open(const char *path, int flag) {
         int fr = f_open(&data.fil, path + 1, FSUtil::open_mode_to_fatfs_mode(flag));
         FS_Element el(data, true);
         path_to_fs_el.put(String(path), el);
-        LastOpenedFile = &data.fil;
+        LastOpenedFile = &path_to_fs_el.get(path).data.fil;
         return fr;
     } else if (flag & S_IFDIR) {
         FS_Data data{};
