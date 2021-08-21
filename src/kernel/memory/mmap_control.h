@@ -6,8 +6,11 @@
 #include "../../lib/stl/stl.h"
 #include "../../lib/stl/PageTableUtil.h"
 #include "../../lib/stl/vector.h"
+#include "../../driver/fatfs/ff.h"
 
 #define MMAP_VIRT_BEGIN 0x100000000
+
+extern FIL* LastOpenedFile;
 
 struct mmap_unit{
     size_t mapped_to;
@@ -66,7 +69,9 @@ public:
             mmap_start+=4096;
         }
         PageTableUtil::FlushCurrentPageTable();
-
+        UINT read_bytes;
+        f_read(LastOpenedFile,(void*)ret,length,&read_bytes);
+//        f_lseek(LastOpenedFile,0);
         return ret;
     }
 
