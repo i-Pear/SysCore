@@ -40,7 +40,7 @@ public:
                 buff[i] = pipe_buf[back];
                 back = next_back;
             } else {
-                if (get_running_pipe_read_count() > 200) {
+                if (get_running_pipe_read_count() > 10) {
                     printf("[Pipe] kill process because of dead lock\n");
                     exit_process(0);
                 }
