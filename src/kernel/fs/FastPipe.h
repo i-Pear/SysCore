@@ -41,7 +41,7 @@ public:
                 back = next_back;
             } else {
                 if (get_running_pipe_read_count() > 200) {
-                    printf("[Pipe] kill process because of dead lock\n");
+                    LOG("[Pipe] kill process because of dead lock\n");
                     exit_process(0);
                 }
                 ++get_running_pipe_read_count();
