@@ -218,7 +218,7 @@ size_t sys_write(Context *context) {
     int fd = sysGetRealFd((int) context->a0);
     char *buf = (char *) get_actual_page(context->a1);
     int count = (int) context->a2;
-    if (fd_array[fd]->ISPipe()) {
+    if (fd_array[fd] && fd_array[fd]->ISPipe()) {
         return FastPipe::Write(fd, buf, count);
     }
     int write_bytes = fs->write(FD::GetFile(fd)->GetCStylePath(), buf, count);
@@ -294,7 +294,7 @@ size_t sys_read(Context *context) {
     int fd = sysGetRealFd(context->a0);
     char *buf = (char *) get_actual_page(context->a1);
     int count = (int)context->a2;
-    if (fd_array[fd]->ISPipe()) {
+    if (fd_array[fd] && fd_array[fd]->ISPipe()) {
         return FastPipe::Read(fd, buf, count);
     }
     return fs->read(FD::GetFile(fd)->GetCStylePath(), buf, count);
