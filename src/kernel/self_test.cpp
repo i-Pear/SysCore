@@ -167,7 +167,9 @@ void init_self_tests(){
 //        add_test("/lmbench_all lat_syscall -P 1 fstat /var/tmp/lmbench");
 //        add_test("/lmbench_all lat_syscall -P 1 open /var/tmp/lmbench");
 
+        add_test("/busybox echo START lat_pipe");
         add_test("/lmbench_all lat_pipe -P 1");
+        add_test("/busybox echo END lat_pipe $?");
 //        add_test("/lmbench_all lat_sig -P 1 install");
 //        add_test("/lmbench_all lat_proc -P 1 fork");
 //
