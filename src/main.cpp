@@ -75,6 +75,7 @@ void init_thread() {
     //    fix_kernel_page_table();
 //    printf("[FS] fs init.\n");
     vfs_init();
+    FastPipe::Init();
 //    printf("[OS] Interrupt & Timer Interrupt Open.\n");
     interrupt_timer_init();
 //    printf("[OS] init scheduler.\n");

@@ -7,6 +7,7 @@
 #include "../../lib/stl/RefCountPtr.h"
 #include "../../lib/stl/string.h"
 #include "../../lib/stl/map.h"
+#include "FastPipe.h"
 
 #define FILE_DESCRIBER_ARRAY_LENGTH 120
 
@@ -15,6 +16,9 @@ public:
     explicit OpenedFile(const String& path):path_(path){}
     virtual ~OpenedFile(){
         LOG("[OpenedFile] close %s\n", path_.c_str());
+        if (path_ == "") {
+            return;
+        }
         fs->close(path_.c_str());
     }
     String& GetPath(){
@@ -33,11 +37,11 @@ enum class FILE_ACCESS_TYPE{
 
 class FileDescriber{
 public:
-    FileDescriber(const RefCountPtr<OpenedFile>& file, FILE_ACCESS_TYPE fileAccessType): file_access_type_(fileAccessType), fd_ref_count_(1){
+    FileDescriber(const RefCountPtr<OpenedFile>& file, FILE_ACCESS_TYPE fileAccessType): file_access_type_(fileAccessType), fd_ref_count_(1), is_pipe_(false){
         file_ = file;
     }
 
-    FileDescriber(const RefCountPtr<OpenedFile>& file, FILE_ACCESS_TYPE fileAccessType, int fd_ref_count): file_access_type_(fileAccessType), fd_ref_count_(fd_ref_count){
+    FileDescriber(const RefCountPtr<OpenedFile>& file, FILE_ACCESS_TYPE fileAccessType, int fd_ref_count): file_access_type_(fileAccessType), fd_ref_count_(fd_ref_count), is_pipe_(false){
         file_ = file;
     }
 
@@ -58,10 +62,19 @@ public:
         }
         return false;
     }
+
+    bool ISPipe() const{
+        return is_pipe_;
+    }
+
+    void MarkPipe() {
+        is_pipe_ = true;
+    }
 private:
     FILE_ACCESS_TYPE file_access_type_;
     RefCountPtr<OpenedFile> file_;
     int fd_ref_count_;
+    int is_pipe_;
 };
 
 extern FileDescriber* fd_array[FILE_DESCRIBER_ARRAY_LENGTH];
@@ -148,17 +161,23 @@ public:
         // TODO: flag
         int read_fd = FindUnUsedFd();
         int write_fd = FindUnusedFdBiggerOrEqual(read_fd + 1);
-        auto read_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++fd_pipe_count);
-        auto write_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++fd_pipe_count);
-        fs->open(read_path.c_str(), O_CREATE | O_RDONLY);
-        fs->open(write_path.c_str(), O_CREATE | O_WRONLY);
-        fs->pipe(read_path.c_str(), write_path.c_str(), flag, 0);
-        RefCountPtr<OpenedFile> write_file(new OpenedFile(write_path));
-        RefCountPtr<OpenedFile> read_file(new OpenedFile(read_path));
-        fd_array[read_fd] = new FileDescriber(read_file, FILE_ACCESS_TYPE::READ, 2);
-        fd_array[write_fd] = new FileDescriber(write_file, FILE_ACCESS_TYPE::WRITE, 2);
+//        auto read_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++fd_pipe_count);
+//        auto write_path = String("/sys/pipe/pipe_") + to_string((unsigned long long)++fd_pipe_count);
+//        fs->open(read_path.c_str(), O_CREATE | O_RDONLY);
+//        fs->open(write_path.c_str(), O_CREATE | O_WRONLY);
+//        fs->pipe(read_path.c_str(), write_path.c_str(), flag, 0);
+//        RefCountPtr<OpenedFile> write_file(new OpenedFile(write_path));
+//        RefCountPtr<OpenedFile> read_file(new OpenedFile(read_path));
+//        fd_array[read_fd] = new FileDescriber(read_file, FILE_ACCESS_TYPE::READ, 2);
+//        fd_array[write_fd] = new FileDescriber(write_file, FILE_ACCESS_TYPE::WRITE, 2);
+        RefCountPtr<OpenedFile> file(new OpenedFile(""));
+        fd_array[read_fd] = new FileDescriber(file, FILE_ACCESS_TYPE::RW, 999);
+        fd_array[write_fd] = new FileDescriber(file, FILE_ACCESS_TYPE::RW, 999);
+        fd_array[read_fd]->MarkPipe();
+        fd_array[write_fd]->MarkPipe();
         pipefd[0] = read_fd;
         pipefd[1] = write_fd;
+        FastPipe::OpenPipe(pipefd);
         return 0;
     }
 private:

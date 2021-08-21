@@ -218,6 +218,9 @@ size_t sys_write(Context *context) {
     int fd = sysGetRealFd((int) context->a0);
     char *buf = (char *) get_actual_page(context->a1);
     int count = (int) context->a2;
+    if (fd_array[fd]->ISPipe()) {
+        return FastPipe::Write(fd, buf, count);
+    }
     int write_bytes = fs->write(FD::GetFile(fd)->GetCStylePath(), buf, count);
     return write_bytes;
 }
@@ -291,6 +294,9 @@ size_t sys_read(Context *context) {
     int fd = sysGetRealFd(context->a0);
     char *buf = (char *) get_actual_page(context->a1);
     int count = (int)context->a2;
+    if (fd_array[fd]->ISPipe()) {
+        return FastPipe::Read(fd, buf, count);
+    }
     return fs->read(FD::GetFile(fd)->GetCStylePath(), buf, count);
 }
 
@@ -741,7 +747,8 @@ size_t sys_pselect6(Context* context) {
         for (int i = 0;i < ndfs; i++) {
             if (FD_ISSET(i, &read_fd_set_copy)) {
                 int res;
-                res = fs->test_pipe(FD::GetFile(i)->GetCStylePath());
+                res = FastPipe::TestPipe(i);
+//                res = fs->test_pipe(FD::GetFile(i)->GetCStylePath());
                 if (res) {
                     FD_SET(i, read_fds);
                     return 1;
