@@ -575,7 +575,7 @@ size_t sys_mmap(Context* context){
     int flags=context->a3;
     int fd=context->a4;
     off_t offset=context->a5;
-    return running->mmap_control->mmap(length);
+    return running->mmap_control->mmap(length,fd);
 }
 
 size_t sys_munmap(Context* context){

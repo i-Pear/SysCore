@@ -5,9 +5,13 @@
 #include "memory.h"
 #include "../../lib/stl/stl.h"
 #include "../../lib/stl/PageTableUtil.h"
-#include "../../lib/stl/list.h"
+#include "../../lib/stl/vector.h"
+#include "../../driver/fatfs/ff.h"
+#include "../time/time.h"
 
 #define MMAP_VIRT_BEGIN 0x100000000
+
+extern FIL* LastOpenedFile;
 
 struct mmap_unit{
     size_t mapped_to;
@@ -23,7 +27,7 @@ private:
 
 public:
 
-    List<mmap_unit> memKeeper;
+    Vector<mmap_unit> memKeeper;
 
     size_t pageTable;
 
@@ -36,14 +40,14 @@ public:
         mmap_start=other.mmap_start;
 
         // copy pages
-        for (auto i=other.memKeeper.start;i;i=i->next) {
+        for (auto i=0;i<other.memKeeper.size;i++) {
             size_t new_page = alloc_page();
-            memcpy((void *) new_page, (const void*)(i->data.source_addr), 4096);
+            memcpy((void *) new_page, (const void*)(other.memKeeper[i].source_addr), 4096);
 
-            memKeeper.push_back({new_page,i->data.mapped_to});
+            memKeeper.push_back({new_page,other.memKeeper[i].mapped_to});
             PageTableUtil::CreateMapping(
                     pageTable,
-                    i->data.mapped_to,
+                    other.memKeeper[i].mapped_to,
                     new_page,
                     PAGE_TABLE_LEVEL::SMALL,
                     PRIVILEGE_LEVEL::USER);
@@ -51,12 +55,11 @@ public:
 
     }
 
-    size_t mmap(size_t length) {
+    size_t mmap(size_t length,int fd) {
         size_t need_page=(length+4096-1)/4096; //align
         size_t ret=mmap_start;
         for(int i=0;i<need_page;i++){
             size_t new_page = alloc_page();
-            memset((void*)(new_page), 0, 4096);
             memKeeper.push_back({mmap_start,new_page});
             PageTableUtil::CreateMapping(
                     pageTable,
@@ -67,7 +70,11 @@ public:
             mmap_start+=4096;
         }
         PageTableUtil::FlushCurrentPageTable();
-
+        UINT read_bytes;
+//        size_t start=timer();
+        f_read(LastOpenedFile,(void*)ret,length,&read_bytes);
+//        printf("<read cost %d>\n",timer()-start);
+        f_lseek(LastOpenedFile,0);
         return ret;
     }
 
@@ -75,11 +82,12 @@ public:
         if(addr%0x1000!=0){
             panic("munmap address not aligned!")
         }
-        for(size_t p=addr;p<addr+length;p+=4096){
+//        for(size_t p=addr;p<addr+length;p+=4096){
+        for(size_t p=(addr+length-1)/4096*4096;p>=addr;p-=4096){
             // free
-            for(auto i=memKeeper.start;i;i=i->next){
-                if(i->data.mapped_to==p){
-                    dealloc_page(i->data.source_addr);
+            for(auto i=memKeeper.size-1;i>=0;i--){
+                if(memKeeper[i].mapped_to==p){
+                    dealloc_page(memKeeper[i].source_addr);
                     //todo: free page table
                     memKeeper.erase(i);
                     goto munmap_next;
@@ -88,6 +96,7 @@ public:
             panic("munmap address is not mapped!")
             munmap_next:;
         }
+        if(memKeeper.is_empty())mmap_start=MMAP_VIRT_BEGIN;
         PageTableUtil::FlushCurrentPageTable();
         return 0;
     }
