@@ -71,9 +71,9 @@ public:
         }
         PageTableUtil::FlushCurrentPageTable();
         UINT read_bytes;
-        size_t start=timer();
+//        size_t start=timer();
         f_read(LastOpenedFile,(void*)ret,length,&read_bytes);
-        printf("<read cost %d>\n",timer()-start);
+//        printf("<read cost %d>\n",timer()-start);
         f_lseek(LastOpenedFile,0);
         return ret;
     }
