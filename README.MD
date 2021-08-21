@@ -42,7 +42,7 @@ make run
 ### 格式化SD卡的命令
 
 ```shell
-！！！格式化前强检查SD卡是不是/dev/sda，否则可能格式化本机硬盘
+！！！格式化前请检查SD卡是不是/dev/sda，否则可能格式化本机硬盘
 sudo dd if=/dev/zero of=/dev/sda bs=1M count=20
 sudo mkfs.vfat -F 32 /dev/sda
 if [ ! -d "/mnt/sd" ]; then mkdir -p /mnt/sd; fi
@@ -92,7 +92,7 @@ qemu-system-riscv64 --version
 
 ### 2. 准备SD卡内存镜像
 
-首先，新建asserts文件夹并放入SD卡所需文件，执行命令：
+首先，新建assets文件夹并放入SD卡所需文件，执行命令：
 
 ```c
 dd if=/dev/zero of=fs.img bs=1M count=20
