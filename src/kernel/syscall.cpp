@@ -731,9 +731,9 @@ size_t sys_pipe2(Context* context){
 size_t sys_pselect6(Context* context) {
     int ndfs = (int) context->a0;
     auto* read_fds = (fd_set*) context->a1;
-    auto* write_fds = (fd_set*) context->a2;
+//    auto* write_fds = (fd_set*) context->a2;
     auto* exception_fds = (fd_set*) context->a3;
-    auto* timeout = (timespec*) context->a4;
+//    auto* timeout = (timespec*) context->a4;
     // sigset = context->a5
 
     if (exception_fds) {
@@ -748,7 +748,6 @@ size_t sys_pselect6(Context* context) {
             if (FD_ISSET(i, &read_fd_set_copy)) {
                 int res;
                 res = FastPipe::TestPipe(i);
-//                res = fs->test_pipe(FD::GetFile(i)->GetCStylePath());
                 if (res) {
                     FD_SET(i, read_fds);
                     return 1;
