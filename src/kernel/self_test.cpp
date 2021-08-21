@@ -158,22 +158,22 @@ void init_self_tests(){
         //    busybox_test();
         //    lua_test();
 
-        add_test("/lmbench_all lat_syscall -P 1 null");
-        add_test("/lmbench_all lat_syscall -P 1 read");
-        add_test("/lmbench_all lat_syscall -P 1 write");
+//        add_test("/lmbench_all lat_syscall -P 1 null");
+//        add_test("/lmbench_all lat_syscall -P 1 read");
+//        add_test("/lmbench_all lat_syscall -P 1 write");
 //        add_test("/busybox mkdir -p /var/tmp");
 //        add_test("/busybox touch /var/tmp/lmbench");
-        add_test("/lmbench_all lat_syscall -P 1 stat /var/tmp/lmbench");
-        add_test("/lmbench_all lat_syscall -P 1 fstat /var/tmp/lmbench");
-        add_test("/lmbench_all lat_syscall -P 1 open /var/tmp/lmbench");
+//        add_test("/lmbench_all lat_syscall -P 1 stat /var/tmp/lmbench");
+//        add_test("/lmbench_all lat_syscall -P 1 fstat /var/tmp/lmbench");
+//        add_test("/lmbench_all lat_syscall -P 1 open /var/tmp/lmbench");
 
         add_test("/lmbench_all lat_pipe -P 1");
-        add_test("/lmbench_all lat_sig -P 1 install");
-        add_test("/lmbench_all lat_proc -P 1 fork");
-
-        add_test("/lmbench_all lat_mmap -P 1 512k /var/tmp/XXX");
-        add_test("/busybox echo Bandwidth measurements");
-        add_test("/lmbench_all bw_mmap_rd -P 1 512k mmap_only /var/tmp/XXX");
-        add_test("/lmbench_all bw_mmap_rd -P 1 512k open2close /var/tmp/XXX");
+//        add_test("/lmbench_all lat_sig -P 1 install");
+//        add_test("/lmbench_all lat_proc -P 1 fork");
+//
+//        add_test("/lmbench_all lat_mmap -P 1 512k /var/tmp/XXX");
+//        add_test("/busybox echo Bandwidth measurements");
+//        add_test("/lmbench_all bw_mmap_rd -P 1 512k mmap_only /var/tmp/XXX");
+//        add_test("/lmbench_all bw_mmap_rd -P 1 512k open2close /var/tmp/XXX");
     }
 }
