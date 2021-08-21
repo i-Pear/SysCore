@@ -19,6 +19,11 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
     int is_interrupt = (int)(scause >> 63);
     scause &= 31;
     switch (scause) {
+        // user ecall
+        case 8:{
+            syscall(context);
+            __restore();
+        }
         case 1:{
             if(is_interrupt == 0){
                 // load ins fault
@@ -73,12 +78,6 @@ Context *handle_interrupt(Context *context, size_t scause, size_t stval) {
                 shutdown();
             }
             break;
-        }
-        // user ecall
-        case 8:{
-            syscall(context);
-            __restore();
-//            __fast_restore();
         }
         // ins page fault & load page fault
         case 12 ... 13:{
