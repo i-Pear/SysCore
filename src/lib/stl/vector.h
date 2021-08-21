@@ -54,15 +54,29 @@ struct Vector{
         size--;
     }
 
-    void erase(T element){
+    void erase(const T& element){
         for(int i=0;i<size;i++){
             if(_data[i]==element){
                 size--;
-                for(int j=i;i<size;i++){
-                    _data[j]=_data[j+1];
+                for(;i<size;i++){
+                    _data[i]=_data[i+1];
                 }
                 break;
             }
+        }
+    }
+
+    void erase(int pos){
+        size--;
+        for(;pos<size;pos++){
+            _data[pos]=_data[pos+1];
+        }
+    }
+
+    void pop_front(){
+        size--;
+        for(int pos=0;pos<size;pos++){
+            _data[pos]=_data[pos+1];
         }
     }
 

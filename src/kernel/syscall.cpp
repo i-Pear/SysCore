@@ -612,15 +612,15 @@ size_t sys_kill(Context* context){
     int pid=context->a0;
     int signal=context->a1;
 
-    List<PCB*>* list;
+    Vector<PCB*>* list;
     auto* process=search_by_pid(&list,pid);
     if(process== nullptr){
         return -1;
     }
     process->kill(1);
     if(list){
-        for(auto i=list->start;i;i=i->next){
-            if(i->data==process){
+        for(int i=0;i<list->length();i++){
+            if(list->operator[](i)==process){
                 list->erase(i);
                 break;
             }

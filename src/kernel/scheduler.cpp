@@ -21,31 +21,27 @@ int* fast_pid;
 size_t fast_syscall_page;
 extern "C" size_t f_syscall_get_start();
 
-PCB *search_by_pid(List<PCB *> **list, int pid) {
+PCB *search_by_pid(Vector<PCB *> **list, int pid) {
     // search in running
     if (running != nullptr && running->pid == pid) {
         *list = nullptr;
         return running;
     }
     // search in runnable
-    auto cnt = runnable.start;
-    while (cnt != nullptr) {
+    for(int i=0;i<runnable.length();i++) {
         // printf(">> runnable pid=%d\n",cnt->PCB->pid);
-        if (cnt->data->pid == pid) {
+        if (runnable[i]->pid == pid) {
             *list = &runnable;
-            return cnt->data;
+            return runnable[i];
         }
-        cnt = cnt->next;
     }
     // search in blocked
-    cnt = blocked.start;
-    while (cnt != nullptr) {
+    for(int i=0;i<blocked.length();i++) {
         // printf(">> blocked pid=%d\n",cnt->PCB->pid);
-        if (cnt->data->pid == pid) {
+        if (blocked[i]->pid == pid) {
             *list = &blocked;
-            return cnt->data;
+            return blocked[i];
         }
-        cnt = cnt->next;
     }
     return nullptr;
 }
@@ -86,7 +82,7 @@ void bind_pages(size_t addr) {
     running->occupied_pages->push_back(addr);
 }
 
-List<PCB *> runnable, blocked;
+Vector<PCB *> runnable, blocked;
 PCB *running;
 
 void init_scheduler() {
@@ -97,8 +93,8 @@ void init_scheduler() {
 #else
     running_context= reinterpret_cast<Context *>(0x89000000 + 8 * 1024 * 1024 - sizeof(Context)-8);
 #endif
-    runnable.start = runnable.end = nullptr;
-    blocked.start = blocked.end = nullptr;
+    runnable=Vector<PCB*>();
+    blocked=Vector<PCB*>();
     running = nullptr;
 
     fast_pid=(int*)(__memory_end -sizeof(int));
@@ -510,13 +506,13 @@ int try_unfreeze_times=0;
 
 void try_to_unfreeze(){
     // search one to unfreeze
-    auto cnt = blocked.start;
-    while (cnt != nullptr) {
-        if (!cnt->data->signal_list.is_empty()) {
+    for(int i=0;i<blocked.length();i++) {
+        auto& cnt=blocked[i];
+        if (!cnt->signal_list.is_empty()) {
             // has signal, wake up
-            running = cnt->data;
+            running = cnt;
             // remove it from blocked list
-            blocked.erase(cnt);
+            blocked.erase(i);
             // get signal to return value
             running->thread_context->a0 = running->signal_list.start->data.first;
             if (running->wstatus) {
@@ -526,7 +522,6 @@ void try_to_unfreeze(){
 
             schedule();
         }
-        cnt = cnt->next;
     }
 }
 
@@ -542,7 +537,7 @@ void schedule() {
         }
         if (!runnable.is_empty()) {
             // pick one to run
-            running = runnable.start->data;lty(running);lty(running->elf_page_base);
+            running = runnable[0];
             runnable.pop_front();
 
             lty(running->thread_context->satp);lty(running->thread_context->sepc);
@@ -603,7 +598,7 @@ int wait(int *wstatus) {
 
 void PCB::kill(int exit_ret) {
     // send signal
-    List<PCB *> *list;
+    Vector<PCB *> *list;
     PCB *parent = search_by_pid(&list, ppid);
     if (parent != nullptr) {
         // printf("unfreeze pid=%d\n",parent->pid);

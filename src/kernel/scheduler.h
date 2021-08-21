@@ -6,6 +6,7 @@
 #include "interrupt.h"
 #include "register.h"
 #include "../lib/stl/list.h"
+#include "../lib/stl/vector.h"
 #include "../lib/stl/map.h"
 #include "../lib/stl/RefCountPtr.h"
 #include "memory/brk_control.h"
@@ -59,7 +60,7 @@ public:
 
 };
 
-extern List<PCB*> runnable,blocked;
+extern Vector<PCB*> runnable,blocked;
 extern PCB* running;
 
 void file_describer_bind(size_t file_id,size_t real_file_describer);
@@ -88,7 +89,7 @@ int get_running_pid();
 
 int get_running_ppid();
 
-PCB *search_by_pid(List<PCB*>** list,int pid);
+PCB *search_by_pid(Vector<PCB*>** list,int pid);
 
 void create_process(const char *elf_path);
 
