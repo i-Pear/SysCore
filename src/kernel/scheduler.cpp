@@ -481,6 +481,7 @@ void yield() {
 }
 
 void execute(const char *exec_path) {
+    exit_process(0);
     // deal with path "/"
     if (exec_path[0] != '/') {
         char buf[strlen(exec_path) + strlen(running->cwd) + 2];
