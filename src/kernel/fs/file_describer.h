@@ -54,7 +54,6 @@ public:
         return file_access_type_;
     }
 
-    // TODO(waitti) ugly code, fix it
     bool DecreaseCount(){
         --fd_ref_count_;
         if(fd_ref_count_ <= 0){

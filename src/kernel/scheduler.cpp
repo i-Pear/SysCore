@@ -440,7 +440,7 @@ void create_process(const char *elf_path, const char *argv[]) {
 
     new_pcb->thread_context = thread_context;
 
-    // TODO: 初始化工作目录为/，这不合理
+    // TODO: 工作目录初始化
     memset(new_pcb->cwd, 0, sizeof(new_pcb->cwd));
     new_pcb->cwd[0] = '/';
 

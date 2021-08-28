@@ -86,7 +86,6 @@ int FS::unlink(const char *path) {
 }
 
 int FS::mkdir(const char *path, int flag) {
-    //TODO: mkdir syscall error
     return f_mkdir(path);
 }
 

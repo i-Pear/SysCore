@@ -21,7 +21,6 @@
 #include "vdso/vdso.h"
 
 void vfs_init();
-void fix_kernel_page_table();
 
 extern "C" {
 #include "driver/interface.h"
@@ -95,7 +94,6 @@ void vfs_init() {
     auto* stdout = new StdoutFs;
     auto* zero_fs = new ZeroFs;
     auto* null_fs = new NullFs;
-    auto* pipe_fs = new PipeFs;
 
     /** /dev **/
     fs->mkdir("/dev", 0, ifs);
@@ -105,7 +103,6 @@ void vfs_init() {
 
     /** /sys/pipe **/
     fs->mkdir("/sys", 0, ifs);
-    fs->mkdir("/sys/pipe", 0, pipe_fs, false);
 
     /** /proc/self/exe **/
     fs->mkdir("/proc", 0, ifs);

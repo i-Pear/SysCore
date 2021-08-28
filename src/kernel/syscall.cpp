@@ -326,7 +326,6 @@ size_t sys_getcwd(Context *context) {
         ret = (char *) get_actual_page(buf);
     }
     strcpy(ret, current_work_dir);
-    // TODO: 如果用户使用虚拟地址此处会返回真实地址，这不合理
     return strlen(ret)+1;
 }
 
@@ -348,7 +347,7 @@ size_t sys_dup3(Context *context) {
     // 返回值：成功执行，返回新的文件描述符。失败，返回-1。
     size_t old_fd = sysGetRealFd(context->a0);
     size_t new_fd = sysGetRealFd(context->a1);
-    // TODO: dup3暂不支持flag参数
+    // TODO: 暂不支持flag参数
     size_t flags = context->a2;
 
     if (old_fd == new_fd) {
@@ -395,7 +394,7 @@ size_t sys_mkdirat(Context *context) {
     // mode：文件的所有权描述。详见`man 7 inode `。
     // int ret = mkdirat(dirfd, path, mode);
     // 返回值：成功执行，返回0。失败，返回-1。
-    // TODO: mode不支持
+    // TODO: 暂不支持mode
     int dir_fd = sysGetRealFd(context->a0);
     char *path = (char *) get_actual_page(context->a1);
     int mode = (int) context->a2;
@@ -409,7 +408,7 @@ size_t sys_unlinkat(Context *context) {
     // flags：可设置为0或AT_REMOVEDIR。
     // int ret = unlinkat(dirfd, path, flags);
     // 返回值：成功执行，返回0。失败，返回-1。
-    // TODO: 没管flag
+    // TODO: 暂不支持flag
     int dir_fd = sysGetRealFd(context->a0);
     char *path = (char *) get_actual_page(context->a1);
     // TODO: we can't really delete it
@@ -505,7 +504,6 @@ size_t sys_exit_group(Context* context){
 }
 
 size_t sys_readv(Context* context){
-    // TODO: test
     int fd = sysGetRealFd(context->a0);
     auto *iov = (struct iovec*) get_actual_page(context->a1);
     int iovcnt = context->a2;
@@ -521,7 +519,6 @@ size_t sys_readv(Context* context){
 }
 
 size_t sys_writev(Context* context){
-    // TODO: test
     int fd = sysGetRealFd(context->a0);
     auto *iov = (struct iovec*) get_actual_page(context->a1);
     int iovcnt = context->a2;
